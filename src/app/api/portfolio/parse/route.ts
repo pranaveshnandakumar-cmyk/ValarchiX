@@ -44,15 +44,15 @@ function loadCachedSchemes(): SchemeRecord[] | null {
 
 function deriveSector(category: string, name: string): string {
   const lc = (category + " " + name).toLowerCase();
-  if (lc.includes("technology") || lc.includes("it") || lc.includes("digital")) return "Technology";
-  if (lc.includes("pharma") || lc.includes("healthcare") || lc.includes("health")) return "Healthcare";
-  if (lc.includes("banking") || lc.includes("financial") || lc.includes("bank")) return "Financials";
-  if (lc.includes("infrastructure") || lc.includes("infra") || lc.includes("capital goods") || lc.includes("manufacturing")) return "Capital Goods";
-  if (lc.includes("energy") || lc.includes("power")) return "Energy";
-  if (lc.includes("consumption") || lc.includes("fmcg") || lc.includes("consumer")) return "Consumer";
-  if (lc.includes("gold") || lc.includes("silver") || lc.includes("commodit")) return "Precious Metals";
-  if (lc.includes("liquid") || lc.includes("overnight") || lc.includes("money market")) return "Liquid Reserves";
-  if (lc.includes("gilt") || lc.includes("corporate bond") || lc.includes("credit") || lc.includes("debt") || lc.includes("dynamic bond") || lc.includes("short duration") || lc.includes("medium duration") || lc.includes("long duration") || lc.includes("low duration") || lc.includes("ultra short") || lc.includes("floater")) return "Fixed Income";
+  if (/\b(technology|it|digital)\b/i.test(lc)) return "Technology";
+  if (/\b(pharma|healthcare|health)\b/i.test(lc)) return "Healthcare";
+  if (/\b(banking|financial|financials|bank)\b/i.test(lc)) return "Financials";
+  if (/\b(infrastructure|infra|capital goods|manufacturing)\b/i.test(lc)) return "Capital Goods";
+  if (/\b(energy|power)\b/i.test(lc)) return "Energy";
+  if (/\b(consumption|fmcg|consumer)\b/i.test(lc)) return "Consumer";
+  if (/\b(gold|silver|commodity|commodities)\b/i.test(lc)) return "Precious Metals";
+  if (/\b(liquid|overnight|money market)\b/i.test(lc)) return "Liquid Reserves";
+  if (/\b(gilt|corporate bond|credit|debt|dynamic bond|short duration|medium duration|long duration|low duration|ultra short|floater)\b/i.test(lc)) return "Fixed Income";
   return "Diversified";
 }
 
