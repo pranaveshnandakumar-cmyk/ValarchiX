@@ -61,129 +61,185 @@ function fuzzyMatch(text: string, schemes: SchemeRecord[]): ParsedHolding[] {
   const matched: ParsedHolding[] = [];
   const seenCodes = new Set<number>();
 
-  for (const line of lines) {
-    const lineLower = line.toLowerCase();
+  // 1. Detect structured CSV layout and map headers
+  let isCSV = false;
+  let nameIdx = -1;
+  let unitsIdx = -1;
+  let investedIdx = -1;
+  let currentIdx = -1;
+
+  for (let i = 0; i < Math.min(lines.length, 30); i++) {
+    const cols = lines[i].split(',').map(c => c.trim().toLowerCase());
+    const hasScheme = cols.some(c => c.includes("scheme") || c.includes("fund") || c.includes("holding"));
+    const hasUnits = cols.some(c => c.includes("units") || c.includes("qty") || c.includes("quantity"));
     
-    let bestScheme: SchemeRecord | null = null;
-    let maxMatchedWords = 0;
-    let bestCleanedLength = 0;
+    if (hasScheme && hasUnits) {
+      isCSV = true;
+      nameIdx = cols.findIndex(c => c.includes("scheme name") || c.includes("scheme") || c.includes("holding") || c.includes("name"));
+      unitsIdx = cols.findIndex(c => c.includes("units") || c.includes("qty") || c.includes("quantity"));
+      investedIdx = cols.findIndex(c => c.includes("invested value") || c.includes("invested") || c.includes("investment") || c.includes("purchase value") || c.includes("cost"));
+      currentIdx = cols.findIndex(c => c.includes("current value") || c.includes("market value") || c.includes("value") || c.includes("current"));
+      // Start parsing after header row
+      lines.splice(0, i + 1);
+      break;
+    }
+  }
 
-    for (const scheme of schemes) {
-      if (seenCodes.has(scheme.code)) continue;
+  if (isCSV && nameIdx !== -1 && unitsIdx !== -1) {
+    for (const line of lines) {
+      const cols = line.split(',');
+      if (cols.length <= Math.max(nameIdx, unitsIdx)) continue;
 
-      const fullNameLower = scheme.name.toLowerCase();
-      // Clean scheme option tags to get core name
-      const cleanedName = fullNameLower
-        .replace(/\b(direct|regular|plan|growth|dividend|idcw|payout|reinvestment|option|growth option)\b/gi, "")
-        .replace(/[^a-z0-9\s]/gi, " ")
-        .replace(/\s+/g, " ")
-        .trim();
+      const rawName = cols[nameIdx]?.trim() || "";
+      const rawUnits = cols[unitsIdx]?.trim() || "";
+      if (!rawName || !rawUnits) continue;
 
-      const words = cleanedName.split(/\s+/).filter(w => w.length > 2);
-      if (words.length === 0) continue;
+      const units = parseFloat(rawUnits.replace(/,/g, ""));
+      if (isNaN(units) || units <= 0) continue;
 
-      const matchedCount = words.filter(word => lineLower.includes(word)).length;
-      const isMatch = matchedCount === words.length && words.length >= 2;
+      const rawInvested = investedIdx !== -1 ? cols[investedIdx]?.trim() : "";
+      const rawCurrent = currentIdx !== -1 ? cols[currentIdx]?.trim() : "";
+      const investedValue = rawInvested ? parseFloat(rawInvested.replace(/,/g, "")) : 0;
+      const currentValue = rawCurrent ? parseFloat(rawCurrent.replace(/,/g, "")) : 0;
 
-      if (isMatch) {
-        if (words.length > maxMatchedWords || (words.length === maxMatchedWords && cleanedName.length > bestCleanedLength)) {
-          maxMatchedWords = words.length;
-          bestCleanedLength = cleanedName.length;
-          bestScheme = scheme;
+      let bestScheme: SchemeRecord | null = null;
+      let maxMatchedWords = 0;
+      let bestCleanedLength = 0;
+
+      const rawNameLower = rawName.toLowerCase();
+      const rawNameWords = rawNameLower.replace(/[^a-z0-9\s]/gi, " ").split(/\s+/).filter(w => w.length > 2);
+
+      for (const scheme of schemes) {
+        if (seenCodes.has(scheme.code)) continue;
+
+        const fullNameLower = scheme.name.toLowerCase();
+        const cleanedName = fullNameLower
+          .replace(/\b(direct|regular|plan|growth|dividend|idcw|payout|reinvestment|option|growth option)\b/gi, "")
+          .replace(/[^a-z0-9\s]/gi, " ")
+          .replace(/\s+/g, " ")
+          .trim();
+
+        const words = cleanedName.split(/\s+/).filter(w => w.length > 2);
+        if (words.length === 0) continue;
+
+        const matchedCount = words.filter(word => rawNameWords.includes(word)).length;
+        const isMatch = matchedCount === words.length && words.length >= 2;
+
+        if (isMatch) {
+          if (words.length > maxMatchedWords || (words.length === maxMatchedWords && cleanedName.length > bestCleanedLength)) {
+            maxMatchedWords = words.length;
+            bestCleanedLength = cleanedName.length;
+            bestScheme = scheme;
+          }
         }
+      }
+
+      if (bestScheme) {
+        seenCodes.add(bestScheme.code);
+        const purchaseNav = investedValue > 0 ? (investedValue / units) : (bestScheme.nav || 10);
+        const currentNav = bestScheme.nav || (currentValue > 0 ? (currentValue / units) : purchaseNav);
+
+        matched.push({
+          name: bestScheme.name,
+          code: bestScheme.code,
+          category: bestScheme.category,
+          assetClass: bestScheme.assetClass,
+          sector: deriveSector(bestScheme.category, bestScheme.name),
+          weight: currentValue > 0 ? currentValue : (units * currentNav),
+          expenseRatio: 0,
+          nav: currentNav,
+          units: Number(units.toFixed(3)),
+          purchaseNav: Number(purchaseNav.toFixed(2))
+        });
       }
     }
+  } else {
+    for (const line of lines) {
+      const lineLower = line.toLowerCase();
+      
+      let bestScheme: SchemeRecord | null = null;
+      let maxMatchedWords = 0;
+      let bestCleanedLength = 0;
 
-    if (bestScheme) {
-      seenCodes.add(bestScheme.code);
+      for (const scheme of schemes) {
+        if (seenCodes.has(scheme.code)) continue;
 
-      // Extract all numbers on this line
-      const numbers = line.match(/(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?/g) || [];
-      const parsedNumbers = numbers.map(n => parseFloat(n.replace(/,/g, ""))).filter(n => n > 0);
+        const fullNameLower = scheme.name.toLowerCase();
+        const cleanedName = fullNameLower
+          .replace(/\b(direct|regular|plan|growth|dividend|idcw|payout|reinvestment|option|growth option)\b/gi, "")
+          .replace(/[^a-z0-9\s]/gi, " ")
+          .replace(/\s+/g, " ")
+          .trim();
 
-      let units = 100; // Default units
-      let purchaseNav = bestScheme.nav || 10; // Default purchase price
-      let currentValue = 0;
+        const words = cleanedName.split(/\s+/).filter(w => w.length > 2);
+        if (words.length === 0) continue;
 
-      if (parsedNumbers.length >= 2) {
-        const maxVal = Math.max(...parsedNumbers);
+        const matchedCount = words.filter(word => lineLower.includes(word)).length;
+        const isMatch = matchedCount === words.length && words.length >= 2;
 
-        // Try mathematical product validation: units * NAV = total value
-        let foundTrio = false;
-        for (let i = 0; i < parsedNumbers.length; i++) {
-          for (let j = 0; j < parsedNumbers.length; j++) {
-            if (i === j) continue;
-            const product = parsedNumbers[i] * parsedNumbers[j];
-            for (let k = 0; k < parsedNumbers.length; k++) {
-              if (k === i || k === j) continue;
-              const val = parsedNumbers[k];
-              if (Math.abs(product - val) / val < 0.05) {
-                currentValue = val;
-                if (parsedNumbers[i] > parsedNumbers[j]) {
-                  purchaseNav = parsedNumbers[i];
-                  units = parsedNumbers[j];
-                } else {
-                  purchaseNav = parsedNumbers[j];
-                  units = parsedNumbers[i];
-                }
-                foundTrio = true;
-                break;
-              }
-            }
-            if (foundTrio) break;
+        if (isMatch) {
+          if (words.length > maxMatchedWords || (words.length === maxMatchedWords && cleanedName.length > bestCleanedLength)) {
+            maxMatchedWords = words.length;
+            bestCleanedLength = cleanedName.length;
+            bestScheme = scheme;
           }
-          if (foundTrio) break;
         }
+      }
 
-        if (!foundTrio) {
-          currentValue = maxVal;
-          const decimalNumbers = parsedNumbers.filter(n => n % 1 !== 0);
-          if (decimalNumbers.length > 0) {
-            units = decimalNumbers[0];
-            const remaining = parsedNumbers.filter(n => n !== currentValue && n !== units);
-            if (remaining.length > 0) {
-              purchaseNav = remaining[0];
-            } else {
-              purchaseNav = bestScheme.nav || 10;
-            }
+      if (bestScheme) {
+        seenCodes.add(bestScheme.code);
+
+        const numbers = line.match(/(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?/g) || [];
+        const parsedNumbers = numbers.map(n => {
+          const val = parseFloat(n.replace(/,/g, ""));
+          if (!n.includes(".") && val > 100000) return null; // Filter large folio integers
+          return val;
+        }).filter((n): n is number => n !== null && n > 0);
+
+        let units = 100;
+        let purchaseNav = bestScheme.nav || 10;
+        let currentValue = 0;
+
+        if (parsedNumbers.length >= 3) {
+          const sorted = [...parsedNumbers].sort((a, b) => a - b);
+          units = sorted[0];
+          const investedValue = sorted[2];
+          currentValue = sorted[1];
+          purchaseNav = investedValue / units;
+        } else if (parsedNumbers.length === 2) {
+          const sorted = [...parsedNumbers].sort((a, b) => a - b);
+          units = sorted[0];
+          currentValue = sorted[1];
+          purchaseNav = bestScheme.nav || 10;
+        } else if (parsedNumbers.length === 1) {
+          if (parsedNumbers[0] > 1000) {
+            currentValue = parsedNumbers[0];
+            purchaseNav = bestScheme.nav || 10;
+            units = currentValue / purchaseNav;
           } else {
-            const remaining = parsedNumbers.filter(n => n !== currentValue).sort((a, b) => b - a);
-            if (remaining.length >= 2) {
-              purchaseNav = remaining[0];
-              units = remaining[1];
-            } else if (remaining.length === 1) {
-              units = remaining[0];
-              purchaseNav = bestScheme.nav || 10;
-            }
+            units = parsedNumbers[0];
+            purchaseNav = bestScheme.nav || 10;
+            currentValue = units * purchaseNav;
           }
         }
-      } else if (parsedNumbers.length === 1) {
-        if (parsedNumbers[0] > 1000) {
-          currentValue = parsedNumbers[0];
-          purchaseNav = bestScheme.nav || 10;
-          units = currentValue / purchaseNav;
-        } else {
-          units = parsedNumbers[0];
-          purchaseNav = bestScheme.nav || 10;
+
+        if (currentValue === 0) {
+          currentValue = units * (bestScheme.nav || purchaseNav || 10);
         }
-      }
 
-      if (currentValue === 0) {
-        currentValue = units * (bestScheme.nav || purchaseNav || 10);
+        matched.push({
+          name: bestScheme.name,
+          code: bestScheme.code,
+          category: bestScheme.category,
+          assetClass: bestScheme.assetClass,
+          sector: deriveSector(bestScheme.category, bestScheme.name),
+          weight: currentValue,
+          expenseRatio: 0,
+          nav: bestScheme.nav || purchaseNav,
+          units: Number(units.toFixed(3)),
+          purchaseNav: Number(purchaseNav.toFixed(2))
+        });
       }
-
-      matched.push({
-        name: bestScheme.name,
-        code: bestScheme.code,
-        category: bestScheme.category,
-        assetClass: bestScheme.assetClass,
-        sector: deriveSector(bestScheme.category, bestScheme.name),
-        weight: currentValue,
-        expenseRatio: 0,
-        nav: bestScheme.nav,
-        units: Number(units.toFixed(3)),
-        purchaseNav: Number(purchaseNav.toFixed(2))
-      });
     }
   }
 
