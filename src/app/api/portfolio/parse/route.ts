@@ -56,6 +56,14 @@ function deriveSector(category: string, name: string): string {
   return "Diversified";
 }
 
+function isWordMatch(w1: string, w2: string): boolean {
+  if (w1 === w2) return true;
+  if (w1.startsWith(w2) || w2.startsWith(w1)) {
+    return Math.min(w1.length, w2.length) >= 4;
+  }
+  return false;
+}
+
 function fuzzyMatch(text: string, schemes: SchemeRecord[]): ParsedHolding[] {
   const lines = text.split(/\r?\n/).map(line => line.trim()).filter(Boolean);
   const matched: ParsedHolding[] = [];
@@ -103,8 +111,8 @@ function fuzzyMatch(text: string, schemes: SchemeRecord[]): ParsedHolding[] {
       const currentValue = rawCurrent ? parseFloat(rawCurrent.replace(/,/g, "")) : 0;
 
       let bestScheme: SchemeRecord | null = null;
-      let maxMatchPercent = 0;
-      let bestCleanedLength = 0;
+      let maxSpecificity = 0;
+      let bestCleanedLength = 9999;
 
       const rawNameLower = rawName.toLowerCase();
       const rawNameCleaned = rawNameLower
@@ -112,7 +120,7 @@ function fuzzyMatch(text: string, schemes: SchemeRecord[]): ParsedHolding[] {
         .replace(/[^a-z0-9\s]/gi, " ")
         .replace(/\s+/g, " ")
         .trim();
-      const rawNameWords = Array.from(new Set(rawNameCleaned.split(/\s+/).filter(w => w.length > 2)));
+      const rawNameWords = Array.from(new Set(rawNameCleaned.split(/\s+/).filter(w => w.length >= 2)));
 
       if (rawNameWords.length > 0) {
         for (const scheme of schemes) {
@@ -125,18 +133,19 @@ function fuzzyMatch(text: string, schemes: SchemeRecord[]): ParsedHolding[] {
             .replace(/\s+/g, " ")
             .trim();
 
-          const words = Array.from(new Set(cleanedName.split(/\s+/).filter(w => w.length > 2)));
+          const words = Array.from(new Set(cleanedName.split(/\s+/).filter(w => w.length >= 2)));
           if (words.length === 0) continue;
 
           // Calculate prefix-based matching intersection percentage
           const intersection = words.filter(w1 => 
-            rawNameWords.some(w2 => w1.startsWith(w2) || w2.startsWith(w1))
+            rawNameWords.some(w2 => isWordMatch(w1, w2))
           ).length;
           const matchPercent = intersection / Math.min(words.length, rawNameWords.length);
+          const specificity = intersection / words.length;
 
           if (matchPercent >= 0.85 && intersection >= 2) {
-            if (matchPercent > maxMatchPercent || (matchPercent === maxMatchPercent && cleanedName.length > bestCleanedLength)) {
-              maxMatchPercent = matchPercent;
+            if (specificity > maxSpecificity || (specificity === maxSpecificity && cleanedName.length < bestCleanedLength)) {
+              maxSpecificity = specificity;
               bestCleanedLength = cleanedName.length;
               bestScheme = scheme;
             }
@@ -168,15 +177,15 @@ function fuzzyMatch(text: string, schemes: SchemeRecord[]): ParsedHolding[] {
       const lineLower = line.toLowerCase();
       
       let bestScheme: SchemeRecord | null = null;
-      let maxMatchPercent = 0;
-      let bestCleanedLength = 0;
+      let maxSpecificity = 0;
+      let bestCleanedLength = 9999;
 
       const lineCleaned = lineLower
         .replace(/\b(direct|regular|plan|growth|dividend|idcw|payout|reinvestment|option|growth option)\b/gi, "")
         .replace(/[^a-z0-9\s]/gi, " ")
         .replace(/\s+/g, " ")
         .trim();
-      const lineWords = Array.from(new Set(lineCleaned.split(/\s+/).filter(w => w.length > 2)));
+      const lineWords = Array.from(new Set(lineCleaned.split(/\s+/).filter(w => w.length >= 2)));
 
       if (lineWords.length > 0) {
         for (const scheme of schemes) {
@@ -189,18 +198,19 @@ function fuzzyMatch(text: string, schemes: SchemeRecord[]): ParsedHolding[] {
             .replace(/\s+/g, " ")
             .trim();
 
-          const words = Array.from(new Set(cleanedName.split(/\s+/).filter(w => w.length > 2)));
+          const words = Array.from(new Set(cleanedName.split(/\s+/).filter(w => w.length >= 2)));
           if (words.length === 0) continue;
 
           // Calculate prefix-based matching intersection percentage
           const intersection = words.filter(w1 => 
-            lineWords.some(w2 => w1.startsWith(w2) || w2.startsWith(w1))
+            lineWords.some(w2 => isWordMatch(w1, w2))
           ).length;
           const matchPercent = intersection / Math.min(words.length, lineWords.length);
+          const specificity = intersection / words.length;
 
           if (matchPercent >= 0.85 && intersection >= 2) {
-            if (matchPercent > maxMatchPercent || (matchPercent === maxMatchPercent && cleanedName.length > bestCleanedLength)) {
-              maxMatchPercent = matchPercent;
+            if (specificity > maxSpecificity || (specificity === maxSpecificity && cleanedName.length < bestCleanedLength)) {
+              maxSpecificity = specificity;
               bestCleanedLength = cleanedName.length;
               bestScheme = scheme;
             }
