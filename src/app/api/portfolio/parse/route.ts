@@ -23,6 +23,8 @@ interface ParsedHolding {
   nav: number | null;
   units: number;
   purchaseNav: number;
+  investedValue?: number;
+  currentValue?: number;
 }
 
 const CACHE_FILE = path.join(process.cwd(), "schemes-cache.json");
@@ -185,7 +187,9 @@ function fuzzyMatch(text: string, schemes: SchemeRecord[]): ParsedHolding[] {
           expenseRatio: 0,
           nav: currentNav,
           units: Number(units.toFixed(3)),
-          purchaseNav: Number(purchaseNav.toFixed(2))
+          purchaseNav: Number(purchaseNav.toFixed(2)),
+          investedValue: investedValue > 0 ? investedValue : undefined,
+          currentValue: currentValue > 0 ? currentValue : undefined
         });
       }
     }
@@ -286,7 +290,9 @@ function fuzzyMatch(text: string, schemes: SchemeRecord[]): ParsedHolding[] {
           expenseRatio: 0,
           nav: bestScheme.nav || purchaseNav,
           units: Number(units.toFixed(3)),
-          purchaseNav: Number(purchaseNav.toFixed(2))
+          purchaseNav: Number(purchaseNav.toFixed(2)),
+          investedValue: (units * purchaseNav) || undefined,
+          currentValue: currentValue || undefined
         });
       }
     }

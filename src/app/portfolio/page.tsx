@@ -28,6 +28,8 @@ interface PortfolioItem {
   purchaseNav: number;
   currentNav: number;
   expenseRatio: number;
+  investedValue?: number;
+  currentValue?: number;
 }
 
 interface SchemeItem {
@@ -280,7 +282,9 @@ export default function PortfolioAnalyzer() {
           units: h.units || 100,
           purchaseNav: h.purchaseNav || h.nav || 10,
           currentNav: h.nav || h.purchaseNav || 10,
-          expenseRatio: h.expenseRatio || 0
+          expenseRatio: h.expenseRatio || 0,
+          investedValue: h.investedValue,
+          currentValue: h.currentValue
         }));
       }
       // Server couldn't find any matches
@@ -362,8 +366,8 @@ export default function PortfolioAnalyzer() {
     let weightedExpense = 0;
 
     const itemsWithValuations = portfolio.map((item) => {
-      const invested = item.units * item.purchaseNav;
-      const current = item.units * item.currentNav;
+      const invested = item.investedValue !== undefined ? item.investedValue : (item.units * item.purchaseNav);
+      const current = item.currentValue !== undefined ? item.currentValue : (item.units * item.currentNav);
       const pnl = current - invested;
       const pnlPct = invested > 0 ? (pnl / invested) * 100 : 0;
 
