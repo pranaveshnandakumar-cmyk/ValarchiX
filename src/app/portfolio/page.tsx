@@ -24,9 +24,10 @@ interface PortfolioItem {
   name: string;
   assetClass: string;
   sector: string;
-  weight: number;
+  units: number;
+  purchaseNav: number;
+  currentNav: number;
   expenseRatio: number;
-  currentNav?: number | null;
 }
 
 interface SchemeItem {
@@ -44,7 +45,8 @@ export default function PortfolioAnalyzer() {
   const [portfolio, setPortfolio] = useState<PortfolioItem[]>([]);
 
   // UI Control States
-  const [inputWeight, setInputWeight] = useState(10);
+  const [inputUnits, setInputUnits] = useState("10");
+  const [inputPurchaseNav, setInputPurchaseNav] = useState("");
   const [activeGuideTab, setActiveGuideTab] = useState<"cams" | "zerodha" | "groww">("cams");
 
   // PDF Parser States
@@ -118,6 +120,7 @@ export default function PortfolioAnalyzer() {
     setSelectedScheme(scheme);
     setSearchQuery(scheme.name);
     setShowSearchDropdown(false);
+    setInputPurchaseNav(scheme.nav ? scheme.nav.toString() : "10");
   };
 
   // Load PDF.js dynamically on the client-side
@@ -274,9 +277,10 @@ export default function PortfolioAnalyzer() {
           name: h.name,
           assetClass: h.assetClass || "Other",
           sector: h.sector || "Diversified",
-          weight: h.weight || 10,
-          expenseRatio: h.expenseRatio || 0,
-          currentNav: h.nav || null
+          units: h.units || 100,
+          purchaseNav: h.purchaseNav || h.nav || 10,
+          currentNav: h.nav || h.purchaseNav || 10,
+          expenseRatio: h.expenseRatio || 0
         }));
       }
       // Server couldn't find any matches
@@ -293,17 +297,27 @@ export default function PortfolioAnalyzer() {
       return;
     }
 
-    const currentTotal = portfolio.reduce((sum, item) => sum + item.weight, 0);
-    if (currentTotal + inputWeight > 100) {
-      alert("Total portfolio weight cannot exceed 100%. Normalize weights if needed.");
+    const parsedUnits = parseFloat(inputUnits);
+    const parsedPurchaseNav = parseFloat(inputPurchaseNav);
+
+    if (isNaN(parsedUnits) || parsedUnits <= 0) {
+      alert("Please enter a valid positive number for units.");
+      return;
+    }
+    if (isNaN(parsedPurchaseNav) || parsedPurchaseNav <= 0) {
+      alert("Please enter a valid positive number for purchase price.");
       return;
     }
 
     const existing = portfolio.find((item) => item.name === selectedScheme.name);
     if (existing) {
+      const newUnits = existing.units + parsedUnits;
+      const newPurchaseNav = (existing.units * existing.purchaseNav + parsedUnits * parsedPurchaseNav) / newUnits;
       setPortfolio(
         portfolio.map((item) =>
-          item.name === selectedScheme.name ? { ...item, weight: Math.min(100, item.weight + inputWeight) } : item
+          item.name === selectedScheme.name
+            ? { ...item, units: Number(newUnits.toFixed(3)), purchaseNav: Number(newPurchaseNav.toFixed(2)) }
+            : item
         )
       );
     } else {
@@ -324,9 +338,10 @@ export default function PortfolioAnalyzer() {
           name: selectedScheme.name,
           assetClass: selectedScheme.assetClass || "Other",
           sector,
-          weight: inputWeight,
-          expenseRatio: 0,
-          currentNav: selectedScheme.nav || null
+          units: Number(parsedUnits.toFixed(3)),
+          purchaseNav: Number(parsedPurchaseNav.toFixed(2)),
+          currentNav: selectedScheme.nav || parsedPurchaseNav || 10,
+          expenseRatio: 0
         }
       ]);
     }
@@ -341,35 +356,37 @@ export default function PortfolioAnalyzer() {
     setPortfolio(portfolio.filter((item) => item.id !== id));
   };
 
-  const handleWeightChange = (id: string, weight: number) => {
-    setPortfolio(
-      portfolio.map((item) => (item.id === id ? { ...item, weight: Number(weight) } : item))
-    );
-  };
-
-  const normalizePortfolio = () => {
-    const total = portfolio.reduce((sum, item) => sum + item.weight, 0);
-    if (total === 0) return;
-    setPortfolio(
-      portfolio.map((item) => ({
-        ...item,
-        weight: Math.round((item.weight / total) * 100)
-      }))
-    );
-  };
-
   const calculations = useMemo(() => {
-    const totalWeight = portfolio.reduce((sum, item) => sum + item.weight, 0);
-    
-    const assetAllocMap: Record<string, number> = {};
-    const sectorAllocMap: Record<string, number> = {};
+    let totalInvestedValue = 0;
+    let totalCurrentValue = 0;
     let weightedExpense = 0;
 
-    portfolio.forEach((item) => {
-      const normalizedWeight = totalWeight > 0 ? (item.weight / totalWeight) * 100 : 0;
-      assetAllocMap[item.assetClass] = (assetAllocMap[item.assetClass] || 0) + normalizedWeight;
-      sectorAllocMap[item.sector] = (sectorAllocMap[item.sector] || 0) + normalizedWeight;
-      weightedExpense += (item.expenseRatio * item.weight) / 100;
+    const itemsWithValuations = portfolio.map((item) => {
+      const invested = item.units * item.purchaseNav;
+      const current = item.units * item.currentNav;
+      const pnl = current - invested;
+      const pnlPct = invested > 0 ? (pnl / invested) * 100 : 0;
+
+      totalInvestedValue += invested;
+      totalCurrentValue += current;
+
+      return {
+        ...item,
+        investedValue: invested,
+        currentValue: current,
+        pnlAmount: pnl,
+        pnlPercent: pnlPct
+      };
+    });
+
+    const assetAllocMap: Record<string, number> = {};
+    const sectorAllocMap: Record<string, number> = {};
+
+    itemsWithValuations.forEach((item) => {
+      const weight = totalCurrentValue > 0 ? (item.currentValue / totalCurrentValue) * 100 : 0;
+      assetAllocMap[item.assetClass] = (assetAllocMap[item.assetClass] || 0) + weight;
+      sectorAllocMap[item.sector] = (sectorAllocMap[item.sector] || 0) + weight;
+      weightedExpense += (item.expenseRatio * weight) / 100;
     });
 
     const COLORS = ["#22c55e", "#0e274e", "#f59e0b", "#ef4444", "#a855f7", "#6366f1", "#06b6d4"];
@@ -401,13 +418,20 @@ export default function PortfolioAnalyzer() {
     else if (equityPct > 50) riskLabel = "High";
     else if (equityPct > 25) riskLabel = "Moderate";
 
+    const totalPnlAmount = totalCurrentValue - totalInvestedValue;
+    const totalPnlPercent = totalInvestedValue > 0 ? (totalPnlAmount / totalInvestedValue) * 100 : 0;
+
     return {
-      totalWeight,
+      totalInvestedValue,
+      totalCurrentValue,
+      totalPnlAmount,
+      totalPnlPercent,
       assetData,
       sectorData,
       weightedExpense: weightedExpense.toFixed(2),
       divScore,
-      riskLabel
+      riskLabel,
+      itemsWithValuations
     };
   }, [portfolio]);
 
@@ -566,20 +590,31 @@ export default function PortfolioAnalyzer() {
                   </div>
                 )}
 
-                <div className="space-y-1">
-                  <div className="flex justify-between text-xs">
-                    <label className="text-muted-grey">Weight (%)</label>
-                    <span className="text-emerald font-bold">{inputWeight}%</span>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold text-muted-grey block">UNITS OWNED</label>
+                    <input
+                      type="number"
+                      step="any"
+                      value={inputUnits}
+                      onChange={(e) => setInputUnits(e.target.value)}
+                      placeholder="e.g. 10.45"
+                      className="w-full glass-input text-xs font-semibold text-white bg-navy-bg"
+                      required
+                    />
                   </div>
-                  <input
-                    type="range"
-                    min={5}
-                    max={100}
-                    step={5}
-                    value={inputWeight}
-                    onChange={(e) => setInputWeight(Number(e.target.value))}
-                    className="w-full accent-emerald bg-navy-bg h-1 rounded-lg"
-                  />
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold text-muted-grey block">PURCHASE NAV (₹)</label>
+                    <input
+                      type="number"
+                      step="any"
+                      value={inputPurchaseNav}
+                      onChange={(e) => setInputPurchaseNav(e.target.value)}
+                      placeholder="e.g. 125.50"
+                      className="w-full glass-input text-xs font-semibold text-white bg-navy-bg"
+                      required
+                    />
+                  </div>
                 </div>
 
                 <button
@@ -601,18 +636,9 @@ export default function PortfolioAnalyzer() {
           {/* Current Allocations List */}
           <div className="p-6 rounded-2xl border border-border-navy bg-navy-card/20 space-y-4">
             <div className="flex justify-between items-center flex-wrap gap-2">
-              <h3 className="text-sm font-bold text-white">Portfolio Holdings ({calculations.totalWeight}%)</h3>
+              <h3 className="text-sm font-bold text-white">Portfolio Holdings ({portfolio.length})</h3>
               
               <div className="flex gap-2">
-                {calculations.totalWeight !== 100 && calculations.totalWeight > 0 && (
-                  <button
-                    onClick={normalizePortfolio}
-                    className="text-[9px] font-bold text-emerald border border-emerald/20 bg-emerald/5 hover:bg-emerald/10 px-2 py-1 rounded transition-all cursor-pointer"
-                    title="Scale all weights proportionally to sum to 100%"
-                  >
-                    Normalize to 100%
-                  </button>
-                )}
                 {portfolio.length > 0 && (
                   <button
                     onClick={() => setPortfolio([])}
@@ -624,46 +650,56 @@ export default function PortfolioAnalyzer() {
               </div>
             </div>
 
-            <div className="space-y-3 max-h-[300px] overflow-y-auto pr-1">
-              {portfolio.map((item) => (
+            <div className="space-y-3 max-h-[350px] overflow-y-auto pr-1">
+              {calculations.itemsWithValuations.map((item) => (
                 <div
                   key={item.id}
-                  className="p-3 bg-navy-bg/50 border border-border-navy/60 rounded-xl space-y-2"
+                  className="p-3.5 bg-navy-bg/50 border border-border-navy/60 rounded-xl space-y-2.5"
                 >
                   <div className="flex justify-between items-start gap-2">
-                    <div className="space-y-0.5">
+                    <div className="space-y-0.5 min-w-0">
                       <span className="font-bold text-white block text-xs truncate max-w-[200px]" title={item.name}>
                         {item.name}
                       </span>
                       <span className="text-[9px] text-muted-grey block">
-                        {item.assetClass} • {item.sector} {item.currentNav ? `• NAV: ₹${item.currentNav}` : ""} • Expense: {item.expenseRatio}%
+                        {item.assetClass} • {item.sector}
                       </span>
                     </div>
                     <button
                       onClick={() => handleRemoveItem(item.id)}
-                      className="p-1 text-muted-grey hover:text-red-400 cursor-pointer shrink-0"
+                      className="p-1 text-muted-grey hover:text-red-400 cursor-pointer shrink-0 transition-colors"
                     >
                       <Trash2 size={13} />
                     </button>
                   </div>
 
-                  <div className="flex items-center gap-4">
-                    <input
-                      type="range"
-                      min={1}
-                      max={100}
-                      value={item.weight}
-                      onChange={(e) => handleWeightChange(item.id, Number(e.target.value))}
-                      className="w-full accent-emerald bg-navy-bg h-1 rounded-lg"
-                    />
-                    <span className="font-bold text-emerald text-xs w-8 text-right shrink-0">{item.weight}%</span>
+                  <div className="grid grid-cols-3 gap-2 pt-2 border-t border-border-navy/30 text-[10px] text-muted-grey">
+                    <div>
+                      <span className="block text-[8px] uppercase font-bold">Qty / Price</span>
+                      <span className="font-semibold text-white">{item.units} @ ₹{item.purchaseNav.toFixed(2)}</span>
+                    </div>
+                    <div>
+                      <span className="block text-[8px] uppercase font-bold">Current NAV</span>
+                      <span className="font-semibold text-white">₹{item.currentNav.toFixed(2)}</span>
+                    </div>
+                    <div className="text-right">
+                      <span className="block text-[8px] uppercase font-bold text-right">Current Value</span>
+                      <span className="font-bold text-white">₹{Math.round(item.currentValue).toLocaleString("en-IN")}</span>
+                    </div>
+                  </div>
+
+                  <div className="flex justify-between items-center text-[10px] bg-navy-card/20 px-2 py-1 rounded">
+                    <span className="text-muted-grey font-medium">Profit / Loss</span>
+                    <span className={`font-bold ${item.pnlAmount >= 0 ? "text-emerald" : "text-red-400"}`}>
+                      {item.pnlAmount >= 0 ? "+" : ""}₹{Math.round(item.pnlAmount).toLocaleString("en-IN")} ({item.pnlPercent.toFixed(2)}%)
+                    </span>
                   </div>
                 </div>
               ))}
 
               {portfolio.length === 0 && (
                 <span className="text-xs text-muted-grey italic text-center block py-8">
-                  No assets loaded. Upload a broker statement PDF or add manually above.
+                  No holdings loaded. Upload a broker statement PDF or add manually above.
                 </span>
               )}
             </div>
@@ -673,24 +709,48 @@ export default function PortfolioAnalyzer() {
         {/* Right Column: Visual Charts & Recommendations */}
         <div className="lg:col-span-2 space-y-6">
           
-          {/* Metrics Grid */}
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          {/* Valuations & Performance Summary Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="p-4 rounded-xl border border-border-navy bg-navy-card/30">
-              <span className="text-[10px] uppercase font-bold text-muted-grey block">Portfolio Risk profile</span>
-              <p className="text-lg font-bold text-white mt-1">{calculations.riskLabel}</p>
-              <span className="text-[9px] text-muted-grey block mt-0.5">Based on Equity weight</span>
+              <span className="text-[10px] uppercase font-bold text-muted-grey block">Total Invested</span>
+              <p className="text-xl font-bold text-white mt-1">₹{calculations.totalInvestedValue.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+              <span className="text-[9px] text-muted-grey block mt-0.5">Principal invested amount</span>
             </div>
 
             <div className="p-4 rounded-xl border border-border-navy bg-navy-card/30">
-              <span className="text-[10px] uppercase font-bold text-muted-grey block">Diversification score</span>
-              <p className="text-lg font-bold text-emerald mt-1">{calculations.divScore} <span className="text-xs text-muted-grey font-semibold">/ 100</span></p>
-              <span className="text-[9px] text-muted-grey block mt-0.5">Weighted sector dispersion</span>
+              <span className="text-[10px] uppercase font-bold text-muted-grey block">Current Value</span>
+              <p className="text-xl font-bold text-white mt-1">₹{calculations.totalCurrentValue.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+              <span className="text-[9px] text-muted-grey block mt-0.5">Valued at daily AMFI NAV</span>
             </div>
 
-            <div className="col-span-2 md:col-span-1 p-4 rounded-xl border border-border-navy bg-navy-card/30">
-              <span className="text-[10px] uppercase font-bold text-muted-grey block">Weighted Expense Ratio</span>
-              <p className="text-lg font-bold text-white mt-1">{calculations.weightedExpense}%</p>
-              <span className="text-[9px] text-muted-grey block mt-0.5">Aggregate annual AMC fees</span>
+            <div className="p-4 rounded-xl border border-border-navy bg-navy-card/30">
+              <span className="text-[10px] uppercase font-bold text-muted-grey block">Total Returns (P&L)</span>
+              <p className={`text-xl font-bold mt-1 ${calculations.totalPnlAmount >= 0 ? "text-emerald" : "text-red-400"}`}>
+                {calculations.totalPnlAmount >= 0 ? "+" : ""}
+                ₹{calculations.totalPnlAmount.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                <span className="text-xs ml-1.5 font-semibold">
+                  ({calculations.totalPnlAmount >= 0 ? "+" : ""}{calculations.totalPnlPercent.toFixed(2)}%)
+                </span>
+              </p>
+              <span className="text-[9px] text-muted-grey block mt-0.5">Absolute returns overview</span>
+            </div>
+          </div>
+
+          {/* Diagnostic Metrics Grid */}
+          <div className="grid grid-cols-3 gap-4">
+            <div className="p-4 rounded-xl border border-border-navy bg-navy-card/30">
+              <span className="text-[10px] uppercase font-bold text-muted-grey block">Portfolio Risk</span>
+              <p className="text-sm font-bold text-white mt-1">{calculations.riskLabel}</p>
+            </div>
+
+            <div className="p-4 rounded-xl border border-border-navy bg-navy-card/30">
+              <span className="text-[10px] uppercase font-bold text-muted-grey block">Diversification</span>
+              <p className="text-sm font-bold text-emerald mt-1">{calculations.divScore}/100</p>
+            </div>
+
+            <div className="p-4 rounded-xl border border-border-navy bg-navy-card/30">
+              <span className="text-[10px] uppercase font-bold text-muted-grey block">Weighted Expense</span>
+              <p className="text-sm font-bold text-white mt-1">{calculations.weightedExpense}%</p>
             </div>
           </div>
 

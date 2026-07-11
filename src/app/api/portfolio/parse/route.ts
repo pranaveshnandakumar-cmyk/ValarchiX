@@ -21,6 +21,8 @@ interface ParsedHolding {
   weight: number;
   expenseRatio: number;
   nav: number | null;
+  units: number;
+  purchaseNav: number;
 }
 
 const CACHE_FILE = path.join(process.cwd(), "schemes-cache.json");
@@ -55,77 +57,146 @@ function deriveSector(category: string, name: string): string {
 }
 
 function fuzzyMatch(text: string, schemes: SchemeRecord[]): ParsedHolding[] {
-  const lowerText = text.toLowerCase();
+  const lines = text.split(/\r?\n/).map(line => line.trim()).filter(Boolean);
   const matched: ParsedHolding[] = [];
   const seenCodes = new Set<number>();
 
-  // Extract all amounts/values near fund names for weight calculation
-  const amountRegex = /(?:INR|Rs\.?|₹)\s*([\d,]+(?:\.\d{1,2})?)/gi;
-  const amounts: { value: number; index: number }[] = [];
-  let amountMatch;
-  while ((amountMatch = amountRegex.exec(text)) !== null) {
-    const val = parseFloat(amountMatch[1].replace(/,/g, ""));
-    if (val > 0) {
-      amounts.push({ value: val, index: amountMatch.index });
-    }
-  }
+  for (const line of lines) {
+    const lineLower = line.toLowerCase();
+    
+    let bestScheme: SchemeRecord | null = null;
+    let maxMatchedWords = 0;
+    let bestCleanedLength = 0;
 
-  // Sort schemes by name length descending (longer names first to avoid partial matches)
-  const sortedSchemes = [...schemes].sort((a, b) => b.name.length - a.name.length);
+    for (const scheme of schemes) {
+      if (seenCodes.has(scheme.code)) continue;
 
-  for (const scheme of sortedSchemes) {
-    if (seenCodes.has(scheme.code)) continue;
+      const fullNameLower = scheme.name.toLowerCase();
+      // Clean scheme option tags to get core name
+      const cleanedName = fullNameLower
+        .replace(/\b(direct|regular|plan|growth|dividend|idcw|payout|reinvestment|option|growth option)\b/gi, "")
+        .replace(/[^a-z0-9\s]/gi, " ")
+        .replace(/\s+/g, " ")
+        .trim();
 
-    // Create search variants: full name, and cleaned name without "Direct Growth" etc.
-    const fullNameLower = scheme.name.toLowerCase();
-    const cleanedName = fullNameLower
-      .replace(/\s*(direct|regular)\s*(plan\s*)?(growth|dividend|idcw|payout|reinvestment)?\s*$/i, "")
-      .trim();
+      const words = cleanedName.split(/\s+/).filter(w => w.length > 2);
+      if (words.length === 0) continue;
 
-    // Only match names with at least 8 characters to avoid false positives
-    if (cleanedName.length < 8) continue;
+      const matchedCount = words.filter(word => lineLower.includes(word)).length;
+      const isMatch = matchedCount === words.length && words.length >= 2;
 
-    const matchIndex = lowerText.indexOf(cleanedName);
-    if (matchIndex === -1) continue;
-
-    seenCodes.add(scheme.code);
-
-    // Try to find the closest amount to this match position
-    let closestAmount = 0;
-    let minDist = Infinity;
-    for (const amt of amounts) {
-      const dist = Math.abs(amt.index - matchIndex);
-      if (dist < minDist && dist < 500) {
-        minDist = dist;
-        closestAmount = amt.value;
+      if (isMatch) {
+        if (words.length > maxMatchedWords || (words.length === maxMatchedWords && cleanedName.length > bestCleanedLength)) {
+          maxMatchedWords = words.length;
+          bestCleanedLength = cleanedName.length;
+          bestScheme = scheme;
+        }
       }
     }
 
-    matched.push({
-      name: scheme.name,
-      code: scheme.code,
-      category: scheme.category,
-      assetClass: scheme.assetClass,
-      sector: deriveSector(scheme.category, scheme.name),
-      weight: closestAmount > 0 ? closestAmount : 0,
-      expenseRatio: 0,
-      nav: scheme.nav
-    });
+    if (bestScheme) {
+      seenCodes.add(bestScheme.code);
+
+      // Extract all numbers on this line
+      const numbers = line.match(/(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?/g) || [];
+      const parsedNumbers = numbers.map(n => parseFloat(n.replace(/,/g, ""))).filter(n => n > 0);
+
+      let units = 100; // Default units
+      let purchaseNav = bestScheme.nav || 10; // Default purchase price
+      let currentValue = 0;
+
+      if (parsedNumbers.length >= 2) {
+        const maxVal = Math.max(...parsedNumbers);
+
+        // Try mathematical product validation: units * NAV = total value
+        let foundTrio = false;
+        for (let i = 0; i < parsedNumbers.length; i++) {
+          for (let j = 0; j < parsedNumbers.length; j++) {
+            if (i === j) continue;
+            const product = parsedNumbers[i] * parsedNumbers[j];
+            for (let k = 0; k < parsedNumbers.length; k++) {
+              if (k === i || k === j) continue;
+              const val = parsedNumbers[k];
+              if (Math.abs(product - val) / val < 0.05) {
+                currentValue = val;
+                if (parsedNumbers[i] > parsedNumbers[j]) {
+                  purchaseNav = parsedNumbers[i];
+                  units = parsedNumbers[j];
+                } else {
+                  purchaseNav = parsedNumbers[j];
+                  units = parsedNumbers[i];
+                }
+                foundTrio = true;
+                break;
+              }
+            }
+            if (foundTrio) break;
+          }
+          if (foundTrio) break;
+        }
+
+        if (!foundTrio) {
+          currentValue = maxVal;
+          const decimalNumbers = parsedNumbers.filter(n => n % 1 !== 0);
+          if (decimalNumbers.length > 0) {
+            units = decimalNumbers[0];
+            const remaining = parsedNumbers.filter(n => n !== currentValue && n !== units);
+            if (remaining.length > 0) {
+              purchaseNav = remaining[0];
+            } else {
+              purchaseNav = bestScheme.nav || 10;
+            }
+          } else {
+            const remaining = parsedNumbers.filter(n => n !== currentValue).sort((a, b) => b - a);
+            if (remaining.length >= 2) {
+              purchaseNav = remaining[0];
+              units = remaining[1];
+            } else if (remaining.length === 1) {
+              units = remaining[0];
+              purchaseNav = bestScheme.nav || 10;
+            }
+          }
+        }
+      } else if (parsedNumbers.length === 1) {
+        if (parsedNumbers[0] > 1000) {
+          currentValue = parsedNumbers[0];
+          purchaseNav = bestScheme.nav || 10;
+          units = currentValue / purchaseNav;
+        } else {
+          units = parsedNumbers[0];
+          purchaseNav = bestScheme.nav || 10;
+        }
+      }
+
+      if (currentValue === 0) {
+        currentValue = units * (bestScheme.nav || purchaseNav || 10);
+      }
+
+      matched.push({
+        name: bestScheme.name,
+        code: bestScheme.code,
+        category: bestScheme.category,
+        assetClass: bestScheme.assetClass,
+        sector: deriveSector(bestScheme.category, bestScheme.name),
+        weight: currentValue,
+        expenseRatio: 0,
+        nav: bestScheme.nav,
+        units: Number(units.toFixed(3)),
+        purchaseNav: Number(purchaseNav.toFixed(2))
+      });
+    }
   }
 
-  // If we found amounts, convert to percentage weights
   const totalAmount = matched.reduce((sum, h) => sum + h.weight, 0);
   if (totalAmount > 0) {
     matched.forEach((h) => {
       h.weight = Math.round((h.weight / totalAmount) * 100);
     });
-    // Ensure sum = 100
     const currentSum = matched.reduce((sum, h) => sum + h.weight, 0);
     if (currentSum !== 100 && matched.length > 0) {
       matched[0].weight += 100 - currentSum;
     }
   } else {
-    // Equal weight distribution
     const equalWeight = Math.floor(100 / Math.max(1, matched.length));
     matched.forEach((h, i) => {
       h.weight = i === 0 ? 100 - equalWeight * (matched.length - 1) : equalWeight;
