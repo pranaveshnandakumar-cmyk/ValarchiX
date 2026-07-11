@@ -103,33 +103,43 @@ function fuzzyMatch(text: string, schemes: SchemeRecord[]): ParsedHolding[] {
       const currentValue = rawCurrent ? parseFloat(rawCurrent.replace(/,/g, "")) : 0;
 
       let bestScheme: SchemeRecord | null = null;
-      let maxMatchedWords = 0;
+      let maxMatchPercent = 0;
       let bestCleanedLength = 0;
 
       const rawNameLower = rawName.toLowerCase();
-      const rawNameWords = rawNameLower.replace(/[^a-z0-9\s]/gi, " ").split(/\s+/).filter(w => w.length > 2);
+      const rawNameCleaned = rawNameLower
+        .replace(/\b(direct|regular|plan|growth|dividend|idcw|payout|reinvestment|option|growth option)\b/gi, "")
+        .replace(/[^a-z0-9\s]/gi, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+      const rawNameWords = rawNameCleaned.split(/\s+/).filter(w => w.length > 2);
 
-      for (const scheme of schemes) {
-        if (seenCodes.has(scheme.code)) continue;
+      if (rawNameWords.length > 0) {
+        for (const scheme of schemes) {
+          if (seenCodes.has(scheme.code)) continue;
 
-        const fullNameLower = scheme.name.toLowerCase();
-        const cleanedName = fullNameLower
-          .replace(/\b(direct|regular|plan|growth|dividend|idcw|payout|reinvestment|option|growth option)\b/gi, "")
-          .replace(/[^a-z0-9\s]/gi, " ")
-          .replace(/\s+/g, " ")
-          .trim();
+          const fullNameLower = scheme.name.toLowerCase();
+          const cleanedName = fullNameLower
+            .replace(/\b(direct|regular|plan|growth|dividend|idcw|payout|reinvestment|option|growth option)\b/gi, "")
+            .replace(/[^a-z0-9\s]/gi, " ")
+            .replace(/\s+/g, " ")
+            .trim();
 
-        const words = cleanedName.split(/\s+/).filter(w => w.length > 2);
-        if (words.length === 0) continue;
+          const words = cleanedName.split(/\s+/).filter(w => w.length > 2);
+          if (words.length === 0) continue;
 
-        const matchedCount = words.filter(word => rawNameWords.includes(word)).length;
-        const isMatch = matchedCount === words.length && words.length >= 2;
+          // Calculate prefix-based matching intersection percentage
+          const intersection = words.filter(w1 => 
+            rawNameWords.some(w2 => w1.startsWith(w2) || w2.startsWith(w1))
+          ).length;
+          const matchPercent = intersection / Math.min(words.length, rawNameWords.length);
 
-        if (isMatch) {
-          if (words.length > maxMatchedWords || (words.length === maxMatchedWords && cleanedName.length > bestCleanedLength)) {
-            maxMatchedWords = words.length;
-            bestCleanedLength = cleanedName.length;
-            bestScheme = scheme;
+          if (matchPercent >= 0.85 && intersection >= 2) {
+            if (matchPercent > maxMatchPercent || (matchPercent === maxMatchPercent && cleanedName.length > bestCleanedLength)) {
+              maxMatchPercent = matchPercent;
+              bestCleanedLength = cleanedName.length;
+              bestScheme = scheme;
+            }
           }
         }
       }
@@ -158,30 +168,42 @@ function fuzzyMatch(text: string, schemes: SchemeRecord[]): ParsedHolding[] {
       const lineLower = line.toLowerCase();
       
       let bestScheme: SchemeRecord | null = null;
-      let maxMatchedWords = 0;
+      let maxMatchPercent = 0;
       let bestCleanedLength = 0;
 
-      for (const scheme of schemes) {
-        if (seenCodes.has(scheme.code)) continue;
+      const lineCleaned = lineLower
+        .replace(/\b(direct|regular|plan|growth|dividend|idcw|payout|reinvestment|option|growth option)\b/gi, "")
+        .replace(/[^a-z0-9\s]/gi, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+      const lineWords = lineCleaned.split(/\s+/).filter(w => w.length > 2);
 
-        const fullNameLower = scheme.name.toLowerCase();
-        const cleanedName = fullNameLower
-          .replace(/\b(direct|regular|plan|growth|dividend|idcw|payout|reinvestment|option|growth option)\b/gi, "")
-          .replace(/[^a-z0-9\s]/gi, " ")
-          .replace(/\s+/g, " ")
-          .trim();
+      if (lineWords.length > 0) {
+        for (const scheme of schemes) {
+          if (seenCodes.has(scheme.code)) continue;
 
-        const words = cleanedName.split(/\s+/).filter(w => w.length > 2);
-        if (words.length === 0) continue;
+          const fullNameLower = scheme.name.toLowerCase();
+          const cleanedName = fullNameLower
+            .replace(/\b(direct|regular|plan|growth|dividend|idcw|payout|reinvestment|option|growth option)\b/gi, "")
+            .replace(/[^a-z0-9\s]/gi, " ")
+            .replace(/\s+/g, " ")
+            .trim();
 
-        const matchedCount = words.filter(word => lineLower.includes(word)).length;
-        const isMatch = matchedCount === words.length && words.length >= 2;
+          const words = cleanedName.split(/\s+/).filter(w => w.length > 2);
+          if (words.length === 0) continue;
 
-        if (isMatch) {
-          if (words.length > maxMatchedWords || (words.length === maxMatchedWords && cleanedName.length > bestCleanedLength)) {
-            maxMatchedWords = words.length;
-            bestCleanedLength = cleanedName.length;
-            bestScheme = scheme;
+          // Calculate prefix-based matching intersection percentage
+          const intersection = words.filter(w1 => 
+            lineWords.some(w2 => w1.startsWith(w2) || w2.startsWith(w1))
+          ).length;
+          const matchPercent = intersection / Math.min(words.length, lineWords.length);
+
+          if (matchPercent >= 0.85 && intersection >= 2) {
+            if (matchPercent > maxMatchPercent || (matchPercent === maxMatchPercent && cleanedName.length > bestCleanedLength)) {
+              maxMatchPercent = matchPercent;
+              bestCleanedLength = cleanedName.length;
+              bestScheme = scheme;
+            }
           }
         }
       }
