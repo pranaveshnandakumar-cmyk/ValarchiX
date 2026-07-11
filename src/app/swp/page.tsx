@@ -1,0 +1,365 @@
+"use client";
+
+import React, { useState, useMemo, useEffect } from "react";
+import { ArrowDownLeft, Info, HelpCircle, AlertTriangle, ShieldCheck } from "lucide-react";
+import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from "recharts";
+
+export default function SwpCalculator() {
+  const [initialCorpus, setInitialCorpus] = useState(5000000); // 50 Lakhs
+  const [monthlyWithdrawal, setMonthlyWithdrawal] = useState(30000);
+  const [expectedReturn, setExpectedReturn] = useState(8.5); // Moderate return on conservative allocation
+  const [years, setYears] = useState(20);
+  const [adjustWithdrawal, setAdjustWithdrawal] = useState(true); // Inflating withdrawals yearly
+  const [inflation, setInflation] = useState(5.09);
+  const [rates, setRates] = useState({ repoRate: 6.50, bondYield10Y: 6.95, inflationRate: 5.09 });
+
+  useEffect(() => {
+    fetch("/api/rates")
+      .then((res) => res.json())
+      .then((data) => {
+        setRates(data);
+        setInflation(data.inflationRate);
+      })
+      .catch((err) => console.error("Error loading rates", err));
+  }, []);
+
+  const calculations = useMemo(() => {
+    const data = [];
+    const monthlyRate = expectedReturn / 100 / 12;
+    const infRate = inflation / 100;
+    
+    let currentCorpus = initialCorpus;
+    let totalWithdrawn = 0;
+    let depletionYear = null;
+    let baseWithdrawal = monthlyWithdrawal;
+
+    data.push({
+      year: "Start",
+      "Remaining Corpus": initialCorpus,
+      "Cumulative Withdrawn": 0
+    });
+
+    for (let y = 1; y <= years; y++) {
+      let yearlyWithdrawn = 0;
+      
+      // Calculate month by month for the year
+      for (let m = 1; m <= 12; m++) {
+        if (currentCorpus > 0) {
+          // 1. Add monthly compounding yield
+          currentCorpus = currentCorpus * (1 + monthlyRate);
+          // 2. Subtract withdrawal
+          const withdrawAmt = Math.min(currentCorpus, baseWithdrawal);
+          currentCorpus = currentCorpus - withdrawAmt;
+          
+          yearlyWithdrawn += withdrawAmt;
+          totalWithdrawn += withdrawAmt;
+        } else {
+          if (depletionYear === null) {
+            depletionYear = y;
+          }
+        }
+      }
+
+      // If adjustWithdrawal is checked, inflate the monthly pension target for the next year
+      if (adjustWithdrawal) {
+        baseWithdrawal = baseWithdrawal * (1 + infRate);
+      }
+
+      data.push({
+        year: `Yr ${y}`,
+        "Remaining Corpus": Math.round(currentCorpus),
+        "Cumulative Withdrawn": Math.round(totalWithdrawn)
+      });
+    }
+
+    return {
+      totalWithdrawn: Math.round(totalWithdrawn),
+      remainingCorpus: Math.round(currentCorpus),
+      depletionYear,
+      chartData: data
+    };
+  }, [initialCorpus, monthlyWithdrawal, expectedReturn, years, adjustWithdrawal, inflation]);
+
+  const formatCurrency = (val: number) => {
+    return new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: "INR",
+      maximumFractionDigits: 0
+    }).format(val);
+  };
+
+  return (
+    <div className="space-y-10 py-6 animate-fadeIn">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-border-navy pb-6 gap-4">
+        <div>
+          <h1 className="text-3xl font-extrabold text-white tracking-tight flex items-center gap-2">
+            <ArrowDownLeft className="text-emerald" />
+            SWP Calculator (Systematic Withdrawal Plan)
+          </h1>
+          <p className="text-sm text-muted-grey mt-1">
+            Simulate monthly cash flow generation from a mutual fund and track safe withdrawal corpus lifetime.
+          </p>
+        </div>
+        <div className="text-xs font-semibold text-emerald bg-emerald/5 border border-emerald/20 px-3 py-1.5 rounded-lg">
+          💡 Motto: We don&apos;t tell what to pick, we tell how to pick.
+        </div>
+      </div>
+
+      <div className="grid lg:grid-cols-3 gap-8">
+        {/* Controls Column */}
+        <div className="lg:col-span-1 space-y-6">
+          <div className="p-6 glass-card space-y-6">
+            <h2 className="text-lg font-bold text-white">Investment Settings</h2>
+
+            {/* Initial Corpus Slider */}
+            <div className="space-y-2">
+              <div className="flex justify-between text-xs font-semibold">
+                <span className="text-muted-grey">Initial Corpus</span>
+                <span className="text-emerald font-bold">{formatCurrency(initialCorpus)}</span>
+              </div>
+              <input
+                type="range"
+                min={100000}
+                max={50000000}
+                step={100000}
+                value={initialCorpus}
+                onChange={(e) => setInitialCorpus(Number(e.target.value))}
+                className="w-full accent-emerald bg-navy-bg h-1 rounded-lg cursor-pointer"
+              />
+              <div className="flex justify-between text-[10px] text-muted-grey">
+                <span>₹1L</span>
+                <span>₹5 Crore</span>
+              </div>
+            </div>
+
+            {/* Monthly Withdrawal Slider */}
+            <div className="space-y-2">
+              <div className="flex justify-between text-xs font-semibold">
+                <span className="text-muted-grey">Desired Monthly Pension</span>
+                <span className="text-emerald font-bold">{formatCurrency(monthlyWithdrawal)}</span>
+              </div>
+              <input
+                type="range"
+                min={5000}
+                max={500000}
+                step={5000}
+                value={monthlyWithdrawal}
+                onChange={(e) => setMonthlyWithdrawal(Number(e.target.value))}
+                className="w-full accent-emerald bg-navy-bg h-1 rounded-lg cursor-pointer"
+              />
+              <div className="flex justify-between text-[10px] text-muted-grey">
+                <span>₹5K</span>
+                <span>₹5L / Mo</span>
+              </div>
+            </div>
+
+            {/* Expected Return Rate */}
+            <div className="space-y-2">
+              <div className="flex justify-between text-xs font-semibold">
+                <span className="text-muted-grey">Expected Yield (p.a.)</span>
+                <span className="text-emerald font-bold">{expectedReturn}%</span>
+              </div>
+              <input
+                type="range"
+                min={4}
+                max={18}
+                step={0.5}
+                value={expectedReturn}
+                onChange={(e) => setExpectedReturn(Number(e.target.value))}
+                className="w-full accent-emerald bg-navy-bg h-1 rounded-lg cursor-pointer"
+              />
+              <div className="flex justify-between text-[10px] text-muted-grey">
+                <span>4%</span>
+                <span>18%</span>
+              </div>
+              <div className="flex flex-wrap gap-1.5 pt-1">
+                <button
+                  type="button"
+                  onClick={() => setExpectedReturn(rates.bondYield10Y)}
+                  className="text-[9px] font-bold text-emerald border border-emerald/20 bg-emerald/5 hover:bg-emerald/10 px-2 py-0.5 rounded transition-all"
+                >
+                  Sovereign 10Y Yield ({rates.bondYield10Y}%)
+                </button>
+              </div>
+            </div>
+
+            {/* SWP Horizon Slider */}
+            <div className="space-y-2">
+              <div className="flex justify-between text-xs font-semibold">
+                <span className="text-muted-grey">SWP Horizon</span>
+                <span className="text-emerald font-bold">{years} Years</span>
+              </div>
+              <input
+                type="range"
+                min={5}
+                max={40}
+                step={1}
+                value={years}
+                onChange={(e) => setYears(Number(e.target.value))}
+                className="w-full accent-emerald bg-navy-bg h-1 rounded-lg cursor-pointer"
+              />
+              <div className="flex justify-between text-[10px] text-muted-grey">
+                <span>5 Yrs</span>
+                <span>40 Yrs</span>
+              </div>
+            </div>
+
+            {/* Adjust Withdrawal for Inflation */}
+            <div className="border-t border-border-navy pt-4 space-y-4">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-semibold text-muted-grey flex items-center gap-1.5">
+                  Inflate Pension Annually
+                  <span className="text-muted-grey/60 cursor-help inline-flex" title="Increases monthly withdrawals annually by inflation to preserve purchasing power."><HelpCircle size={14} /></span>
+                </label>
+                <input
+                  type="checkbox"
+                  checked={adjustWithdrawal}
+                  onChange={(e) => setAdjustWithdrawal(e.target.checked)}
+                  className="rounded border-border-navy text-emerald focus:ring-emerald accent-emerald h-4 w-4"
+                />
+              </div>
+
+              {adjustWithdrawal && (
+                <div className="space-y-2 animate-fadeIn">
+                  <div className="flex justify-between text-xs font-semibold">
+                    <span className="text-muted-grey">Expected Inflation Rate</span>
+                    <span className="text-amber-500">{inflation}%</span>
+                  </div>
+                  <input
+                    type="range"
+                    min={3}
+                    max={12}
+                    step={0.5}
+                    value={inflation}
+                    onChange={(e) => setInflation(Number(e.target.value))}
+                    className="w-full accent-amber-500 bg-navy-bg h-1 rounded-lg cursor-pointer"
+                  />
+                  <div className="flex justify-between text-[10px] text-muted-grey">
+                    <span>3%</span>
+                    <span>12%</span>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Results Panel */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* Status Banners */}
+          {calculations.depletionYear !== null ? (
+            <div className="p-4 rounded-xl border border-red-500/20 bg-red-500/10 flex items-start gap-3 text-red-400 text-xs leading-relaxed animate-pulse">
+              <AlertTriangle className="shrink-0 mt-0.5" size={18} />
+              <div>
+                <strong className="text-sm font-bold block">⚠️ Alert: Corpus Depleted Prematurely</strong>
+                Your withdrawal rate is unsustainably high for this return yield. Your retirement nest egg ran completely dry in **Year {calculations.depletionYear}**. Reduce your withdrawal amount or increase your equity yield allocation.
+              </div>
+            </div>
+          ) : (
+            <div className="p-4 rounded-xl border border-emerald/20 bg-emerald/10 flex items-start gap-3 text-emerald text-xs leading-relaxed">
+              <ShieldCheck className="shrink-0 mt-0.5" size={18} />
+              <div>
+                <strong className="text-sm font-bold block">🛡️ Safe SWP Strategy</strong>
+                Your retirement corpus compounds faster than withdrawals are eating it. The nest egg remains healthy and self-sustaining across the entire {years}-year term.
+              </div>
+            </div>
+          )}
+
+          {/* Stats Grid */}
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            <div className="p-4 rounded-xl border border-border-navy bg-navy-card/45">
+              <span className="text-[10px] uppercase font-bold text-muted-grey block">Initial Principal</span>
+              <p className="text-xl font-bold text-white mt-1">
+                {formatCurrency(initialCorpus)}
+              </p>
+            </div>
+            <div className="p-4 rounded-xl border border-border-navy bg-navy-card/45">
+              <span className="text-[10px] uppercase font-bold text-muted-grey block">Total Pension Paid Out</span>
+              <p className="text-xl font-bold text-emerald mt-1">
+                {formatCurrency(calculations.totalWithdrawn)}
+              </p>
+            </div>
+            <div className="p-4 rounded-xl border border-border-navy bg-navy-card/45 col-span-2 md:col-span-1">
+              <span className="text-[10px] uppercase font-bold text-muted-grey block">Remaining Balance</span>
+              <p className={`text-xl font-bold mt-1 ${calculations.remainingCorpus > 0 ? "text-emerald" : "text-red-400"}`}>
+                {formatCurrency(calculations.remainingCorpus)}
+              </p>
+            </div>
+          </div>
+
+          {/* Chart Display */}
+          <div className="p-6 rounded-2xl border border-border-navy bg-navy-card/20 space-y-4">
+            <h3 className="text-sm font-bold text-white uppercase tracking-wider">
+              SWP Wealth Exhaustion Curve Map
+            </h3>
+            <div className="h-[280px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart
+                  data={calculations.chartData}
+                  margin={{ top: 10, right: 10, left: -25, bottom: 0 }}
+                >
+                  <defs>
+                    <linearGradient id="colorCorpus" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#22c55e" stopOpacity={0.3}/>
+                      <stop offset="95%" stopColor="#22c55e" stopOpacity={0}/>
+                    </linearGradient>
+                    <linearGradient id="colorWithdrawn" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.2}/>
+                      <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#112d55" vertical={false} />
+                  <XAxis dataKey="year" stroke="#64748b" fontSize={11} tickLine={false} />
+                  <YAxis
+                    stroke="#64748b"
+                    fontSize={11}
+                    tickLine={false}
+                    tickFormatter={(val) => `₹${val/100000}L`}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "#081c3a",
+                      borderColor: "#112d55",
+                      borderRadius: "8px",
+                      color: "#f1f5f9"
+                    }}
+                    formatter={(v: any) => [formatCurrency(v), ""]}
+                  />
+                  <Legend iconType="circle" />
+                  <Area
+                    type="monotone"
+                    dataKey="Remaining Corpus"
+                    stroke="#22c55e"
+                    fillOpacity={1}
+                    fill="url(#colorCorpus)"
+                    strokeWidth={2}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="Cumulative Withdrawn"
+                    stroke="#3b82f6"
+                    fillOpacity={1}
+                    fill="url(#colorWithdrawn)"
+                    strokeWidth={2}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          {/* Education card */}
+          <div className="p-6 rounded-2xl border border-border-navy bg-navy-card/45 space-y-4">
+            <h3 className="text-base font-bold text-white flex items-center gap-1.5">
+              <Info className="text-emerald" size={18} />
+              Educational Concept: Safe Withdrawal Limits
+            </h3>
+            <p className="text-xs text-muted-grey leading-relaxed">
+              Generating post-retirement income requires setting a safe withdrawal rate. If you withdraw **more than 4% to 5%** of your initial capital annually (while adjusting for inflation), your corpus faces a high risk of depletion (sequence of returns risk) during market downturns. SWP simulators teach you how to set sustainable withdrawal levels to prevent running out of money in old age.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

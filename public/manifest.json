@@ -1,0 +1,28 @@
+{
+  "name": "valarchiX - Financial Calculators & Education",
+  "short_name": "valarchiX",
+  "description": "Operating System for Financial Knowledge. Learn. Analyze. Invest Smarter.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#030a16",
+  "theme_color": "#081c3a",
+  "orientation": "portrait",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
