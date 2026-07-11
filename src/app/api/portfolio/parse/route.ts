@@ -64,6 +64,15 @@ function isWordMatch(w1: string, w2: string): boolean {
   return false;
 }
 
+function cleanLabel(val: string): string {
+  if (!val) return "";
+  return val
+    .trim()
+    .split(/\s+/)
+    .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+    .join(" ");
+}
+
 function fuzzyMatch(text: string, schemes: SchemeRecord[]): ParsedHolding[] {
   const lines = text.split(/\r?\n/).map(line => line.trim()).filter(Boolean);
   const matched: ParsedHolding[] = [];
@@ -75,6 +84,8 @@ function fuzzyMatch(text: string, schemes: SchemeRecord[]): ParsedHolding[] {
   let unitsIdx = -1;
   let investedIdx = -1;
   let currentIdx = -1;
+  let categoryIdx = -1;
+  let subcategoryIdx = -1;
 
   for (let i = 0; i < Math.min(lines.length, 30); i++) {
     const cols = lines[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/"/g, "").trim().toLowerCase());
@@ -87,6 +98,9 @@ function fuzzyMatch(text: string, schemes: SchemeRecord[]): ParsedHolding[] {
       unitsIdx = cols.findIndex(c => c.includes("units") || c.includes("qty") || c.includes("quantity"));
       investedIdx = cols.findIndex(c => c.includes("invested value") || c.includes("invested") || c.includes("investment") || c.includes("purchase value") || c.includes("cost"));
       currentIdx = cols.findIndex(c => c.includes("current value") || c.includes("market value") || c.includes("value") || c.includes("current"));
+      categoryIdx = cols.findIndex(c => c === "category" || c === "asset class" || c.includes("class"));
+      subcategoryIdx = cols.findIndex(c => c.includes("sub-category") || c.includes("subcategory") || c.includes("sub category") || c.includes("sector") || c.includes("type"));
+      
       // Start parsing after header row
       lines.splice(0, i + 1);
       break;
@@ -109,6 +123,9 @@ function fuzzyMatch(text: string, schemes: SchemeRecord[]): ParsedHolding[] {
       const rawCurrent = currentIdx !== -1 ? cols[currentIdx] : "";
       const investedValue = rawInvested ? parseFloat(rawInvested.replace(/,/g, "")) : 0;
       const currentValue = rawCurrent ? parseFloat(rawCurrent.replace(/,/g, "")) : 0;
+
+      const rawCategory = categoryIdx !== -1 ? cols[categoryIdx] : "";
+      const rawSubcategory = subcategoryIdx !== -1 ? cols[subcategoryIdx] : "";
 
       let bestScheme: SchemeRecord | null = null;
       let maxSpecificity = 0;
@@ -162,8 +179,8 @@ function fuzzyMatch(text: string, schemes: SchemeRecord[]): ParsedHolding[] {
           name: bestScheme.name,
           code: bestScheme.code,
           category: bestScheme.category,
-          assetClass: bestScheme.assetClass,
-          sector: deriveSector(bestScheme.category, bestScheme.name),
+          assetClass: cleanLabel(rawCategory) || bestScheme.assetClass || "Other",
+          sector: cleanLabel(rawSubcategory) || deriveSector(bestScheme.category, bestScheme.name),
           weight: currentValue > 0 ? currentValue : (units * currentNav),
           expenseRatio: 0,
           nav: currentNav,
