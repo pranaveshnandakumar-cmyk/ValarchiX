@@ -1,4 +1,4 @@
-# valarchiX - Operating System for Financial Knowledge
+# ValarchiX - Operating System for Financial Knowledge
 
 > 💡 **“We don't tell what to pick, we tell how to pick”**
 
