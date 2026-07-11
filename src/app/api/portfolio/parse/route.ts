@@ -98,8 +98,14 @@ function fuzzyMatch(text: string, schemes: SchemeRecord[]): ParsedHolding[] {
       isCSV = true;
       nameIdx = cols.findIndex(c => c.includes("scheme name") || c.includes("scheme") || c.includes("holding") || c.includes("name"));
       unitsIdx = cols.findIndex(c => c.includes("units") || c.includes("qty") || c.includes("quantity"));
-      investedIdx = cols.findIndex(c => c.includes("invested value") || c.includes("invested") || c.includes("investment") || c.includes("purchase value") || c.includes("cost"));
-      currentIdx = cols.findIndex(c => c.includes("current value") || c.includes("market value") || c.includes("value") || c.includes("current"));
+      investedIdx = cols.findIndex(c => 
+        c === "invested value" || c === "invested" || c === "investment" || c === "purchase value" || c === "cost" ||
+        (c.includes("invested") || c.includes("purchase") || c.includes("cost"))
+      );
+      currentIdx = cols.findIndex(c => 
+        c === "current value" || c === "market value" || c === "value" || c === "current" ||
+        (c.includes("current") || c.includes("market") || (c.includes("value") && !c.includes("invested") && !c.includes("purchase")))
+      );
       categoryIdx = cols.findIndex(c => c === "category" || c === "asset class" || c.includes("class"));
       subcategoryIdx = cols.findIndex(c => c.includes("sub-category") || c.includes("subcategory") || c.includes("sub category") || c.includes("sector") || c.includes("type"));
       
