@@ -11,10 +11,11 @@ import {
   ResponsiveContainer,
   Legend
 } from "recharts";
-import { Info, HelpCircle, TrendingUp, AlertTriangle, Landmark, ShieldCheck } from "lucide-react";
+import { Info, HelpCircle, TrendingUp, AlertTriangle, Landmark, ShieldCheck, ChevronDown } from "lucide-react";
 
 export default function SipCalculator() {
   const [calcMode, setCalcMode] = useState<"sip" | "lumpsum" | "fd-vs-mf">("sip");
+  const [showAudit, setShowAudit] = useState(false);
   const [amount, setAmount] = useState(10000);
   const [rate, setRate] = useState(12);
   const [fdRate, setFdRate] = useState(7.0);
@@ -613,6 +614,91 @@ export default function SipCalculator() {
                     At 5% inflation, a cup of coffee costing ₹100 today will cost ₹208 in 15 years. While your nominal corpus might reach ₹50 Lakhs, its purchasing power (real value) is equivalent to only ₹24 Lakhs today. Always calibrate your targets using the <strong>Inflation Adjusted</strong> toggle to ensure you budget enough!
                   </p>
                 </div>
+              </div>
+            )}
+          </div>
+
+          {/* Collapsible Math Audit Section */}
+          <div className="p-6 rounded-2xl border border-border-navy bg-navy-card/45 space-y-4">
+            <button 
+              onClick={() => setShowAudit(!showAudit)} 
+              className="w-full flex justify-between items-center text-sm font-bold text-white hover:text-emerald transition-colors cursor-pointer"
+            >
+              <span className="flex items-center gap-1.5">
+                <HelpCircle className="text-emerald" size={18} />
+                How This is Calculated & Excel Replication
+              </span>
+              <ChevronDown className={`w-4 h-4 transform transition-transform ${showAudit ? 'rotate-180' : ''}`} />
+            </button>
+            
+            {showAudit && (
+              <div className="text-xs text-muted-grey leading-relaxed space-y-4 pt-4 border-t border-border-navy/60 animate-fadeIn">
+                <div className="space-y-2">
+                  <h4 className="font-semibold text-white">Mathematical Formulas</h4>
+                  <div className="bg-navy-bg/50 p-3 rounded-xl space-y-2 font-mono">
+                    <p>
+                      <strong>Monthly SIP Future Value:</strong>
+                      <br />
+                      FV = P * [ ((1 + i)^n - 1) / i ] * (1 + i)
+                      <br />
+                      <span className="text-[10px] text-muted-grey">where: P = monthly deposit, i = monthly interest rate (r / 12), n = number of months (years * 12).</span>
+                    </p>
+                    <p>
+                      <strong>Lumpsum Future Value:</strong>
+                      <br />
+                      FV = P * (1 + r)^y
+                      <br />
+                      <span className="text-[10px] text-muted-grey">where: P = lump sum deposit, r = annual interest rate, y = number of years.</span>
+                    </p>
+                    <p>
+                      <strong>Real Return (Inflation Adjusted):</strong>
+                      <br />
+                      Real Rate (i_real) = (1 + nominal_rate) / (1 + inflation_rate) - 1
+                      <br />
+                      <span className="text-[10px] text-muted-grey">where: nominal_rate is monthly or annual, and inflation_rate is the corresponding monthly or annual inflation.</span>
+                    </p>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <h4 className="font-semibold text-white">Macroeconomic Reference Metrics</h4>
+                  <p>
+                    • <strong>Risk-Free Rate:</strong> We reference the <strong>10Y G-Sec Bond Yield ({rates.bondYield10Y}%)</strong> as the baseline return for zero-risk Sovereign debt in India. Nominal mutual fund yields are expected to earn a risk premium above this rate.
+                    <br />
+                    • <strong>Baseline Inflation:</strong> Re-calibrated against the latest CPI inflation index value of <strong>{rates.inflationRate}%</strong> to compute real purchasing power.
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <h4 className="font-semibold text-white">Excel Replication (Audit Script)</h4>
+                  <p>To replicate the calculations in Excel or Google Sheets, use the following formulas:</p>
+                  <table className="w-full text-[10px] border-collapse border border-border-navy/80 mt-2">
+                    <thead>
+                      <tr className="bg-navy-bg/60">
+                        <th className="border border-border-navy/80 p-2 text-left">Calculation</th>
+                        <th className="border border-border-navy/80 p-2 text-left">Excel / Sheets Formula</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td className="border border-border-navy/80 p-2 font-medium text-white">SIP Future Value</td>
+                        <td className="border border-border-navy/80 p-2 font-mono text-emerald">=-FV({rate}%/12, {years}*12, {amount}, 0, 1)</td>
+                      </tr>
+                      <tr>
+                        <td className="border border-border-navy/80 p-2 font-medium text-white">Lumpsum Future Value</td>
+                        <td className="border border-border-navy/80 p-2 font-mono text-emerald">=-FV({rate}%, {years}, 0, {amount})</td>
+                      </tr>
+                      <tr>
+                        <td className="border border-border-navy/80 p-2 font-medium text-white">Inflation Real Value</td>
+                        <td className="border border-border-navy/80 p-2 font-mono text-emerald">=-FV(((1 + {rate}%/12)/(1 + {inflation}%/12) - 1), {years}*12, {amount}, 0, 1)</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                <p className="text-[10px] text-amber-500 border-t border-border-navy/60 pt-3">
+                  ⚠️ <strong>Disclaimer:</strong> This tool is for training purposes only and represents a mathematical compound interest simulator. It does not provide SEBI-registered investment advice or guarantee any capital performance.
+                </p>
               </div>
             )}
           </div>

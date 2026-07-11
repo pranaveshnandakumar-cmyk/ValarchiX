@@ -1,10 +1,11 @@
 "use client";
 
 import React, { useState, useMemo, useEffect } from "react";
-import { ArrowDownLeft, Info, HelpCircle, AlertTriangle, ShieldCheck } from "lucide-react";
+import { ArrowDownLeft, Info, HelpCircle, AlertTriangle, ShieldCheck, ChevronDown } from "lucide-react";
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from "recharts";
 
 export default function SwpCalculator() {
+  const [showAudit, setShowAudit] = useState(false);
   const [initialCorpus, setInitialCorpus] = useState(5000000); // 50 Lakhs
   const [monthlyWithdrawal, setMonthlyWithdrawal] = useState(30000);
   const [expectedReturn, setExpectedReturn] = useState(8.5); // Moderate return on conservative allocation
@@ -357,6 +358,62 @@ export default function SwpCalculator() {
             <p className="text-xs text-muted-grey leading-relaxed">
               Generating post-retirement income requires setting a safe withdrawal rate. If you withdraw **more than 4% to 5%** of your initial capital annually (while adjusting for inflation), your corpus faces a high risk of depletion (sequence of returns risk) during market downturns. SWP simulators teach you how to set sustainable withdrawal levels to prevent running out of money in old age.
             </p>
+          </div>
+
+          {/* Collapsible Math Audit Section */}
+          <div className="p-6 rounded-2xl border border-border-navy bg-navy-card/45 space-y-4">
+            <button 
+              onClick={() => setShowAudit(!showAudit)} 
+              className="w-full flex justify-between items-center text-sm font-bold text-white hover:text-emerald transition-colors cursor-pointer"
+            >
+              <span className="flex items-center gap-1.5">
+                <HelpCircle className="text-emerald" size={18} />
+                How This is Calculated & Excel Replication
+              </span>
+              <ChevronDown className={`w-4 h-4 transform transition-transform ${showAudit ? 'rotate-180' : ''}`} />
+            </button>
+            
+            {showAudit && (
+              <div className="text-xs text-muted-grey leading-relaxed space-y-4 pt-4 border-t border-border-navy/60 animate-fadeIn">
+                <div className="space-y-2">
+                  <h4 className="font-semibold text-white">Mathematical Formula & Depletion Mechanics</h4>
+                  <div className="bg-navy-bg/50 p-3 rounded-xl space-y-2 font-mono">
+                    <p>
+                      <strong>Monthly SWP Calculation Loop:</strong>
+                      <br />
+                      For each month m = 1 to (years * 12):
+                      <br />
+                      1. Interest Accrued: I_m = Corpus_(m-1) * (r_expected / 12)
+                      <br />
+                      2. Withdrawal Amount: W_m (adjusted for yearly inflation if selected)
+                      <br />
+                      3. New Corpus: Corpus_m = Corpus_(m-1) + I_m - W_m
+                    </p>
+                    <p>
+                      <strong>Inflation Adjustment on Withdrawals:</strong>
+                      <br />
+                      Every 12 months, W is step-increased: W_new = W_old * (1 + inflation_rate)
+                    </p>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <h4 className="font-semibold text-white">Excel Replication (Audit Script)</h4>
+                  <p>To audit or build your own SWP ledger in Excel, build a table with columns:</p>
+                  <ul className="list-disc pl-5 space-y-1">
+                    <li><strong>Month (A):</strong> Row indices (e.g. 1 to 240)</li>
+                    <li><strong>Opening Balance (B):</strong> `=B1 + D1 - E1` (starts with corpus, e.g. `5000000`)</li>
+                    <li><strong>Interest Earned (C):</strong> `=B2 * ({expectedReturn}%/12)`</li>
+                    <li><strong>Withdrawal (D):</strong> `{monthlyWithdrawal}` (for first 12 rows, then `{monthlyWithdrawal} * (1 + {inflation}%)` for the next 12, etc.)</li>
+                    <li><strong>Ending Balance (E):</strong> `=B2 + C2 - D2`</li>
+                  </ul>
+                </div>
+
+                <p className="text-[10px] text-amber-500 border-t border-border-navy/60 pt-3">
+                  ⚠️ <strong>Disclaimer:</strong> This tool is for training purposes only and represents a mathematical compound interest simulator. It does not provide SEBI-registered investment advice or guarantee any capital performance.
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </div>

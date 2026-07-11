@@ -1,10 +1,11 @@
 "use client";
 
 import React, { useState, useMemo, useEffect } from "react";
-import { Coins, Info, HelpCircle } from "lucide-react";
+import { Coins, Info, HelpCircle, ChevronDown } from "lucide-react";
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from "recharts";
 
 export default function PpfCalculator() {
+  const [showAudit, setShowAudit] = useState(false);
   const [yearlyDeposit, setYearlyDeposit] = useState(150000);
   const [years, setYears] = useState(15); // PPF has a default 15-year lock-in
   const [adjustInflation, setAdjustInflation] = useState(true);
@@ -284,6 +285,67 @@ export default function PpfCalculator() {
             <p className="text-xs text-muted-grey leading-relaxed">
               The Public Provident Fund is backed directly by the Central Government of India, making default risk virtually non-existent. However, because it compounds at a fixed rate (7.10% p.a.), it tracks close to average CPI inflation (5.09%). This means it is the perfect tool for capital preservation and debt allocation, but should be combined with equity indexes for long-term growth.
             </p>
+          </div>
+
+          {/* Collapsible Math Audit Section */}
+          <div className="p-6 rounded-2xl border border-border-navy bg-navy-card/45 space-y-4">
+            <button 
+              onClick={() => setShowAudit(!showAudit)} 
+              className="w-full flex justify-between items-center text-sm font-bold text-white hover:text-emerald transition-colors cursor-pointer"
+            >
+              <span className="flex items-center gap-1.5">
+                <HelpCircle className="text-emerald" size={18} />
+                How This is Calculated & Excel Replication
+              </span>
+              <ChevronDown className={`w-4 h-4 transform transition-transform ${showAudit ? 'rotate-180' : ''}`} />
+            </button>
+            
+            {showAudit && (
+              <div className="text-xs text-muted-grey leading-relaxed space-y-4 pt-4 border-t border-border-navy/60 animate-fadeIn">
+                <div className="space-y-2">
+                  <h4 className="font-semibold text-white">PPF Annual Compounding & Balance Formulation</h4>
+                  <div className="bg-navy-bg/50 p-3 rounded-xl space-y-2 font-mono">
+                    <p>
+                      <strong>Annual Compounding Formula (assuming deposit on Day 1):</strong>
+                      <br />
+                      Maturity Balance (F) = A * [ ((1 + r)^n - 1) / r ] * (1 + r)
+                      <br />
+                      <span className="text-[10px] text-muted-grey">where: A = annual deposit (max ₹1.5 Lakhs), r = PPF interest rate (7.10%), n = number of years.</span>
+                    </p>
+                    <p>
+                      Note: Under Indian Government rules, interest is calculated monthly on the lowest balance between the 5th and the last day of the month, and compounded annually at the end of the FY (March 31).
+                    </p>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <h4 className="font-semibold text-white">Excel Replication (Audit Script)</h4>
+                  <p>To replicate this PPF compounding model in Excel or Google Sheets, use:</p>
+                  <table className="w-full text-[10px] border-collapse border border-border-navy/80 mt-2">
+                    <thead>
+                      <tr className="bg-navy-bg/60">
+                        <th className="border border-border-navy/80 p-2 text-left">Calculation</th>
+                        <th className="border border-border-navy/80 p-2 text-left">Excel / Sheets Formula</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td className="border border-border-navy/80 p-2 font-medium text-white">PPF Maturity Balance</td>
+                        <td className="border border-border-navy/80 p-2 font-mono text-emerald">=-FV({PPF_INTEREST_RATE}%, {years}, {yearlyDeposit}, 0, 1)</td>
+                      </tr>
+                      <tr>
+                        <td className="border border-border-navy/80 p-2 font-medium text-white">Inflation Real Value</td>
+                        <td className="border border-border-navy/80 p-2 font-mono text-emerald">=-FV(((1 + {PPF_INTEREST_RATE}%)/(1 + {inflation}%) - 1), {years}, {yearlyDeposit}, 0, 1)</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                <p className="text-[10px] text-amber-500 border-t border-border-navy/60 pt-3">
+                  ⚠️ <strong>Disclaimer:</strong> This tool is an educational planning model designed to teach capital compounding. It does not provide SEBI-registered investment advice or guarantee future Sovereign rates.
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </div>

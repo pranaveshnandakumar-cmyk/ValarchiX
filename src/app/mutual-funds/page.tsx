@@ -305,8 +305,19 @@ export default function MutualFundAnalyzer() {
           <p className="text-sm text-muted-grey mt-1">
             Search real-world mutual funds, compare risk ratios, filter categories, and analyze compounding.
           </p>
+          <div className="flex items-center gap-2 mt-2.5 flex-wrap">
+            <span className="text-[10px] text-emerald bg-emerald/5 border border-emerald/20 px-2 py-0.5 rounded font-semibold">
+              Data Source: AMFI Daily NAV Cache
+            </span>
+            <span className="text-[10px] text-muted-grey bg-navy-card/40 border border-border-navy px-2 py-0.5 rounded">
+              NAV Updated Daily Post 9:00 PM IST
+            </span>
+            <span className="text-[10px] text-muted-grey bg-navy-card/40 border border-border-navy px-2 py-0.5 rounded">
+              Benchmarks Approximated via Index Trackers
+            </span>
+          </div>
         </div>
-        <div className="text-xs font-semibold text-emerald bg-emerald/5 border border-emerald/20 px-3 py-1.5 rounded-lg">
+        <div className="text-xs font-semibold text-emerald bg-emerald/5 border border-emerald/20 px-3 py-1.5 rounded-lg shrink-0">
           💡 Motto: We don&apos;t tell what to pick, we tell how to pick.
         </div>
       </div>
@@ -816,6 +827,11 @@ export default function MutualFundAnalyzer() {
                       </div>
                     )}
                   </div>
+                  {compareFund && (
+                    <p className="text-[10px] text-muted-grey text-right pt-2">
+                      * <strong>Benchmark Disclosure:</strong> Benchmarks (like Nifty 50 TRI) are approximated using passive index-tracking mutual fund schemes as direct proxies.
+                    </p>
+                  )}
                 </div>
 
                 {/* Volatility Ratios Explanation card */}

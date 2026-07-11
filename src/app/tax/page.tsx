@@ -50,34 +50,37 @@ export default function TaxLearningHub() {
     const finalOldTax = oldTax * 1.04;
 
 
-    // --- NEW REGIME TAX CALCULATION (FY 2024-25 / FY 2025-26 rules) ---
+    // --- NEW REGIME TAX CALCULATION (FY 2025-26 / FY 2026-27 Union Budget 2025 rules) ---
     const newStandardDeduction = 75000;
     const newTaxableIncome = Math.max(0, grossIncome - newStandardDeduction);
     let newTax = 0;
 
-    // Slabs for New Regime:
-    // Up to 3L: Nil
-    // 3L to 6L: 5%
-    // 6L to 9L: 10%
-    // 9L to 12L: 15%
-    // 12L to 15L: 20%
-    // Above 15L: 30%
-    if (newTaxableIncome <= 300000) {
+    // Slabs for New Regime (Budget 2025):
+    // Up to 4L: Nil
+    // 4L to 8L: 5%
+    // 8L to 12L: 10%
+    // 12L to 16L: 15%
+    // 16L to 20L: 20%
+    // 20L to 24L: 25%
+    // Above 24L: 30%
+    if (newTaxableIncome <= 400000) {
       newTax = 0;
-    } else if (newTaxableIncome <= 600000) {
-      newTax = (newTaxableIncome - 300000) * 0.05;
-    } else if (newTaxableIncome <= 900000) {
-      newTax = (300000 * 0.05) + (newTaxableIncome - 600000) * 0.10;
+    } else if (newTaxableIncome <= 800000) {
+      newTax = (newTaxableIncome - 400000) * 0.05;
     } else if (newTaxableIncome <= 1200000) {
-      newTax = (300000 * 0.05) + (300000 * 0.10) + (newTaxableIncome - 900000) * 0.15;
-    } else if (newTaxableIncome <= 1500000) {
-      newTax = (300000 * 0.05) + (300000 * 0.10) + (300000 * 0.15) + (newTaxableIncome - 1200000) * 0.20;
+      newTax = (400000 * 0.05) + (newTaxableIncome - 800000) * 0.10;
+    } else if (newTaxableIncome <= 1600000) {
+      newTax = (400000 * 0.05) + (400000 * 0.10) + (newTaxableIncome - 1200000) * 0.15;
+    } else if (newTaxableIncome <= 2000000) {
+      newTax = (400000 * 0.05) + (400000 * 0.10) + (400000 * 0.15) + (newTaxableIncome - 1600000) * 0.20;
+    } else if (newTaxableIncome <= 2400000) {
+      newTax = (400000 * 0.05) + (400000 * 0.10) + (400000 * 0.15) + (400000 * 0.20) + (newTaxableIncome - 2000000) * 0.25;
     } else {
-      newTax = (300000 * 0.05) + (300000 * 0.10) + (300000 * 0.15) + (300000 * 0.20) + (newTaxableIncome - 1500000) * 0.30;
+      newTax = (400000 * 0.05) + (400000 * 0.10) + (400000 * 0.15) + (400000 * 0.20) + (400000 * 0.25) + (newTaxableIncome - 2400000) * 0.30;
     }
 
-    // 87A Rebate: Under new regime, tax is zero if taxable income <= 7L
-    if (newTaxableIncome <= 700000) {
+    // 87A Rebate: Under New Regime (Budget 2025), tax is zero if taxable income <= 12L
+    if (newTaxableIncome <= 1200000) {
       newTax = 0;
     }
 
@@ -243,7 +246,7 @@ export default function TaxLearningHub() {
           {/* Recommendation Banner */}
           <div className="p-6 rounded-2xl border border-emerald/30 bg-gradient-to-br from-emerald/10 to-transparent flex flex-col md:flex-row justify-between items-center gap-4">
             <div className="space-y-1">
-              <span className="text-xs uppercase font-bold text-emerald tracking-wide">Recommended Regime</span>
+              <span className="text-xs uppercase font-bold text-emerald tracking-wide">Lower Tax Liability Regime (Estimate)</span>
               <h3 className="text-2xl font-extrabold text-white">
                 {calculations.preferredRegime}
               </h3>
@@ -265,7 +268,7 @@ export default function TaxLearningHub() {
             <div className="p-6 rounded-2xl border border-border-navy bg-navy-card/25 space-y-4">
               <div className="flex justify-between items-center">
                 <h3 className="text-base font-bold text-white">Old Tax Regime</h3>
-                <span className="text-xs text-muted-grey">FY 2024-25</span>
+                <span className="text-xs text-muted-grey">FY 2025-26 / FY 2026-27</span>
               </div>
               <div className="space-y-3">
                 <div className="flex justify-between text-xs border-b border-border-navy/60 pb-2">
@@ -291,7 +294,7 @@ export default function TaxLearningHub() {
             <div className="p-6 rounded-2xl border border-border-navy bg-navy-card/25 space-y-4">
               <div className="flex justify-between items-center">
                 <h3 className="text-base font-bold text-white">New Tax Regime</h3>
-                <span className="text-xs text-emerald bg-emerald/10 border border-emerald/20 px-2 py-0.5 rounded">Default</span>
+                <span className="text-xs text-emerald bg-emerald/10 border border-emerald/20 px-2 py-0.5 rounded">Default • Budget 2025</span>
               </div>
               <div className="space-y-3">
                 <div className="flex justify-between text-xs border-b border-border-navy/60 pb-2">
@@ -341,6 +344,28 @@ export default function TaxLearningHub() {
                   <strong>NPS (National Pension Scheme)</strong>: EET status. Locked until age 60. NPS allows equity exposure (up to 75%), which generally yields higher compounding rates than PPF over 20+ years.
                 </p>
               </div>
+            </div>
+          </div>
+
+          {/* Rules and Legal Disclaimer Panel */}
+          <div className="p-6 rounded-2xl border border-border-navy bg-navy-card/40 space-y-4">
+            <h3 className="text-base font-bold text-white flex items-center gap-1.5">
+              <ShieldCheck className="text-emerald" size={18} />
+              Budget 2025 Rules & Switch Guidelines
+            </h3>
+            <div className="text-xs text-muted-grey space-y-3 leading-relaxed">
+              <p>
+                • <strong>New Tax Regime Slabs (FY 2025-26):</strong> Exempt up to ₹4 Lakhs. Slabs: ₹4L–8L (5%), ₹8L–12L (10%), ₹12L–16L (15%), ₹16L–20L (20%), ₹20L–24L (25%), Above ₹24L (30%).
+              </p>
+              <p>
+                • <strong>Section 87A Rebate:</strong> Tax liability is fully rebated up to ₹12 Lakhs taxable income (making it ₹0 tax). When combined with the ₹75,000 standard deduction, a salaried employee earning up to ₹12.75 Lakhs pays NIL tax.
+              </p>
+              <p>
+                • <strong>Switching Guidelines:</strong> Salaried individuals can switch between the Old and New tax regimes every financial year. Taxpayers with business or professional income (e.g. freelancers, consultants, business owners) can only switch regimes once in their lifetime.
+              </p>
+              <p className="border-t border-border-navy/60 pt-3 text-[10px] text-amber-500 font-medium">
+                ⚠️ <strong>Educational Disclaimer:</strong> Tax estimations are based on current Union Budget 2025 interpretations. Actual calculations can vary based on specific perks, exemptions, and professional profiles. Always consult a qualified CA or tax professional before filing taxes.
+              </p>
             </div>
           </div>
         </div>

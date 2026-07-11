@@ -1,10 +1,11 @@
 "use client";
 
 import React, { useState, useMemo, useEffect } from "react";
-import { TrendingUp, Info, HelpCircle } from "lucide-react";
+import { TrendingUp, Info, HelpCircle, ChevronDown } from "lucide-react";
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from "recharts";
 
 export default function NpsCalculator() {
+  const [showAudit, setShowAudit] = useState(false);
   const [currentAge, setCurrentAge] = useState(28);
   const [monthlyContribution, setMonthlyContribution] = useState(10000);
   const [expectedReturn, setExpectedReturn] = useState(10); // Average of Equity (E) + Debt (C/G) NPS allocations
@@ -371,6 +372,79 @@ export default function NpsCalculator() {
             <p className="text-xs text-muted-grey leading-relaxed">
               At age 60, NPS allows you to withdraw up to **60% of the corpus completely tax-free**. The remaining **40% must be reinvested in an Annuity Plan** with a registered insurance company. This annuity corpus yields a regular monthly interest payout (pension), which acts as a debt cushion during your retirement years, while the 60% lump sum can remain compounded in equities.
             </p>
+          </div>
+
+          {/* Collapsible Math Audit Section */}
+          <div className="p-6 rounded-2xl border border-border-navy bg-navy-card/45 space-y-4">
+            <button 
+              onClick={() => setShowAudit(!showAudit)} 
+              className="w-full flex justify-between items-center text-sm font-bold text-white hover:text-emerald transition-colors cursor-pointer"
+            >
+              <span className="flex items-center gap-1.5">
+                <HelpCircle className="text-emerald" size={18} />
+                How This is Calculated & Excel Replication
+              </span>
+              <ChevronDown className={`w-4 h-4 transform transition-transform ${showAudit ? 'rotate-180' : ''}`} />
+            </button>
+            
+            {showAudit && (
+              <div className="text-xs text-muted-grey leading-relaxed space-y-4 pt-4 border-t border-border-navy/60 animate-fadeIn">
+                <div className="space-y-2">
+                  <h4 className="font-semibold text-white">NPS Compounding & Annuity Payout Formulation</h4>
+                  <div className="bg-navy-bg/50 p-3 rounded-xl space-y-2 font-mono">
+                    <p>
+                      <strong>Accumulated NPS Corpus (Future Value):</strong>
+                      <br />
+                      Corpus = P * [ ((1 + i)^n - 1) / i ] * (1 + i)
+                      <br />
+                      <span className="text-[10px] text-muted-grey">where: P = monthly contribution, i = monthly return rate (expected_return / 12), n = monthly installments ((60 - age) * 12).</span>
+                    </p>
+                    <p>
+                      <strong>Lump Sum Withdrawal (Tax-Free 60%):</strong>
+                      <br />
+                      Lump_Sum = Corpus * (1 - annuity_ratio / 100)
+                    </p>
+                    <p>
+                      <strong>Annuity Corpus (40% Minimum Reinvestment):</strong>
+                      <br />
+                      Annuity_Corpus = Corpus * (annuity_ratio / 100)
+                    </p>
+                    <p>
+                      <strong>Estimated Monthly Pension:</strong>
+                      <br />
+                      Monthly Pension = Annuity_Corpus * (annuity_yield / 100) / 12
+                    </p>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <h4 className="font-semibold text-white">Excel Replication (Audit Script)</h4>
+                  <p>To replicate this NPS model in Excel or Google Sheets, use the following cell formulas:</p>
+                  <table className="w-full text-[10px] border-collapse border border-border-navy/80 mt-2">
+                    <thead>
+                      <tr className="bg-navy-bg/60">
+                        <th className="border border-border-navy/80 p-2 text-left">Calculation</th>
+                        <th className="border border-border-navy/80 p-2 text-left">Excel / Sheets Formula</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td className="border border-border-navy/80 p-2 font-medium text-white">Accumulated Corpus at age 60</td>
+                        <td className="border border-border-navy/80 p-2 font-mono text-emerald">=-FV({expectedReturn}%/12, (60-{currentAge})*12, {monthlyContribution}, 0, 1)</td>
+                      </tr>
+                      <tr>
+                        <td className="border border-border-navy/80 p-2 font-medium text-white">Annuity Payout (Per Month)</td>
+                        <td className="border border-border-navy/80 p-2 font-mono text-emerald">= (Corpus * {annuityRatio}% * {annuityYield}%) / 12</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                <p className="text-[10px] text-amber-500 border-t border-border-navy/60 pt-3">
+                  ⚠️ <strong>Disclaimer:</strong> This tool is an educational retirement planning model. It does not provide SEBI-registered investment advice or guarantee annuity rate returns.
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </div>

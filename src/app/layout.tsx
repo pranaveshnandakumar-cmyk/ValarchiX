@@ -56,7 +56,7 @@ export default function RootLayout({
                 💡 “We don&apos;t tell what to pick, we tell how to pick”
               </p>
               <p className="leading-relaxed">
-                This platform (valarchiX) is for educational purposes only and should not be considered personalized financial advice. Content, metrics, and planning models are designed to teach users how to think about investing. Always conduct your own research or seek advice from a SEBI registered/certified financial planner.
+                valarchiX is an educational simulator for building financial knowledge. Calculators, planning models, and metrics are designed to teach analytical thinking. We do not provide SEBI-registered investment, legal, or tax advice. Read our full <a href="/disclaimer" className="text-emerald hover:underline font-semibold">Disclaimer & Legal Disclosures</a> before using the platform.
               </p>
               <p>© {new Date().getFullYear()} valarchiX. All rights reserved.</p>
             </div>

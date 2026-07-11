@@ -11,7 +11,7 @@ import {
   ResponsiveContainer,
   Cell
 } from "recharts";
-import { Target, Home, Car, Heart, GraduationCap, ShieldAlert, Palmtree, HelpCircle } from "lucide-react";
+import { Target, Home, Car, Heart, GraduationCap, ShieldAlert, Palmtree, HelpCircle, ChevronDown } from "lucide-react";
 
 interface GoalType {
   id: string;
@@ -66,6 +66,7 @@ const GOAL_TYPES: GoalType[] = [
 ];
 
 export default function GoalPlanner() {
+  const [showAudit, setShowAudit] = useState(false);
   const [selectedGoal, setSelectedGoal] = useState<GoalType>(GOAL_TYPES[0]);
   const [targetAmount, setTargetAmount] = useState(selectedGoal.defaultAmount);
   const [years, setYears] = useState(selectedGoal.defaultYears);
@@ -405,6 +406,69 @@ export default function GoalPlanner() {
                 </ul>
               </div>
             </div>
+          </div>
+
+          {/* Collapsible Math Audit Section */}
+          <div className="p-6 rounded-2xl border border-border-navy bg-navy-card/45 space-y-4">
+            <button 
+              onClick={() => setShowAudit(!showAudit)} 
+              className="w-full flex justify-between items-center text-sm font-bold text-white hover:text-emerald transition-colors cursor-pointer"
+            >
+              <span className="flex items-center gap-1.5">
+                <HelpCircle className="text-emerald" size={18} />
+                How This is Calculated & Excel Replication
+              </span>
+              <ChevronDown className={`w-4 h-4 transform transition-transform ${showAudit ? 'rotate-180' : ''}`} />
+            </button>
+            
+            {showAudit && (
+              <div className="text-xs text-muted-grey leading-relaxed space-y-4 pt-4 border-t border-border-navy/60 animate-fadeIn">
+                <div className="space-y-2">
+                  <h4 className="font-semibold text-white">Goal Future Cost & Required SIP Formulation</h4>
+                  <div className="bg-navy-bg/50 p-3 rounded-xl space-y-2 font-mono">
+                    <p>
+                      <strong>Inflated Goal Target (Future Value of Cost):</strong>
+                      <br />
+                      Inflated Target = Current Target * (1 + inflation_rate)^y
+                    </p>
+                    <p>
+                      <strong>Monthly SIP Required:</strong>
+                      <br />
+                      Monthly SIP = Target_Corpus / [ ((1 + i)^n - 1) / i * (1 + i) ]
+                      <br />
+                      <span className="text-[10px] text-muted-grey">where: i = monthly expected return (r_expected / 12), n = number of months (years * 12).</span>
+                    </p>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <h4 className="font-semibold text-white">Excel Replication (Audit Script)</h4>
+                  <p>To replicate this goal plan inside Excel or Google Sheets:</p>
+                  <table className="w-full text-[10px] border-collapse border border-border-navy/80 mt-2">
+                    <thead>
+                      <tr className="bg-navy-bg/60">
+                        <th className="border border-border-navy/80 p-2 text-left">Calculation</th>
+                        <th className="border border-border-navy/80 p-2 text-left">Excel / Sheets Formula</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td className="border border-border-navy/80 p-2 font-medium text-white">Inflated Target Amount</td>
+                        <td className="border border-border-navy/80 p-2 font-mono text-emerald">={targetAmount} * (1 + {inflation}%)^{years}</td>
+                      </tr>
+                      <tr>
+                        <td className="border border-border-navy/80 p-2 font-medium text-white">Required Monthly SIP</td>
+                        <td className="border border-border-navy/80 p-2 font-mono text-emerald">=PMT({expectedReturn}%/12, {years}*12, 0, -{adjustInflation ? (targetAmount * Math.pow(1 + inflation / 100, years)) : targetAmount}, 1)</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                <p className="text-[10px] text-amber-500 border-t border-border-navy/60 pt-3">
+                  ⚠️ <strong>Disclaimer:</strong> This tool is an educational planning model designed to teach compounding principles. It does not provide SEBI-registered investment advice or guarantee that targets will be achieved.
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </div>

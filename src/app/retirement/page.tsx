@@ -10,9 +10,10 @@ import {
   Tooltip,
   ResponsiveContainer
 } from "recharts";
-import { Hourglass, AlertCircle, Sparkles, BookOpen, HelpCircle } from "lucide-react";
+import { Hourglass, AlertCircle, Sparkles, BookOpen, HelpCircle, ChevronDown } from "lucide-react";
 
 export default function RetirementPlanner() {
+  const [showAudit, setShowAudit] = useState(false);
   const [currentAge, setCurrentAge] = useState(25);
   const [retireAge, setRetireAge] = useState(60);
   const [lifeExpectancy, setLifeExpectancy] = useState(85);
@@ -435,6 +436,80 @@ export default function RetirementPlanner() {
             </p>
           </div>
         </div>
+      </div>
+
+      {/* Collapsible Math Audit Section */}
+      <div className="p-6 rounded-2xl border border-border-navy bg-navy-card/45 mt-6 space-y-4">
+        <button 
+          onClick={() => setShowAudit(!showAudit)} 
+          className="w-full flex justify-between items-center text-sm font-bold text-white hover:text-emerald transition-colors cursor-pointer"
+        >
+          <span className="flex items-center gap-1.5">
+            <HelpCircle className="text-emerald" size={18} />
+            How This is Calculated & Excel Replication
+          </span>
+          <ChevronDown className={`w-4 h-4 transform transition-transform ${showAudit ? 'rotate-180' : ''}`} />
+        </button>
+        
+        {showAudit && (
+          <div className="text-xs text-muted-grey leading-relaxed space-y-4 pt-4 border-t border-border-navy/60 animate-fadeIn">
+            <div className="space-y-2">
+              <h4 className="font-semibold text-white">Retirement Target Corpus & Required Monthly SIP Formulation</h4>
+              <div className="bg-navy-bg/50 p-3 rounded-xl space-y-2 font-mono">
+                <p>
+                  <strong>Inflated Monthly Expense at Retirement:</strong>
+                  <br />
+                  Expense_Retire = Expense_Current * (1 + inflation_rate)^(Retire_Age - Current_Age)
+                </p>
+                <p>
+                  <strong>Total Retirement Corpus Required (Capitalized Value):</strong>
+                  <br />
+                  Corpus_Required = (Expense_Retire * 12) / Safe_Withdrawal_Rate
+                  <br />
+                  <span className="text-[10px] text-muted-grey">where: Safe_Withdrawal_Rate = {swr}% (expressed as {swr / 100}) as baseline.</span>
+                </p>
+                <p>
+                  <strong>Required Monthly SIP to Target Corpus:</strong>
+                  <br />
+                  Monthly SIP = Corpus_Required / [ ((1 + i)^n - 1) / i * (1 + i) ]
+                  <br />
+                  <span className="text-[10px] text-muted-grey">where: i = monthly pre-retirement return (r_pre / 12), n = number of pre-retirement months (Years_to_Retire * 12).</span>
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <h4 className="font-semibold text-white">Excel Replication (Audit Script)</h4>
+              <p>To audit or build your own Retirement Plan in Excel:</p>
+              <table className="w-full text-[10px] border-collapse border border-border-navy/80 mt-2">
+                <thead>
+                  <tr className="bg-navy-bg/60">
+                    <th className="border border-border-navy/80 p-2 text-left">Calculation</th>
+                    <th className="border border-border-navy/80 p-2 text-left">Excel / Sheets Formula</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td className="border border-border-navy/80 p-2 font-medium text-white">Monthly Expense at Retirement</td>
+                    <td className="border border-border-navy/80 p-2 font-mono text-emerald">={monthlyExpense} * (1 + {inflation}%)^{retireAge - currentAge}</td>
+                  </tr>
+                  <tr>
+                    <td className="border border-border-navy/80 p-2 font-medium text-white">Target Corpus ({swr}% SWR Rule)</td>
+                    <td className="border border-border-navy/80 p-2 font-mono text-emerald">= (Monthly_Expense_at_Retirement * 12) / {swr}%</td>
+                  </tr>
+                  <tr>
+                    <td className="border border-border-navy/80 p-2 font-medium text-white">Monthly SIP Needed</td>
+                    <td className="border border-border-navy/80 p-2 font-mono text-emerald">=PMT({preReturn}%/12, ({retireAge} - {currentAge})*12, 0, -Target_Corpus, 1)</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <p className="text-[10px] text-amber-500 border-t border-border-navy/60 pt-3">
+              ⚠️ <strong>Disclaimer:</strong> This tool is an educational planning model designed to teach compounding principles. It does not provide SEBI-registered investment advice or guarantee that targets will be achieved.
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );
