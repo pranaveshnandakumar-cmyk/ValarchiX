@@ -69,7 +69,7 @@ function fuzzyMatch(text: string, schemes: SchemeRecord[]): ParsedHolding[] {
   let currentIdx = -1;
 
   for (let i = 0; i < Math.min(lines.length, 30); i++) {
-    const cols = lines[i].split(',').map(c => c.trim().toLowerCase());
+    const cols = lines[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/"/g, "").trim().toLowerCase());
     const hasScheme = cols.some(c => c.includes("scheme") || c.includes("fund") || c.includes("holding"));
     const hasUnits = cols.some(c => c.includes("units") || c.includes("qty") || c.includes("quantity"));
     
@@ -87,18 +87,18 @@ function fuzzyMatch(text: string, schemes: SchemeRecord[]): ParsedHolding[] {
 
   if (isCSV && nameIdx !== -1 && unitsIdx !== -1) {
     for (const line of lines) {
-      const cols = line.split(',');
+      const cols = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/"/g, "").trim());
       if (cols.length <= Math.max(nameIdx, unitsIdx)) continue;
 
-      const rawName = cols[nameIdx]?.trim() || "";
-      const rawUnits = cols[unitsIdx]?.trim() || "";
+      const rawName = cols[nameIdx] || "";
+      const rawUnits = cols[unitsIdx] || "";
       if (!rawName || !rawUnits) continue;
 
       const units = parseFloat(rawUnits.replace(/,/g, ""));
       if (isNaN(units) || units <= 0) continue;
 
-      const rawInvested = investedIdx !== -1 ? cols[investedIdx]?.trim() : "";
-      const rawCurrent = currentIdx !== -1 ? cols[currentIdx]?.trim() : "";
+      const rawInvested = investedIdx !== -1 ? cols[investedIdx] : "";
+      const rawCurrent = currentIdx !== -1 ? cols[currentIdx] : "";
       const investedValue = rawInvested ? parseFloat(rawInvested.replace(/,/g, "")) : 0;
       const currentValue = rawCurrent ? parseFloat(rawCurrent.replace(/,/g, "")) : 0;
 
