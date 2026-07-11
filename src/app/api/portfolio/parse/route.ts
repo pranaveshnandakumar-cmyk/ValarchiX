@@ -112,7 +112,7 @@ function fuzzyMatch(text: string, schemes: SchemeRecord[]): ParsedHolding[] {
         .replace(/[^a-z0-9\s]/gi, " ")
         .replace(/\s+/g, " ")
         .trim();
-      const rawNameWords = rawNameCleaned.split(/\s+/).filter(w => w.length > 2);
+      const rawNameWords = Array.from(new Set(rawNameCleaned.split(/\s+/).filter(w => w.length > 2)));
 
       if (rawNameWords.length > 0) {
         for (const scheme of schemes) {
@@ -125,7 +125,7 @@ function fuzzyMatch(text: string, schemes: SchemeRecord[]): ParsedHolding[] {
             .replace(/\s+/g, " ")
             .trim();
 
-          const words = cleanedName.split(/\s+/).filter(w => w.length > 2);
+          const words = Array.from(new Set(cleanedName.split(/\s+/).filter(w => w.length > 2)));
           if (words.length === 0) continue;
 
           // Calculate prefix-based matching intersection percentage
@@ -176,7 +176,7 @@ function fuzzyMatch(text: string, schemes: SchemeRecord[]): ParsedHolding[] {
         .replace(/[^a-z0-9\s]/gi, " ")
         .replace(/\s+/g, " ")
         .trim();
-      const lineWords = lineCleaned.split(/\s+/).filter(w => w.length > 2);
+      const lineWords = Array.from(new Set(lineCleaned.split(/\s+/).filter(w => w.length > 2)));
 
       if (lineWords.length > 0) {
         for (const scheme of schemes) {
@@ -189,7 +189,7 @@ function fuzzyMatch(text: string, schemes: SchemeRecord[]): ParsedHolding[] {
             .replace(/\s+/g, " ")
             .trim();
 
-          const words = cleanedName.split(/\s+/).filter(w => w.length > 2);
+          const words = Array.from(new Set(cleanedName.split(/\s+/).filter(w => w.length > 2)));
           if (words.length === 0) continue;
 
           // Calculate prefix-based matching intersection percentage
