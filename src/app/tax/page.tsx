@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo } from "react";
 import { Calculator, Info, HelpCircle, ArrowRight, ShieldCheck } from "lucide-react";
+import NumericInput from "@/components/NumericInput";
 
 export default function TaxLearningHub() {
   const [grossIncome, setGrossIncome] = useState(1200000);
@@ -151,9 +152,16 @@ export default function TaxLearningHub() {
 
               {/* 80C */}
               <div className="space-y-1">
-                <div className="flex justify-between text-xs">
+                <div className="flex justify-between items-center text-xs">
                   <span className="text-muted-grey">Section 80C (PPF, ELSS, EPF)</span>
-                  <span className="text-emerald font-semibold">{formatCurrency(sec80C)}</span>
+                  <NumericInput
+                    value={sec80C}
+                    onChange={setSec80C}
+                    min={0}
+                    max={150000}
+                    step={1000}
+                    type="currency"
+                  />
                 </div>
                 <input
                   type="range"
@@ -169,9 +177,16 @@ export default function TaxLearningHub() {
 
               {/* 80D */}
               <div className="space-y-1">
-                <div className="flex justify-between text-xs">
+                <div className="flex justify-between items-center text-xs">
                   <span className="text-muted-grey">Section 80D (Health Premium)</span>
-                  <span className="text-emerald font-semibold">{formatCurrency(sec80D)}</span>
+                  <NumericInput
+                    value={sec80D}
+                    onChange={setSec80D}
+                    min={0}
+                    max={100000}
+                    step={500}
+                    type="currency"
+                  />
                 </div>
                 <input
                   type="range"
@@ -187,9 +202,16 @@ export default function TaxLearningHub() {
 
               {/* HRA */}
               <div className="space-y-1">
-                <div className="flex justify-between text-xs">
+                <div className="flex justify-between items-center text-xs">
                   <span className="text-muted-grey">HRA Tax Exemption</span>
-                  <span className="text-emerald font-semibold">{formatCurrency(hra)}</span>
+                  <NumericInput
+                    value={hra}
+                    onChange={setHra}
+                    min={0}
+                    max={10000000}
+                    step={1000}
+                    type="currency"
+                  />
                 </div>
                 <input
                   type="range"
@@ -204,9 +226,16 @@ export default function TaxLearningHub() {
 
               {/* Section 24b Home Loan */}
               <div className="space-y-1">
-                <div className="flex justify-between text-xs">
+                <div className="flex justify-between items-center text-xs">
                   <span className="text-muted-grey">Home Loan Interest (Sec 24b)</span>
-                  <span className="text-emerald font-semibold">{formatCurrency(homeLoanInterest)}</span>
+                  <NumericInput
+                    value={homeLoanInterest}
+                    onChange={setHomeLoanInterest}
+                    min={0}
+                    max={10000000}
+                    step={5000}
+                    type="currency"
+                  />
                 </div>
                 <input
                   type="range"
@@ -222,9 +251,16 @@ export default function TaxLearningHub() {
 
               {/* NPS 80CCD(1B) */}
               <div className="space-y-1">
-                <div className="flex justify-between text-xs">
+                <div className="flex justify-between items-center text-xs">
                   <span className="text-muted-grey">NPS Voluntary (Sec 80CCD)</span>
-                  <span className="text-emerald font-semibold">{formatCurrency(npsExtra)}</span>
+                  <NumericInput
+                    value={npsExtra}
+                    onChange={setNpsExtra}
+                    min={0}
+                    max={150000}
+                    step={1000}
+                    type="currency"
+                  />
                 </div>
                 <input
                   type="range"

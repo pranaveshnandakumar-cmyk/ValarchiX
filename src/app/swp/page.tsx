@@ -3,6 +3,7 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { ArrowDownLeft, Info, HelpCircle, AlertTriangle, ShieldCheck, ChevronDown } from "lucide-react";
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from "recharts";
+import NumericInput from "@/components/NumericInput";
 
 export default function SwpCalculator() {
   const [showAudit, setShowAudit] = useState(false);
@@ -115,9 +116,16 @@ export default function SwpCalculator() {
 
             {/* Initial Corpus Slider */}
             <div className="space-y-2">
-              <div className="flex justify-between text-xs font-semibold">
+              <div className="flex justify-between items-center text-xs font-semibold">
                 <span className="text-muted-grey">Initial Corpus</span>
-                <span className="text-emerald font-bold">{formatCurrency(initialCorpus)}</span>
+                <NumericInput
+                  value={initialCorpus}
+                  onChange={setInitialCorpus}
+                  min={100000}
+                  max={1000000000}
+                  step={100000}
+                  type="currency"
+                />
               </div>
               <input
                 type="range"
@@ -136,9 +144,16 @@ export default function SwpCalculator() {
 
             {/* Monthly Withdrawal Slider */}
             <div className="space-y-2">
-              <div className="flex justify-between text-xs font-semibold">
+              <div className="flex justify-between items-center text-xs font-semibold">
                 <span className="text-muted-grey">Desired Monthly Pension</span>
-                <span className="text-emerald font-bold">{formatCurrency(monthlyWithdrawal)}</span>
+                <NumericInput
+                  value={monthlyWithdrawal}
+                  onChange={setMonthlyWithdrawal}
+                  min={1000}
+                  max={10000000}
+                  step={1000}
+                  type="currency"
+                />
               </div>
               <input
                 type="range"
@@ -157,9 +172,16 @@ export default function SwpCalculator() {
 
             {/* Expected Return Rate */}
             <div className="space-y-2">
-              <div className="flex justify-between text-xs font-semibold">
+              <div className="flex justify-between items-center text-xs font-semibold">
                 <span className="text-muted-grey">Expected Yield (p.a.)</span>
-                <span className="text-emerald font-bold">{expectedReturn}%</span>
+                <NumericInput
+                  value={expectedReturn}
+                  onChange={setExpectedReturn}
+                  min={1}
+                  max={50}
+                  step={0.1}
+                  type="percent"
+                />
               </div>
               <input
                 type="range"
@@ -187,9 +209,16 @@ export default function SwpCalculator() {
 
             {/* SWP Horizon Slider */}
             <div className="space-y-2">
-              <div className="flex justify-between text-xs font-semibold">
+              <div className="flex justify-between items-center text-xs font-semibold">
                 <span className="text-muted-grey">SWP Horizon</span>
-                <span className="text-emerald font-bold">{years} Years</span>
+                <NumericInput
+                  value={years}
+                  onChange={setYears}
+                  min={1}
+                  max={50}
+                  step={1}
+                  type="years"
+                />
               </div>
               <input
                 type="range"
@@ -223,9 +252,17 @@ export default function SwpCalculator() {
 
               {adjustWithdrawal && (
                 <div className="space-y-2 animate-fadeIn">
-                  <div className="flex justify-between text-xs font-semibold">
+                  <div className="flex justify-between items-center text-xs font-semibold">
                     <span className="text-muted-grey">Expected Inflation Rate</span>
-                    <span className="text-amber-500">{inflation}%</span>
+                    <NumericInput
+                      value={inflation}
+                      onChange={setInflation}
+                      min={0}
+                      max={25}
+                      step={0.1}
+                      type="percent"
+                      className="text-amber-500 focus-within:border-amber-500/50"
+                    />
                   </div>
                   <input
                     type="range"

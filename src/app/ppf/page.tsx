@@ -3,6 +3,7 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { Coins, Info, HelpCircle, ChevronDown } from "lucide-react";
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from "recharts";
+import NumericInput from "@/components/NumericInput";
 
 export default function PpfCalculator() {
   const [showAudit, setShowAudit] = useState(false);
@@ -92,9 +93,16 @@ export default function PpfCalculator() {
 
             {/* Yearly Deposit Slider */}
             <div className="space-y-2">
-              <div className="flex justify-between text-xs font-semibold">
+              <div className="flex justify-between items-center text-xs font-semibold">
                 <span className="text-muted-grey">Yearly Deposit</span>
-                <span className="text-emerald font-bold">{formatCurrency(yearlyDeposit)}</span>
+                <NumericInput
+                  value={yearlyDeposit}
+                  onChange={setYearlyDeposit}
+                  min={500}
+                  max={150000}
+                  step={500}
+                  type="currency"
+                />
               </div>
               <input
                 type="range"
@@ -122,9 +130,16 @@ export default function PpfCalculator() {
 
             {/* Horizon Slider */}
             <div className="space-y-2">
-              <div className="flex justify-between text-xs font-semibold">
+              <div className="flex justify-between items-center text-xs font-semibold">
                 <span className="text-muted-grey">Lock-in Period (Years)</span>
-                <span className="text-emerald font-bold">{years} Years</span>
+                <NumericInput
+                  value={years}
+                  onChange={setYears}
+                  min={15}
+                  max={50}
+                  step={1}
+                  type="years"
+                />
               </div>
               <input
                 type="range"
@@ -158,9 +173,17 @@ export default function PpfCalculator() {
 
               {adjustInflation && (
                 <div className="space-y-2 animate-fadeIn">
-                  <div className="flex justify-between text-xs font-semibold">
+                  <div className="flex justify-between items-center text-xs font-semibold">
                     <span className="text-muted-grey">Expected Inflation Rate</span>
-                    <span className="text-amber-500">{inflation}%</span>
+                    <NumericInput
+                      value={inflation}
+                      onChange={setInflation}
+                      min={0}
+                      max={25}
+                      step={0.1}
+                      type="percent"
+                      className="text-amber-500 focus-within:border-amber-500/50"
+                    />
                   </div>
                   <input
                     type="range"

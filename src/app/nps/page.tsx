@@ -3,6 +3,7 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { TrendingUp, Info, HelpCircle, ChevronDown } from "lucide-react";
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from "recharts";
+import NumericInput from "@/components/NumericInput";
 
 export default function NpsCalculator() {
   const [showAudit, setShowAudit] = useState(false);
@@ -126,9 +127,16 @@ export default function NpsCalculator() {
 
             {/* Current Age Slider */}
             <div className="space-y-2">
-              <div className="flex justify-between text-xs font-semibold">
+              <div className="flex justify-between items-center text-xs font-semibold">
                 <span className="text-muted-grey">Your Current Age</span>
-                <span className="text-emerald font-bold">{currentAge} Years</span>
+                <NumericInput
+                  value={currentAge}
+                  onChange={setCurrentAge}
+                  min={18}
+                  max={59}
+                  step={1}
+                  type="years"
+                />
               </div>
               <input
                 type="range"
@@ -147,9 +155,16 @@ export default function NpsCalculator() {
 
             {/* Monthly Contribution Slider */}
             <div className="space-y-2">
-              <div className="flex justify-between text-xs font-semibold">
+              <div className="flex justify-between items-center text-xs font-semibold">
                 <span className="text-muted-grey">Monthly NPS Contribution</span>
-                <span className="text-emerald font-bold">{formatCurrency(monthlyContribution)}</span>
+                <NumericInput
+                  value={monthlyContribution}
+                  onChange={setMonthlyContribution}
+                  min={500}
+                  max={10000000}
+                  step={500}
+                  type="currency"
+                />
               </div>
               <input
                 type="range"
@@ -168,9 +183,16 @@ export default function NpsCalculator() {
 
             {/* Expected Return Rate */}
             <div className="space-y-2">
-              <div className="flex justify-between text-xs font-semibold">
+              <div className="flex justify-between items-center text-xs font-semibold">
                 <span className="text-muted-grey">Expected Return Rate (p.a.)</span>
-                <span className="text-emerald font-bold">{expectedReturn}%</span>
+                <NumericInput
+                  value={expectedReturn}
+                  onChange={setExpectedReturn}
+                  min={1}
+                  max={50}
+                  step={0.1}
+                  type="percent"
+                />
               </div>
               <input
                 type="range"
@@ -189,9 +211,16 @@ export default function NpsCalculator() {
 
             {/* Annuity Ratio Slider */}
             <div className="space-y-2">
-              <div className="flex justify-between text-xs font-semibold">
+              <div className="flex justify-between items-center text-xs font-semibold">
                 <span className="text-muted-grey">Annuity Purchase Ratio</span>
-                <span className="text-emerald font-bold">{annuityRatio}%</span>
+                <NumericInput
+                  value={annuityRatio}
+                  onChange={setAnnuityRatio}
+                  min={40}
+                  max={100}
+                  step={1}
+                  type="percent"
+                />
               </div>
               <input
                 type="range"
@@ -210,9 +239,16 @@ export default function NpsCalculator() {
 
             {/* Expected Annuity Yield */}
             <div className="space-y-2">
-              <div className="flex justify-between text-xs font-semibold">
+              <div className="flex justify-between items-center text-xs font-semibold">
                 <span className="text-muted-grey">Expected Annuity Yield (p.a.)</span>
-                <span className="text-emerald font-bold">{annuityYield}%</span>
+                <NumericInput
+                  value={annuityYield}
+                  onChange={setAnnuityYield}
+                  min={1}
+                  max={25}
+                  step={0.1}
+                  type="percent"
+                />
               </div>
               <input
                 type="range"
@@ -246,9 +282,17 @@ export default function NpsCalculator() {
 
               {adjustInflation && (
                 <div className="space-y-2 animate-fadeIn">
-                  <div className="flex justify-between text-xs font-semibold">
+                  <div className="flex justify-between items-center text-xs font-semibold">
                     <span className="text-muted-grey">Expected Inflation Rate</span>
-                    <span className="text-amber-500">{inflation}%</span>
+                    <NumericInput
+                      value={inflation}
+                      onChange={setInflation}
+                      min={0}
+                      max={25}
+                      step={0.1}
+                      type="percent"
+                      className="text-amber-500 focus-within:border-amber-500/50"
+                    />
                   </div>
                   <input
                     type="range"

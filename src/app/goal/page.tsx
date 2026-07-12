@@ -12,6 +12,7 @@ import {
   Cell
 } from "recharts";
 import { Target, Home, Car, Heart, GraduationCap, ShieldAlert, Palmtree, HelpCircle, ChevronDown } from "lucide-react";
+import NumericInput from "@/components/NumericInput";
 
 interface GoalType {
   id: string;
@@ -201,9 +202,16 @@ export default function GoalPlanner() {
 
             {/* Target Amount */}
             <div className="space-y-2">
-              <div className="flex justify-between text-xs font-semibold">
+              <div className="flex justify-between items-center text-xs font-semibold">
                 <span className="text-muted-grey">Target Amount Required</span>
-                <span className="text-emerald font-bold">{formatCurrency(targetAmount)}</span>
+                <NumericInput
+                  value={targetAmount}
+                  onChange={setTargetAmount}
+                  min={1000}
+                  max={1000000000}
+                  step={5000}
+                  type="currency"
+                />
               </div>
               <input
                 type="range"
@@ -222,9 +230,16 @@ export default function GoalPlanner() {
 
             {/* Years to Goal */}
             <div className="space-y-2">
-              <div className="flex justify-between text-xs font-semibold">
+              <div className="flex justify-between items-center text-xs font-semibold">
                 <span className="text-muted-grey">Time Horizon (Years)</span>
-                <span className="text-emerald font-bold">{years} {years === 1 ? "Year" : "Years"}</span>
+                <NumericInput
+                  value={years}
+                  onChange={setYears}
+                  min={1}
+                  max={50}
+                  step={1}
+                  type="years"
+                />
               </div>
               <input
                 type="range"
@@ -243,9 +258,16 @@ export default function GoalPlanner() {
 
             {/* Expected Returns */}
             <div className="space-y-2">
-              <div className="flex justify-between text-xs font-semibold">
+              <div className="flex justify-between items-center text-xs font-semibold">
                 <span className="text-muted-grey">Expected Return Rate (p.a.)</span>
-                <span className="text-emerald font-bold">{expectedReturn}%</span>
+                <NumericInput
+                  value={expectedReturn}
+                  onChange={setExpectedReturn}
+                  min={1}
+                  max={50}
+                  step={0.1}
+                  type="percent"
+                />
               </div>
               <input
                 type="range"
@@ -295,9 +317,17 @@ export default function GoalPlanner() {
 
               {adjustInflation && (
                 <div className="space-y-2 animate-fadeIn">
-                  <div className="flex justify-between text-xs font-semibold">
+                  <div className="flex justify-between items-center text-xs font-semibold">
                     <span className="text-muted-grey">Expected Inflation Rate</span>
-                    <span className="text-amber-500">{inflation}%</span>
+                    <NumericInput
+                      value={inflation}
+                      onChange={setInflation}
+                      min={0}
+                      max={25}
+                      step={0.1}
+                      type="percent"
+                      className="text-amber-500 focus-within:border-amber-500/50"
+                    />
                   </div>
                   <input
                     type="range"

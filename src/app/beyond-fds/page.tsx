@@ -33,6 +33,7 @@ import {
   Award,
   ArrowRightLeft
 } from "lucide-react";
+import NumericInput from "@/components/NumericInput";
 
 export default function BeyondFdsPage() {
   const [mounted, setMounted] = useState(false);
@@ -208,9 +209,16 @@ export default function BeyondFdsPage() {
               
               {/* Monthly Amount */}
               <div className="space-y-2">
-                <div className="flex justify-between text-xs font-semibold">
+                <div className="flex justify-between items-center text-xs font-semibold">
                   <span className="text-muted-grey">Monthly Investment</span>
-                  <span className="text-emerald font-bold">{formatCurrency(monthlyInvest)}</span>
+                  <NumericInput
+                    value={monthlyInvest}
+                    onChange={setMonthlyInvest}
+                    min={500}
+                    max={10000000}
+                    step={500}
+                    type="currency"
+                  />
                 </div>
                 <input
                   type="range"
@@ -229,9 +237,16 @@ export default function BeyondFdsPage() {
 
               {/* Rate of return */}
               <div className="space-y-2">
-                <div className="flex justify-between text-xs font-semibold">
+                <div className="flex justify-between items-center text-xs font-semibold">
                   <span className="text-muted-grey">Average Equity Return</span>
-                  <span className="text-emerald font-bold">{compoundingRate}% p.a.</span>
+                  <NumericInput
+                    value={compoundingRate}
+                    onChange={setCompoundingRate}
+                    min={1}
+                    max={50}
+                    step={0.1}
+                    type="percent"
+                  />
                 </div>
                 <input
                   type="range"
@@ -413,9 +428,16 @@ export default function BeyondFdsPage() {
               
               {/* Deposit amount */}
               <div className="space-y-1">
-                <div className="flex justify-between text-xs">
+                <div className="flex justify-between items-center text-xs">
                   <span className="text-muted-grey">FD Deposit</span>
-                  <span className="text-white font-bold">{formatCurrency(fdDeposit)}</span>
+                  <NumericInput
+                    value={fdDeposit}
+                    onChange={setFdDeposit}
+                    min={1000}
+                    max={1000000000}
+                    step={5000}
+                    type="currency"
+                  />
                 </div>
                 <input
                   type="range"
@@ -430,9 +452,16 @@ export default function BeyondFdsPage() {
 
               {/* FD rate */}
               <div className="space-y-1">
-                <div className="flex justify-between text-xs">
+                <div className="flex justify-between items-center text-xs">
                   <span className="text-muted-grey">FD Yield Rate</span>
-                  <span className="text-white font-bold">{fdRate}% p.a.</span>
+                  <NumericInput
+                    value={fdRate}
+                    onChange={setFdRate}
+                    min={1}
+                    max={25}
+                    step={0.1}
+                    type="percent"
+                  />
                 </div>
                 <input
                   type="range"
@@ -467,9 +496,17 @@ export default function BeyondFdsPage() {
 
               {/* Inflation */}
               <div className="space-y-1">
-                <div className="flex justify-between text-xs">
+                <div className="flex justify-between items-center text-xs">
                   <span className="text-muted-grey">Avg. Inflation Rate</span>
-                  <span className="text-amber-500 font-bold">{fdInflation}%</span>
+                  <NumericInput
+                    value={fdInflation}
+                    onChange={setFdInflation}
+                    min={0}
+                    max={25}
+                    step={0.1}
+                    type="percent"
+                    className="text-amber-500 focus-within:border-amber-500/50"
+                  />
                 </div>
                 <input
                   type="range"
@@ -484,9 +521,16 @@ export default function BeyondFdsPage() {
 
               {/* Horizon */}
               <div className="space-y-1">
-                <div className="flex justify-between text-xs">
+                <div className="flex justify-between items-center text-xs">
                   <span className="text-muted-grey">Horizon (Years)</span>
-                  <span className="text-white font-bold">{fdYears} Years</span>
+                  <NumericInput
+                    value={fdYears}
+                    onChange={setFdYears}
+                    min={1}
+                    max={50}
+                    step={1}
+                    type="years"
+                  />
                 </div>
                 <input
                   type="range"

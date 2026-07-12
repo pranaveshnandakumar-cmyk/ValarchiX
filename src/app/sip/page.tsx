@@ -12,6 +12,7 @@ import {
   Legend
 } from "recharts";
 import { Info, HelpCircle, TrendingUp, AlertTriangle, Landmark, ShieldCheck, ChevronDown } from "lucide-react";
+import NumericInput from "@/components/NumericInput";
 
 export default function SipCalculator() {
   const [calcMode, setCalcMode] = useState<"sip" | "lumpsum" | "fd-vs-mf">("sip");
@@ -220,11 +221,18 @@ export default function SipCalculator() {
 
             {/* Amount Slider */}
             <div className="space-y-2">
-              <div className="flex justify-between text-xs font-semibold">
+              <div className="flex justify-between items-center text-xs font-semibold">
                 <span className="text-muted-grey">
                   {calcMode === "sip" ? "Monthly SIP Amount" : "Lumpsum Principal"}
                 </span>
-                <span className="text-emerald">{formatCurrency(amount)}</span>
+                <NumericInput
+                  value={amount}
+                  onChange={setAmount}
+                  min={calcMode === "sip" ? 500 : 10000}
+                  max={calcMode === "sip" ? 1000000 : 100000000}
+                  step={calcMode === "sip" ? 500 : 10000}
+                  type="currency"
+                />
               </div>
               <input
                 type="range"
@@ -243,11 +251,18 @@ export default function SipCalculator() {
 
             {/* Mutual Fund Return Slider */}
             <div className="space-y-2">
-              <div className="flex justify-between text-xs font-semibold">
+              <div className="flex justify-between items-center text-xs font-semibold">
                 <span className="text-muted-grey">
                   {calcMode === "fd-vs-mf" ? "Mutual Fund Return Rate" : "Expected Return Rate (p.a.)"}
                 </span>
-                <span className="text-emerald">{rate}%</span>
+                <NumericInput
+                  value={rate}
+                  onChange={setRate}
+                  min={1}
+                  max={50}
+                  step={0.1}
+                  type="percent"
+                />
               </div>
               <input
                 type="range"
@@ -285,9 +300,16 @@ export default function SipCalculator() {
               <div className="space-y-4 pt-4 border-t border-border-navy/60 animate-fadeIn">
                 {/* FD Yield Slider */}
                 <div className="space-y-2">
-                  <div className="flex justify-between text-xs font-semibold">
+                  <div className="flex justify-between items-center text-xs font-semibold">
                     <span className="text-muted-grey">Fixed Deposit Rate (p.a.)</span>
-                    <span className="text-emerald">{fdRate}%</span>
+                    <NumericInput
+                      value={fdRate}
+                      onChange={setFdRate}
+                      min={1}
+                      max={25}
+                      step={0.1}
+                      type="percent"
+                    />
                   </div>
                   <input
                     type="range"
@@ -341,9 +363,16 @@ export default function SipCalculator() {
 
             {/* Time Horizon Slider */}
             <div className="space-y-2">
-              <div className="flex justify-between text-xs font-semibold">
+              <div className="flex justify-between items-center text-xs font-semibold">
                 <span className="text-muted-grey">Time Horizon</span>
-                <span className="text-emerald">{years} Years</span>
+                <NumericInput
+                  value={years}
+                  onChange={setYears}
+                  min={1}
+                  max={50}
+                  step={1}
+                  type="years"
+                />
               </div>
               <input
                 type="range"
@@ -378,9 +407,17 @@ export default function SipCalculator() {
 
                 {adjustInflation && (
                   <div className="space-y-2 animate-fadeIn">
-                    <div className="flex justify-between text-xs font-semibold">
+                    <div className="flex justify-between items-center text-xs font-semibold">
                       <span className="text-muted-grey">Expected Inflation Rate</span>
-                      <span className="text-amber-500">{inflation}%</span>
+                      <NumericInput
+                        value={inflation}
+                        onChange={setInflation}
+                        min={0}
+                        max={25}
+                        step={0.1}
+                        type="percent"
+                        className="text-amber-500 focus-within:border-amber-500/50"
+                      />
                     </div>
                     <input
                       type="range"
@@ -412,9 +449,17 @@ export default function SipCalculator() {
             {/* In FD mode, inflation is always visible because it is critical to compare real yields */}
             {calcMode === "fd-vs-mf" && (
               <div className="border-t border-border-navy pt-4 space-y-2 animate-fadeIn">
-                <div className="flex justify-between text-xs font-semibold">
+                <div className="flex justify-between items-center text-xs font-semibold">
                   <span className="text-muted-grey">Economic Inflation Rate</span>
-                  <span className="text-amber-500">{inflation}%</span>
+                  <NumericInput
+                    value={inflation}
+                    onChange={setInflation}
+                    min={0}
+                    max={25}
+                    step={0.1}
+                    type="percent"
+                    className="text-amber-500 focus-within:border-amber-500/50"
+                  />
                 </div>
                 <input
                   type="range"

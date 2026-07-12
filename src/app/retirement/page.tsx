@@ -11,6 +11,7 @@ import {
   ResponsiveContainer
 } from "recharts";
 import { Hourglass, AlertCircle, Sparkles, BookOpen, HelpCircle, ChevronDown } from "lucide-react";
+import NumericInput from "@/components/NumericInput";
 
 export default function RetirementPlanner() {
   const [showAudit, setShowAudit] = useState(false);
@@ -170,9 +171,16 @@ export default function RetirementPlanner() {
 
             {/* Monthly Expenses */}
             <div className="space-y-2">
-              <div className="flex justify-between text-xs font-semibold">
+              <div className="flex justify-between items-center text-xs font-semibold">
                 <span className="text-muted-grey">Current Monthly Expense</span>
-                <span className="text-emerald font-bold">{formatCurrency(monthlyExpense)}</span>
+                <NumericInput
+                  value={monthlyExpense}
+                  onChange={setMonthlyExpense}
+                  min={1000}
+                  max={5000000}
+                  step={1000}
+                  type="currency"
+                />
               </div>
               <input
                 type="range"
@@ -192,9 +200,16 @@ export default function RetirementPlanner() {
             {/* Pre/Post Return Rates */}
             <div className="space-y-3 pt-3 border-t border-border-navy/60">
               <div className="space-y-2">
-                <div className="flex justify-between text-xs">
+                <div className="flex justify-between items-center text-xs">
                   <span className="text-muted-grey">Pre-Retirement Return (Equity)</span>
-                  <span className="text-emerald font-semibold">{preReturn}%</span>
+                  <NumericInput
+                    value={preReturn}
+                    onChange={setPreReturn}
+                    min={1}
+                    max={50}
+                    step={0.1}
+                    type="percent"
+                  />
                 </div>
                 <input
                   type="range"
@@ -217,9 +232,16 @@ export default function RetirementPlanner() {
               </div>
 
               <div className="space-y-2">
-                <div className="flex justify-between text-xs">
+                <div className="flex justify-between items-center text-xs">
                   <span className="text-muted-grey">Post-Retirement Return (Debt)</span>
-                  <span className="text-emerald font-semibold">{postReturn}%</span>
+                  <NumericInput
+                    value={postReturn}
+                    onChange={setPostReturn}
+                    min={1}
+                    max={25}
+                    step={0.1}
+                    type="percent"
+                  />
                 </div>
                 <input
                   type="range"
@@ -259,9 +281,16 @@ export default function RetirementPlanner() {
 
               {adjustInflation && (
                 <div className="space-y-2 animate-fadeIn">
-                  <div className="flex justify-between text-xs">
+                  <div className="flex justify-between items-center text-xs">
                     <span className="text-muted-grey">Expected Inflation Rate</span>
-                    <span className="text-emerald font-semibold">{inflation}%</span>
+                    <NumericInput
+                      value={inflation}
+                      onChange={setInflation}
+                      min={0}
+                      max={25}
+                      step={0.1}
+                      type="percent"
+                    />
                   </div>
                   <input
                     type="range"
@@ -285,9 +314,16 @@ export default function RetirementPlanner() {
               )}
 
               <div className="space-y-2">
-                <div className="flex justify-between text-xs">
+                <div className="flex justify-between items-center text-xs">
                   <span className="text-muted-grey">Safe Withdrawal Rate (SWR)</span>
-                  <span className="text-emerald font-semibold">{swr}%</span>
+                  <NumericInput
+                    value={swr}
+                    onChange={setSwr}
+                    min={1}
+                    max={15}
+                    step={0.1}
+                    type="percent"
+                  />
                 </div>
                 <input
                   type="range"
