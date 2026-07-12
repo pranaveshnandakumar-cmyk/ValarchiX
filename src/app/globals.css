@@ -158,12 +158,14 @@ input[type="range"]::-moz-range-thumb:hover {
 .gradient-text {
   background: linear-gradient(135deg, var(--text-main-color) 30%, var(--text-muted-color) 100%);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
 .gradient-green {
   background: linear-gradient(135deg, #22c55e 30%, #4ade80 100%);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
