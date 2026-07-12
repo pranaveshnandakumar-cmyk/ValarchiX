@@ -1,4 +1,4 @@
-# valarchiX - Operating System for Financial Knowledge
+# ValarchiX - Operating System for Financial Knowledge
 
 > 💡 **“We don't tell what to pick, we tell how to pick”**
 
@@ -63,32 +63,6 @@
 
 ---
 
-## ⚙️ Getting Started
-
-### Prerequisites
-* [Node.js](https://nodejs.org/) (v18.x or higher)
-* [npm](https://www.npmjs.com/) (v9.x or higher)
-
-### Installation
-1. Clone the repository:
-   ```bash
-   git clone git@github.com:pranaveshnandakumar-cmyk/ValarchiX.git
-   cd ValarchiX
-   ```
-
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-
-3. Launch the local development server:
-   ```bash
-   npm run dev
-   ```
-
-4. Open [http://localhost:3000](http://localhost:3000) with your browser to launch the dashboard.
-
----
 
 ## 🔒 Legal Disclaimer & SEBI Positioning
 valarchiX is built solely as an interactive simulator to help users understand business economics, tax regimes, compounding mathematics, and mutual fund valuation metrics. The platform never issues buy, sell, or hold recommendations for any security or asset class. valarchiX is not a registered investment advisor with SEBI. Always seek the services of a certified financial planner, tax consultant, or SEBI-registered investment advisor before making real-world investments. 
