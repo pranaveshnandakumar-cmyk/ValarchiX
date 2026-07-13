@@ -13,11 +13,13 @@ import {
   ArrowDownLeft,
   ArrowRight,
   Landmark,
-  ArrowUpRight
+  ArrowUpRight,
+  Flame,
+  ShieldAlert
 } from "lucide-react";
 
 const STATS = [
-  { value: "10+", label: "Financial Calculators" },
+  { value: "13+", label: "Financial Calculators" },
   { value: "500+", label: "Mutual Funds Indexed" },
   { value: "100% Safe", label: "No Stock-Picking Risk" },
   { value: "Dynamic", label: "Goal & Pension Math" },
@@ -120,6 +122,13 @@ const EXPLORE_CARDS = [
     category: "Retirement"
   },
   {
+    name: "FIRE Early Retirement Simulator",
+    desc: "Determine your early financial independence target corpus using safe withdrawal rates and calculate the required monthly SIP.",
+    href: "/fire",
+    icon: Flame,
+    category: "Retirement"
+  },
+  {
     name: "Financial Goal Planner",
     desc: "Set timelines for a house, car, or marriage with inflation-adjusted targets to calculate your monthly SIP.",
     href: "/goal",
@@ -138,6 +147,20 @@ const EXPLORE_CARDS = [
     desc: "Solve for your target corpus, safe withdrawal rates, inflation-adjusted spend, and retirement age.",
     href: "/retirement",
     icon: Hourglass,
+    category: "Calculators"
+  },
+  {
+    name: "Loan EMI & Prepayment Accelerator",
+    desc: "Calculate monthly installments and simulate how extra prepayments dramatically save interest and reduce loan tenure.",
+    href: "/emi",
+    icon: Landmark,
+    category: "Calculators"
+  },
+  {
+    name: "Emergency Fund & Runway Planner",
+    desc: "Calculate risk-adjusted emergency reserve targets based on job sector stability and family dependent buffers.",
+    href: "/emergency-fund",
+    icon: ShieldAlert,
     category: "Calculators"
   },
   {

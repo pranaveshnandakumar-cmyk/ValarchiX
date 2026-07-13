@@ -20,7 +20,10 @@ import {
   Coins,
   TrendingUp,
   ArrowDownLeft,
-  ArrowUpRight
+  ArrowUpRight,
+  Landmark,
+  ShieldAlert,
+  Flame
 } from "lucide-react";
 
 const NAV_ITEMS = [
@@ -44,6 +47,9 @@ const NAV_ITEMS = [
       { name: "SIP & FD Simulator", href: "/sip", icon: Percent },
       { name: "Step Up SIP", href: "/step-up-sip", icon: ArrowUpRight },
       { name: "Goal Planner", href: "/goal", icon: Target },
+      { name: "Loan EMI Simulator", href: "/emi", icon: Landmark },
+      { name: "Emergency Fund", href: "/emergency-fund", icon: ShieldAlert },
+      { name: "FIRE Early Retirement", href: "/fire", icon: Flame },
       { name: "Retirement", href: "/retirement", icon: Hourglass },
       { name: "Portfolio Allocator", href: "/portfolio", icon: PieChart },
       { name: "Tax Regime Hub", href: "/tax", icon: Calculator },
