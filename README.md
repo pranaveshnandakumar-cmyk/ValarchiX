@@ -30,6 +30,7 @@
 ### 3. 🪙 Calculators & Planners Suite (with Math Audits)
 * **Calculation Transparency Panels**: Every calculator features a collapsible **"How This is Calculated & Excel Replication"** section displaying math formulas, variables, and step-by-step Excel/Google Sheets functions (e.g. `PMT`, `FV`).
 * **SIP & FD Simulators**: Model wealth creation paths comparing Systematic Investment Plans with fixed-yield structures.
+* **Step Up SIP Simulator**: Compare the compounding power and maturity value of a flat monthly SIP against a Step Up SIP (increasing yearly by a percentage or a fixed amount) using interactive area charts.
 * **SWP Planner**: Simulate Systematic Withdrawal Plans (SWP) to design sustainable retirement cash flows, highlighting safe withdrawal rates (4% rule) and sequence of returns risk.
 * **Goal & Retirement Planners**: Plot future corpus requirements factoring in inflation, annual escalations, and target maturity horizons.
 * **NPS & PPF Simulators**: Run returns compounding models for public pension and provident schemes.

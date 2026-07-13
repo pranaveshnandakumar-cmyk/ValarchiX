@@ -19,7 +19,8 @@ import {
   Moon,
   Coins,
   TrendingUp,
-  ArrowDownLeft
+  ArrowDownLeft,
+  ArrowUpRight
 } from "lucide-react";
 
 const NAV_ITEMS = [
@@ -41,6 +42,7 @@ const NAV_ITEMS = [
     category: "Calculators & Planners",
     items: [
       { name: "SIP & FD Simulator", href: "/sip", icon: Percent },
+      { name: "Step Up SIP", href: "/step-up-sip", icon: ArrowUpRight },
       { name: "Goal Planner", href: "/goal", icon: Target },
       { name: "Retirement", href: "/retirement", icon: Hourglass },
       { name: "Portfolio Allocator", href: "/portfolio", icon: PieChart },

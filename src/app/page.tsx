@@ -12,16 +12,18 @@ import {
   TrendingUp,
   ArrowDownLeft,
   ArrowRight,
-  Landmark
+  Landmark,
+  ArrowUpRight
 } from "lucide-react";
 
 const STATS = [
-  { value: "9+", label: "Financial Calculators" },
+  { value: "10+", label: "Financial Calculators" },
   { value: "500+", label: "Mutual Funds Indexed" },
   { value: "100% Safe", label: "No Stock-Picking Risk" },
   { value: "Dynamic", label: "Goal & Pension Math" },
   { value: "Accurate", label: "Regime Tax Rules" }
 ];
+
 
 const FOUNDATIONS = [
   {
@@ -122,6 +124,13 @@ const EXPLORE_CARDS = [
     desc: "Set timelines for a house, car, or marriage with inflation-adjusted targets to calculate your monthly SIP.",
     href: "/goal",
     icon: Target,
+    category: "Calculators"
+  },
+  {
+    name: "Step Up SIP Calculator",
+    desc: "Calculate how a yearly increase in SIP contributions (either by % or flat amount) accelerates your long-term wealth compounding versus a normal flat SIP.",
+    href: "/step-up-sip",
+    icon: ArrowUpRight,
     category: "Calculators"
   },
   {
