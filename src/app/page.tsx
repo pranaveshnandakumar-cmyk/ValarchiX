@@ -15,11 +15,19 @@ import {
   Landmark,
   ArrowUpRight,
   Flame,
-  ShieldAlert
+  ShieldAlert,
+  Wallet,
+  Coffee,
+  Home as HomeIcon,
+  Clock,
+  BarChart2,
+  Scissors,
+  CreditCard,
+  HeartPulse
 } from "lucide-react";
 
 const STATS = [
-  { value: "13+", label: "Financial Calculators" },
+  { value: "22+", label: "Financial Calculators" },
   { value: "500+", label: "Mutual Funds Indexed" },
   { value: "100% Safe", label: "No Stock-Picking Risk" },
   { value: "Dynamic", label: "Goal & Pension Math" },
@@ -101,6 +109,48 @@ const QUICK_ACTIONS = [
 
 const EXPLORE_CARDS = [
   {
+    name: "Emergency Fund Planner",
+    desc: "Build the right safety net — minimum 3 months, ideal 6 months of total family monthly expense in high-liquidity instruments.",
+    href: "/emergency-fund",
+    icon: ShieldAlert,
+    category: "Budgeting"
+  },
+  {
+    name: "Net Worth Calculator",
+    desc: "Subtract total liabilities from total assets. Understand the true definition of wealth and track your financial progress.",
+    href: "/net-worth",
+    icon: Wallet,
+    category: "Budgeting"
+  },
+  {
+    name: "Latte Factor Calculator",
+    desc: "Visualise the dramatic long-term cost of small recurring daily spends — and what they could have become if invested.",
+    href: "/latte-factor",
+    icon: Coffee,
+    category: "Budgeting"
+  },
+  {
+    name: "Rent vs. Buy Calculator",
+    desc: "Compare the true mathematical costs of renting vs. buying — EMIs, maintenance, appreciation, and opportunity cost.",
+    href: "/rent-vs-buy",
+    icon: HomeIcon,
+    category: "Budgeting"
+  },
+  {
+    name: "Tax Regime Hub",
+    desc: "Compare Old vs New Tax regimes, learn about tax harvesting, 80C, and asset taxation.",
+    href: "/tax",
+    icon: Calculator,
+    category: "Tax"
+  },
+  {
+    name: "Debt Fund Explorer",
+    desc: "Compare credit risk, liquid funds, average durations, and find who they are suitable for.",
+    href: "/debt-funds",
+    icon: Shield,
+    category: "Analysis"
+  },
+  {
     name: "PPF Calculator",
     desc: "Calculate maturity and interest earnings in the Public Provident Fund under the fixed 7.10% tax-free rate.",
     href: "/ppf",
@@ -116,65 +166,93 @@ const EXPLORE_CARDS = [
   },
   {
     name: "SWP Pension Calculator",
-    desc: "Simulate systematic withdrawals (SWP) for retirement cash flow, testing for corpus depletion against inflation.",
+    desc: "Simulate systematic withdrawals for retirement cash flow, testing for corpus depletion against inflation.",
     href: "/swp",
     icon: ArrowDownLeft,
     category: "Retirement"
   },
   {
-    name: "FIRE Early Retirement Simulator",
-    desc: "Determine your early financial independence target corpus using safe withdrawal rates and calculate the required monthly SIP.",
+    name: "FIRE Early Retirement",
+    desc: "Determine your financial independence target corpus using safe withdrawal rates and required monthly SIP.",
     href: "/fire",
     icon: Flame,
     category: "Retirement"
   },
   {
     name: "Financial Goal Planner",
-    desc: "Set timelines for a house, car, or marriage with inflation-adjusted targets to calculate your monthly SIP.",
+    desc: "Set timelines for a house, car, or marriage with inflation-adjusted targets and monthly SIP calculation.",
     href: "/goal",
     icon: Target,
-    category: "Calculators"
+    category: "Planners"
   },
   {
     name: "Step Up SIP Calculator",
-    desc: "Calculate how a yearly increase in SIP contributions (either by % or flat amount) accelerates your long-term wealth compounding versus a normal flat SIP.",
+    desc: "Calculate how a yearly SIP increase accelerates long-term wealth compounding versus a flat SIP.",
     href: "/step-up-sip",
     icon: ArrowUpRight,
-    category: "Calculators"
+    category: "Planners"
   },
   {
     name: "Retirement Planner",
     desc: "Solve for your target corpus, safe withdrawal rates, inflation-adjusted spend, and retirement age.",
     href: "/retirement",
     icon: Hourglass,
-    category: "Calculators"
+    category: "Planners"
   },
   {
-    name: "Loan EMI & Prepayment Accelerator",
-    desc: "Calculate monthly installments and simulate how extra prepayments dramatically save interest and reduce loan tenure.",
+    name: "Loan EMI & Prepayment",
+    desc: "Calculate monthly installments and simulate how extra prepayments save interest and reduce tenure.",
     href: "/emi",
     icon: Landmark,
-    category: "Calculators"
+    category: "Debt"
   },
   {
-    name: "Emergency Fund & Runway Planner",
-    desc: "Calculate risk-adjusted emergency reserve targets based on job sector stability and family dependent buffers.",
-    href: "/emergency-fund",
-    icon: ShieldAlert,
-    category: "Calculators"
+    name: "Compound Interest Calculator",
+    desc: "Demonstrate exponential money growth through compounding — with frequency comparison and the Rule of 72.",
+    href: "/compound-interest",
+    icon: TrendingUp,
+    category: "Wealth"
   },
   {
-    name: "Tax Regime Hub",
-    desc: "Compare Old vs New Tax regimes, learn about tax harvesting, 80C, and asset taxation.",
-    href: "/tax",
-    icon: Calculator,
-    category: "Education"
+    name: "Cost of Delay Calculator",
+    desc: "See exactly how much wealth you lose by delaying investing by 3 or 5 years — compounding's cruelest lesson.",
+    href: "/cost-of-delay",
+    icon: Clock,
+    category: "Wealth"
   },
   {
-    name: "Debt Fund Explorer",
-    desc: "Compare credit risk, liquid funds, average durations, and find who they are suitable for.",
-    href: "/debt-funds",
-    icon: Shield,
+    name: "Inflation Calculator",
+    desc: "Illustrate the eroding purchasing power of cash and calculate the SIP needed to stay ahead of inflation.",
+    href: "/inflation",
+    icon: BarChart2,
+    category: "Wealth"
+  },
+  {
+    name: "Debt Snowball / Avalanche",
+    desc: "Compare strategies to accelerate debt payoff — Snowball (lowest balance) vs. Avalanche (highest rate).",
+    href: "/debt-payoff",
+    icon: Scissors,
+    category: "Debt"
+  },
+  {
+    name: "Credit Card Payoff",
+    desc: "Reveal the true danger of minimum payments — total interest costs and years trapped in 36–42% p.a. debt.",
+    href: "/credit-card",
+    icon: CreditCard,
+    category: "Debt"
+  },
+  {
+    name: "Human Life Value (HLV)",
+    desc: "Calculate the life insurance cover your family truly needs based on future income, liabilities, and inflation.",
+    href: "/hlv",
+    icon: HeartPulse,
+    category: "Retirement"
+  },
+  {
+    name: "Portfolio Allocator",
+    desc: "Check asset overlap, expense ratios, and overall diversification score. No buy/sell tips, just pure logic.",
+    href: "/portfolio",
+    icon: PieChart,
     category: "Analysis"
   }
 ];

@@ -23,7 +23,16 @@ import {
   ArrowUpRight,
   Landmark,
   ShieldAlert,
-  Flame
+  Flame,
+  Wallet,
+  Coffee,
+  Clock,
+  BarChart2,
+  Scissors,
+  CreditCard,
+  HeartPulse,
+  TrendingDown,
+  Zap
 } from "lucide-react";
 
 const NAV_ITEMS = [
@@ -42,20 +51,49 @@ const NAV_ITEMS = [
     ]
   },
   {
-    category: "Calculators & Planners",
+    category: "Budgeting & Cash Flow",
+    items: [
+      { name: "Net Worth", href: "/net-worth", icon: Wallet },
+      { name: "Emergency Fund", href: "/emergency-fund", icon: ShieldAlert },
+      { name: "Latte Factor", href: "/latte-factor", icon: Coffee },
+      { name: "Rent vs. Buy", href: "/rent-vs-buy", icon: Home }
+    ]
+  },
+  {
+    category: "Wealth Building",
     items: [
       { name: "SIP & FD Simulator", href: "/sip", icon: Percent },
       { name: "Step Up SIP", href: "/step-up-sip", icon: ArrowUpRight },
-      { name: "Goal Planner", href: "/goal", icon: Target },
+      { name: "Compound Interest", href: "/compound-interest", icon: TrendingUp },
+      { name: "Cost of Delay", href: "/cost-of-delay", icon: Clock },
+      { name: "Inflation Calculator", href: "/inflation", icon: BarChart2 }
+    ]
+  },
+  {
+    category: "Debt Tools",
+    items: [
+      { name: "Debt Snowball / Avalanche", href: "/debt-payoff", icon: Scissors },
       { name: "Loan EMI Simulator", href: "/emi", icon: Landmark },
-      { name: "Emergency Fund", href: "/emergency-fund", icon: ShieldAlert },
+      { name: "Credit Card Payoff", href: "/credit-card", icon: CreditCard }
+    ]
+  },
+  {
+    category: "Retirement & Planning",
+    items: [
+      { name: "Goal Planner", href: "/goal", icon: Target },
       { name: "FIRE Early Retirement", href: "/fire", icon: Flame },
       { name: "Retirement", href: "/retirement", icon: Hourglass },
-      { name: "Portfolio Allocator", href: "/portfolio", icon: PieChart },
-      { name: "Tax Regime Hub", href: "/tax", icon: Calculator },
+      { name: "Human Life Value (HLV)", href: "/hlv", icon: HeartPulse },
       { name: "PPF Calculator", href: "/ppf", icon: Coins },
       { name: "NPS Calculator", href: "/nps", icon: TrendingUp },
       { name: "SWP Calculator", href: "/swp", icon: ArrowDownLeft }
+    ]
+  },
+  {
+    category: "Portfolio & Tax",
+    items: [
+      { name: "Portfolio Allocator", href: "/portfolio", icon: PieChart },
+      { name: "Tax Regime Hub", href: "/tax", icon: Calculator }
     ]
   }
 ];
