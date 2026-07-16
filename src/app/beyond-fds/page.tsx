@@ -170,11 +170,11 @@ export default function BeyondFdsPage() {
 
   return (
     <div className="space-y-16 py-6 animate-fadeIn text-light-grey">
-      
+
       {/* Header Banner */}
       <section className="relative flex flex-col items-center justify-center text-center py-12 md:py-16 px-4 rounded-3xl overflow-hidden bg-gradient-to-b from-navy-card/45 to-transparent border border-border-navy/60">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(34,197,94,0.08),transparent_50%)]" />
-        
+
         <div className="relative space-y-4 max-w-4xl">
           <div className="inline-flex items-center gap-2 rounded-full border border-emerald/30 bg-emerald/10 px-4 py-1.5 text-xs font-semibold text-emerald glow-emerald tracking-wide">
             🎓 Personal Finance Foundations
@@ -206,7 +206,7 @@ export default function BeyondFdsPage() {
           <div className="lg:col-span-1 space-y-6">
             <div className="p-6 glass-card space-y-6">
               <h3 className="text-base font-bold text-white uppercase tracking-wider">Simulate Compounding</h3>
-              
+
               {/* Monthly Amount */}
               <div className="space-y-2">
                 <div className="flex justify-between items-center text-xs font-semibold">
@@ -276,10 +276,10 @@ export default function BeyondFdsPage() {
 
           {/* Interactive Graph & Results */}
           <div className="lg:col-span-2 space-y-6">
-            
+
             {/* Rohan vs Priya Stats Card */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              
+
               {/* Rohan Card */}
               <div className="p-5 rounded-2xl border border-emerald/30 bg-emerald/5 flex flex-col justify-between">
                 <div>
@@ -341,7 +341,7 @@ export default function BeyondFdsPage() {
             {/* Explanatory Banner */}
             <div className="p-4 rounded-xl border border-emerald/25 bg-emerald/5 text-xs text-light-grey leading-relaxed">
               <span className="font-black text-emerald mr-1">🔥 THE MIND-BLOWING FACT:</span>
-              Rohan invested <strong>only 10 years (₹12 Lakhs)</strong> starting at age 25, while Priya invested for <strong>25 years (₹30 Lakhs)</strong> starting at age 35. Yet, Rohan retires with <strong>{formatCurrency(compoundingStoryData.rohanFinal - compoundingStoryData.priyaFinal)} MORE</strong> than Priya! Rohan&apos;s money had an extra 10 years to compound in silence, proving that starting early beats trying to make up for lost time.
+              Rohan invested <strong>only 10 years </strong> starting at age 25, while Priya invested for <strong>25 years </strong> starting at age 35. Yet, Rohan retires with <strong>{formatCurrency(compoundingStoryData.rohanFinal - compoundingStoryData.priyaFinal)} MORE</strong> than Priya! Rohan&apos;s money had an extra 10 years to compound in silence, proving that starting early beats trying to make up for lost time.
             </div>
 
             {/* Rohan vs Priya chart */}
@@ -357,12 +357,12 @@ export default function BeyondFdsPage() {
                   >
                     <defs>
                       <linearGradient id="colorRohan" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#22c55e" stopOpacity={0.25}/>
-                        <stop offset="95%" stopColor="#22c55e" stopOpacity={0}/>
+                        <stop offset="5%" stopColor="#22c55e" stopOpacity={0.25} />
+                        <stop offset="95%" stopColor="#22c55e" stopOpacity={0} />
                       </linearGradient>
                       <linearGradient id="colorPriya" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.15}/>
-                        <stop offset="95%" stopColor="#f59e0b" stopOpacity={0}/>
+                        <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.15} />
+                        <stop offset="95%" stopColor="#f59e0b" stopOpacity={0} />
                       </linearGradient>
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" stroke="#112d55" vertical={false} />
@@ -425,7 +425,7 @@ export default function BeyondFdsPage() {
           <div className="lg:col-span-1 space-y-6">
             <div className="p-6 glass-card space-y-5">
               <h3 className="text-base font-bold text-white uppercase tracking-wider">FD Parameter Settings</h3>
-              
+
               {/* Deposit amount */}
               <div className="space-y-1">
                 <div className="flex justify-between items-center text-xs">
@@ -482,11 +482,10 @@ export default function BeyondFdsPage() {
                     <button
                       key={slab}
                       onClick={() => setFdTaxSlab(slab)}
-                      className={`py-1.5 rounded-lg text-xs font-bold transition-all border cursor-pointer ${
-                        fdTaxSlab === slab
+                      className={`py-1.5 rounded-lg text-xs font-bold transition-all border cursor-pointer ${fdTaxSlab === slab
                           ? "bg-amber-500 border-amber-500 text-navy-bg"
                           : "bg-navy-bg border-border-navy text-muted-grey hover:text-white"
-                      }`}
+                        }`}
                     >
                       {slab}%
                     </button>
@@ -547,7 +546,7 @@ export default function BeyondFdsPage() {
 
           {/* Chart & Real Loss Dashboard */}
           <div className="lg:col-span-2 space-y-6">
-            
+
             {/* Destroyer stats */}
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               <div className="p-4 rounded-xl border border-border-navy bg-navy-card/45">
@@ -582,7 +581,7 @@ export default function BeyondFdsPage() {
                 <h4 className="font-bold text-white uppercase">The Erosion Breakdown</h4>
                 <p className="text-muted-grey leading-relaxed">
                   You deposited {formatCurrency(fdDeposit)}. After {fdYears} years, although your statement will say you have {formatCurrency(fdDestroyerData.finalNominal)}, its actual buying power is only <strong>{formatCurrency(fdDestroyerData.finalReal)}</strong>.
-                  Taxes took {formatCurrency(fdDestroyerData.taxLoss)} and inflation took another {formatCurrency(fdDestroyerData.inflationLoss)}. 
+                  Taxes took {formatCurrency(fdDestroyerData.taxLoss)} and inflation took another {formatCurrency(fdDestroyerData.inflationLoss)}.
                   Your money did not grow; it decayed by <strong>{formatCurrency(fdDestroyerData.destroyedPower)}</strong> in real value!
                 </p>
               </div>
@@ -601,12 +600,12 @@ export default function BeyondFdsPage() {
                   >
                     <defs>
                       <linearGradient id="colorNominal" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#22c55e" stopOpacity={0.2}/>
-                        <stop offset="95%" stopColor="#22c55e" stopOpacity={0}/>
+                        <stop offset="5%" stopColor="#22c55e" stopOpacity={0.2} />
+                        <stop offset="95%" stopColor="#22c55e" stopOpacity={0} />
                       </linearGradient>
                       <linearGradient id="colorRealFd" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#ef4444" stopOpacity={0.25}/>
-                        <stop offset="95%" stopColor="#ef4444" stopOpacity={0}/>
+                        <stop offset="5%" stopColor="#ef4444" stopOpacity={0.25} />
+                        <stop offset="95%" stopColor="#ef4444" stopOpacity={0} />
                       </linearGradient>
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" stroke="#112d55" vertical={false} />
@@ -673,7 +672,7 @@ export default function BeyondFdsPage() {
               </div>
               <h3 className="text-sm font-bold text-white uppercase">What is a Mutual Fund & its Types</h3>
             </div>
-            
+
             <p>
               A Mutual Fund is a pooled asset managed by an AMC (Asset Management Company) that invests in a diversified list of shares or bonds. Rather than buying single stocks (which has default risk), index and mutual funds bundle 50+ companies.
             </p>
@@ -706,7 +705,7 @@ export default function BeyondFdsPage() {
               </div>
               <h3 className="text-sm font-bold text-white uppercase">The Shield: How to Manage Volatility</h3>
             </div>
-            
+
             <p>
               Many people avoid investing in mutual funds because they fear losing money. While equity has short-term volatility (fluctuations), long-term investing uses structural shields:
             </p>
@@ -756,7 +755,7 @@ export default function BeyondFdsPage() {
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          
+
           {/* Step 1 */}
           <div className="p-6 glass-card flex flex-col justify-between hover:border-emerald/40 transition-all duration-300">
             <div className="space-y-3">
