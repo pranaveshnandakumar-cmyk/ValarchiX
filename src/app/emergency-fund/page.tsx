@@ -6,61 +6,50 @@ import {
   Pie,
   Cell,
   ResponsiveContainer,
-  Legend,
   Tooltip
 } from "recharts";
-import { Info, HelpCircle, ShieldCheck, ChevronDown, Landmark, Shield, AlertTriangle } from "lucide-react";
+import { HelpCircle, ShieldCheck, ChevronDown, Landmark, Shield, AlertTriangle, HeartPulse, Briefcase, Wrench, Plane } from "lucide-react";
 import NumericInput from "@/components/NumericInput";
 
 export default function EmergencyFundCalculator() {
   const [showAudit, setShowAudit] = useState(false);
-  const [essential, setEssential] = useState(35000); // rent, food, bills
+  const [essential, setEssential] = useState(35000);        // rent, food, bills
   const [discretionary, setDiscretionary] = useState(15000); // lifestyle, shopping
-  const [debt, setDebt] = useState(10000); // EMIs, premiums
-  const [riskMultiplier, setRiskMultiplier] = useState(6); // 3, 6, 9, 12 depending on sector
-  const [dependents, setDependents] = useState(2); // adds 1 month per dependent
-
-  const jobSectors = [
-    { label: "Govt / PSU (Low)", multiplier: 3, desc: "Highest job stability, steady income" },
-    { label: "Corporate (Medium)", multiplier: 6, desc: "Moderate stability, standard notice periods" },
-    { label: "Startup (High)", multiplier: 9, desc: "High volatility, frequent layoffs" },
-    { label: "Freelancer (Very High)", multiplier: 12, desc: "Irregular inflows, client contract risks" }
-  ];
+  const [debt, setDebt] = useState(10000);                   // EMIs, premiums
+  const [targetMonths, setTargetMonths] = useState(6);       // 3 = minimum, 6 = ideal
 
   const calculations = useMemo(() => {
-    // Total months of runway recommended
-    const totalMonths = riskMultiplier + dependents;
-    
-    // Monthly outflows
-    const totalMonthlyOutflow = essential + discretionary + debt;
-    
-    // Target emergency fund assuming 100% of essential + debt, and 30% of lifestyle expenses (discretionary)
-    const suggestedLifestyleCut = 0.3; // Cut 70% discretionary
-    const essentialMonthlyNeeds = essential + debt + Math.round(discretionary * suggestedLifestyleCut);
-    
-    const targetCorpus = essentialMonthlyNeeds * totalMonths;
+    // Total monthly expense (whole family) — emergency fund must cover this in full
+    const totalMonthlyExpense = essential + discretionary + debt;
+
+    // Minimum buffer: 3 months of total expense (absolute floor)
+    const minCorpus = totalMonthlyExpense * 3;
+
+    // Ideal buffer: 6 months of total expense (recommended target)
+    const idealCorpus = totalMonthlyExpense * 6;
+
+    // User-selected target
+    const targetCorpus = totalMonthlyExpense * targetMonths;
 
     // Split recommended allocations
-    const cashAllocation = Math.round(targetCorpus * 0.20); // 20% in standard savings
-    const liquidFundAllocation = Math.round(targetCorpus * 0.80); // 80% in Sweep FDs / Liquid Funds
+    const cashAllocation = Math.round(targetCorpus * 0.20);        // 20% instant-access savings
+    const liquidFundAllocation = Math.round(targetCorpus * 0.80);  // 80% sweep FDs / liquid funds
 
     const pieData = [
       { name: "Savings Account (20%)", value: cashAllocation, color: "#3b82f6" },
       { name: "Sweep FD & Liquid Funds (80%)", value: liquidFundAllocation, color: "#22c55e" }
     ];
 
-    const survivalOnlyRunway = (essential + debt) * totalMonths;
-
     return {
-      totalMonths,
-      totalMonthlyOutflow,
+      totalMonthlyExpense,
       targetCorpus,
+      minCorpus,
+      idealCorpus,
       cashAllocation,
       liquidFundAllocation,
-      survivalOnlyRunway,
       pieData
     };
-  }, [essential, discretionary, debt, riskMultiplier, dependents]);
+  }, [essential, discretionary, debt, targetMonths]);
 
   const formatCurrency = (val: number) => {
     return new Intl.NumberFormat("en-IN", {
@@ -90,10 +79,10 @@ export default function EmergencyFundCalculator() {
         <div>
           <h1 className="text-3xl font-extrabold text-white tracking-tight flex items-center gap-2">
             <Shield className="text-emerald" />
-            Emergency Fund & Runway Planner
+            Emergency Fund Planner
           </h1>
           <p className="text-sm text-muted-grey mt-1">
-            Determine your risk-adjusted emergency reserve targets based on living expenses, family dependencies, job sector security, and allocate it optimally.
+            Build the right safety net — minimum 3 months, ideal 6 months of your total family monthly expense, kept in high-liquidity instruments.
           </p>
         </div>
         <div className="text-xs font-semibold text-emerald bg-emerald/5 border border-emerald/20 px-3 py-1.5 rounded-lg">
@@ -101,11 +90,44 @@ export default function EmergencyFundCalculator() {
         </div>
       </div>
 
+      {/* What is an Emergency Fund? */}
+      <div className="p-5 rounded-2xl border border-border-navy bg-navy-card/30 space-y-4">
+        <h2 className="text-sm font-bold text-white flex items-center gap-2">
+          <HeartPulse className="text-emerald" size={16} />
+          What Is an Emergency Fund — and When Do You Use It?
+        </h2>
+        <p className="text-xs text-muted-grey leading-relaxed">
+          An emergency fund is a dedicated, instantly accessible cash reserve set aside <strong className="text-white">only for genuine financial shocks</strong> — not vacations, not gadgets, not planned purchases. It is your household&apos;s financial immune system.
+        </p>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-1">
+          {[
+            { icon: <Briefcase size={14} className="text-amber-400" />, title: "Job Loss / Pay Cut", desc: "Cover living costs while you find a new role or stabilise income." },
+            { icon: <HeartPulse size={14} className="text-red-400" />, title: "Medical Emergency", desc: "Bridge the gap before insurance reimbursement hits your account." },
+            { icon: <Wrench size={14} className="text-blue-400" />, title: "Critical Home / Vehicle Repair", desc: "Burst pipes, car breakdown — urgent repairs that cannot wait." },
+            { icon: <Plane size={14} className="text-purple-400" />, title: "Urgent Family Obligation", desc: "Unplanned travel, bereavement costs or sudden family support needs." },
+          ].map((item) => (
+            <div key={item.title} className="p-3 rounded-xl border border-border-navy/60 bg-navy-bg/40 space-y-1">
+              <div className="flex items-center gap-1.5 font-semibold text-white text-[10px]">
+                {item.icon}
+                {item.title}
+              </div>
+              <p className="text-[9.5px] text-muted-grey leading-tight">{item.desc}</p>
+            </div>
+          ))}
+        </div>
+        <p className="text-[10px] text-amber-400 border-t border-border-navy/60 pt-3">
+          ⚠️ An emergency fund is <strong>not</strong> an investment. It must stay liquid at all times — prioritise access speed over returns.
+        </p>
+      </div>
+
       <div className="grid lg:grid-cols-3 gap-8">
         {/* Sliders and Controls */}
         <div className="lg:col-span-1 space-y-6">
           <div className="p-6 glass-card space-y-6">
-            <h2 className="text-lg font-bold text-white">Expense Outflows</h2>
+            <h2 className="text-lg font-bold text-white">Monthly Family Expenses</h2>
+            <p className="text-[10px] text-muted-grey -mt-3 leading-relaxed">
+              Enter your total household outflows. The emergency fund must cover the full amount — these are family expenses, not individual.
+            </p>
 
             {/* Essential Expenses */}
             <div className="space-y-2">
@@ -200,54 +222,30 @@ export default function EmergencyFundCalculator() {
               </div>
             </div>
 
-            {/* Dependents Count */}
-            <div className="space-y-2 border-t border-border-navy/60 pt-4">
-              <div className="flex justify-between items-center text-xs font-semibold">
-                <span className="text-muted-grey">Number of Dependents</span>
-                <NumericInput
-                  value={dependents}
-                  onChange={setDependents}
-                  min={0}
-                  max={10}
-                  step={1}
-                  type="number"
-                />
-              </div>
-              <input
-                type="range"
-                min={0}
-                max={6}
-                step={1}
-                value={dependents}
-                onChange={(e) => setDependents(Number(e.target.value))}
-                className="w-full accent-emerald bg-navy-bg h-1 rounded-lg cursor-pointer"
-              />
-              <div className="flex justify-between text-[10px] text-muted-grey">
-                <span>0 Dependents</span>
-                <span>6 Dependents</span>
-              </div>
-              <span className="text-[9.5px] text-muted-grey block leading-tight">
-                *Each family dependent adds 1 extra month of expense runway to guard against emergencies.
-              </span>
-            </div>
 
-            {/* Job Sector Risk Selection */}
-            <div className="space-y-2 border-t border-border-navy/60 pt-4">
-              <label className="text-xs font-semibold text-muted-grey block">Job / Inflow Sector Risk</label>
+            {/* Target Months Selector */}
+            <div className="space-y-3 border-t border-border-navy/60 pt-4">
+              <div>
+                <label className="text-xs font-semibold text-muted-grey block">Target Coverage</label>
+                <p className="text-[10px] text-muted-grey/70 mt-0.5">How many months of total expense should your fund cover?</p>
+              </div>
               <div className="grid grid-cols-2 gap-2 text-[10px] font-bold">
-                {jobSectors.map((sector) => (
+                {[
+                  { months: 3, label: "Minimum (3 Months)", desc: "Absolute floor — for very stable, dual-income households." },
+                  { months: 6, label: "Ideal (6 Months)", desc: "Recommended for most families — covers job transitions & medical shocks." },
+                ].map((opt) => (
                   <button
-                    key={sector.multiplier}
+                    key={opt.months}
                     type="button"
-                    onClick={() => setRiskMultiplier(sector.multiplier)}
+                    onClick={() => setTargetMonths(opt.months)}
                     className={`p-2.5 rounded-lg border text-left flex flex-col justify-between transition-all cursor-pointer ${
-                      riskMultiplier === sector.multiplier
+                      targetMonths === opt.months
                         ? "bg-emerald/10 border-emerald text-white"
                         : "bg-navy-bg/40 border-border-navy text-muted-grey hover:text-white"
                     }`}
                   >
-                    <span>{sector.label}</span>
-                    <span className="text-[9px] font-normal text-muted-grey/80 mt-1 leading-tight">{sector.desc}</span>
+                    <span>{opt.label}</span>
+                    <span className="text-[9px] font-normal text-muted-grey/80 mt-1 leading-tight">{opt.desc}</span>
                   </button>
                 ))}
               </div>
@@ -260,32 +258,32 @@ export default function EmergencyFundCalculator() {
           {/* Key Metrics Grid */}
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             <div className="p-4 rounded-xl border border-border-navy bg-navy-card/45">
-              <span className="text-[10px] uppercase font-bold text-muted-grey block">Suggested Emergency Fund</span>
+              <span className="text-[10px] uppercase font-bold text-muted-grey block">Your Target Fund</span>
               <p className="text-xl font-bold text-emerald mt-1">
                 {formatCurrency(calculations.targetCorpus)}
               </p>
               <span className="text-[9px] text-muted-grey block mt-0.5 leading-none">
-                Risk Runway: {calculations.totalMonths} Months
+                {targetMonths}M × {formatCurrency(calculations.totalMonthlyExpense)}/mo
               </span>
             </div>
 
             <div className="p-4 rounded-xl border border-border-navy bg-navy-card/45">
-              <span className="text-[10px] uppercase font-bold text-muted-grey block">Cash Reserve (20%)</span>
-              <p className="text-xl font-bold text-blue-400 mt-1">
-                {formatCurrency(calculations.cashAllocation)}
+              <span className="text-[10px] uppercase font-bold text-muted-grey block">Minimum Floor (3M)</span>
+              <p className="text-xl font-bold text-amber-400 mt-1">
+                {formatCurrency(calculations.minCorpus)}
               </p>
               <span className="text-[9px] text-muted-grey block mt-0.5 leading-none">
-                For Instant Withdrawals
+                Never go below this
               </span>
             </div>
 
             <div className="p-4 rounded-xl border border-border-navy bg-navy-card/45 col-span-2 md:col-span-1">
-              <span className="text-[10px] uppercase font-bold text-emerald block">Liquid Funds Reserve (80%)</span>
+              <span className="text-[10px] uppercase font-bold text-emerald block">Ideal Target (6M)</span>
               <p className="text-xl font-bold text-emerald glow-emerald mt-1">
-                {formatCurrency(calculations.liquidFundAllocation)}
+                {formatCurrency(calculations.idealCorpus)}
               </p>
               <span className="text-[9px] text-muted-grey block mt-0.5 leading-none">
-                For Yield-Optimized Safety
+                Full peace-of-mind buffer
               </span>
             </div>
           </div>
@@ -297,7 +295,7 @@ export default function EmergencyFundCalculator() {
                 Emergency Corpus Recommended Split Allocation
               </h3>
               <p className="text-xs text-muted-grey leading-relaxed">
-                Keeping 100% of your emergency fund in normal savings accounts causes it to lose value to inflation. Keeping it in sweep-in FDs or liquid funds earns **6.5% - 7.2%**, compounding safely while staying fully accessible.
+                Keeping 100% of your emergency fund in normal savings accounts causes it to lose value to inflation. Keeping it in sweep-in FDs or liquid funds earns <strong className="text-white">6.5% – 7.2%</strong>, compounding safely while staying fully accessible.
               </p>
               <div className="space-y-2 border-t border-border-navy/60 pt-3 text-[11px] text-muted-grey">
                 <div className="flex items-center gap-1.5">
@@ -349,13 +347,13 @@ export default function EmergencyFundCalculator() {
                 <div className="space-y-2">
                   <h4 className="font-bold text-white flex items-center gap-1">
                     <Landmark size={14} className="text-blue-400" />
-                    Why the standard 3-Month rule is broken
+                    Why 3–6 months of total expense, not salary
                   </h4>
                   <p>
-                    Standard internet advice is to save &quot;3 months of salary.&quot; This advice is deeply flawed. Your emergency fund target should not be based on salary, but on **essential outflows (commitments)**. 
+                    Standard internet advice says &quot;save 3 months of salary.&quot; This is flawed. Your emergency fund should cover your actual <strong className="text-white">outflows</strong>, not income. A family spending ₹60,000/month needs ₹1.8L minimum and ₹3.6L ideally — regardless of income level.
                   </p>
                   <p className="text-[11px] text-muted-grey/80">
-                    If you earn ₹1 Lakh but have ₹80,000 in monthly expenses (rent + EMIs + dependent costs), a ₹3L fund covers you for barely 3.7 months. If you are in high-volatility sectors (startups, freelance), you need a much longer cushion.
+                    The <strong className="text-white">minimum of 3 months</strong> is the absolute floor — enough to bridge a short job gap or medical event. The <strong className="text-white">ideal of 6 months</strong> gives real peace of mind, covering longer job searches, income volatility, or layered emergencies.
                   </p>
                 </div>
                 <div className="space-y-2">
@@ -364,10 +362,10 @@ export default function EmergencyFundCalculator() {
                     Mitigating the Inflation Drag
                   </h4>
                   <p>
-                    If inflation is 5.09%, storing a large emergency corpus (e.g. ₹5 Lakhs) in a standard savings account earning 3% means you are **losing 2% purchasing power every year**.
+                    If inflation is 5%, storing ₹5 Lakhs in a savings account earning 3% means you are <strong className="text-white">losing 2% purchasing power every year</strong>.
                   </p>
                   <p className="text-[11px] text-muted-grey/80">
-                    To beat this drag, allocate 80% to **sweep-in Fixed Deposits** (which automatically link FDs to your savings account, breaking and using them only if balance drops to zero) or **Liquid Mutual Funds** (investing in ultra-safe short term government Treasury bills).
+                    Allocate 80% to <strong className="text-white">sweep-in Fixed Deposits</strong> (auto-link FDs to your savings account, breaking only when balance drops to zero) or <strong className="text-white">Liquid Mutual Funds</strong> (ultra-safe, invest in short-term government T-bills). Both earn 6.5–7.2% and remain accessible within 1 business day.
                   </p>
                 </div>
               </div>
@@ -393,18 +391,16 @@ export default function EmergencyFundCalculator() {
                   <h4 className="font-semibold text-white">Mathematical Model</h4>
                   <div className="bg-navy-bg/50 p-3 rounded-xl space-y-2 font-mono">
                     <p>
-                      Runway Months (M) = Job_Risk_Multiplier + Dependents
+                      Total Monthly Expense = Essential + Discretionary + Debt_EMIs
                     </p>
                     <p>
-                      Survival-Only Outflow = Essential_Expenses + Debt_EMIs_and_Insurance
+                      Minimum Emergency Fund = Total Monthly Expense × 3
                     </p>
                     <p>
-                      Suggested Outflow (with 70% lifestyle cuts):
-                      <br />
-                      Monthly_Needs = Essential_Expenses + Debt_EMIs_and_Insurance + (Discretionary_Expenses * 0.3)
+                      Ideal Emergency Fund = Total Monthly Expense × 6
                     </p>
                     <p>
-                      Target Emergency Corpus = Monthly_Needs * M
+                      Your Target = Total Monthly Expense × {targetMonths}
                     </p>
                   </div>
                 </div>
@@ -433,19 +429,23 @@ export default function EmergencyFundCalculator() {
                         <td className="border border-border-navy/80 p-2">{debt}</td>
                       </tr>
                       <tr>
-                        <td className="border border-border-navy/80 p-2 font-medium text-white">Risk Runway Months (B4)</td>
-                        <td className="border border-border-navy/80 p-2">{calculations.totalMonths}</td>
+                        <td className="border border-border-navy/80 p-2 font-medium text-white">Total Monthly Expense (B4)</td>
+                        <td className="border border-border-navy/80 p-2 font-mono text-emerald">=B1+B2+B3</td>
                       </tr>
                       <tr>
-                        <td className="border border-border-navy/80 p-2 font-medium text-white">Target Emergency Fund</td>
-                        <td className="border border-border-navy/80 p-2 font-mono text-emerald">=(B1 + B3 + B2 * 0.3) * B4</td>
+                        <td className="border border-border-navy/80 p-2 font-medium text-white">Minimum Fund (3M)</td>
+                        <td className="border border-border-navy/80 p-2 font-mono text-amber-400">=B4*3</td>
+                      </tr>
+                      <tr>
+                        <td className="border border-border-navy/80 p-2 font-medium text-white">Ideal Fund (6M)</td>
+                        <td className="border border-border-navy/80 p-2 font-mono text-emerald">=B4*6</td>
                       </tr>
                     </tbody>
                   </table>
                 </div>
 
                 <p className="text-[10px] text-amber-500 border-t border-border-navy/60 pt-3">
-                  ⚠️ <strong>Disclaimer:</strong> This tool is for training purposes only and represents a mathematical risk model. It does not guarantee cash flow stability or job retention.
+                  ⚠️ <strong>Disclaimer:</strong> This tool is for educational purposes only. It does not guarantee cash flow stability or job retention.
                 </p>
               </div>
             )}
