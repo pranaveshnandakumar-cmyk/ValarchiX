@@ -32,7 +32,8 @@ import {
   CreditCard,
   HeartPulse,
   TrendingDown,
-  Zap
+  Zap,
+  Download
 } from "lucide-react";
 
 const NAV_ITEMS = [
@@ -66,7 +67,10 @@ const NAV_ITEMS = [
       { name: "Step Up SIP", href: "/step-up-sip", icon: ArrowUpRight },
       { name: "Compound Interest", href: "/compound-interest", icon: TrendingUp },
       { name: "Cost of Delay", href: "/cost-of-delay", icon: Clock },
-      { name: "Inflation Calculator", href: "/inflation", icon: BarChart2 }
+      { name: "Inflation Calculator", href: "/inflation", icon: BarChart2 },
+      { name: "RD Calculator", href: "/rd", icon: Percent },
+      { name: "ROI & CAGR", href: "/roi", icon: TrendingUp },
+      { name: "XIRR Calculator", href: "/xirr", icon: Zap }
     ]
   },
   {
@@ -86,14 +90,24 @@ const NAV_ITEMS = [
       { name: "Human Life Value (HLV)", href: "/hlv", icon: HeartPulse },
       { name: "PPF Calculator", href: "/ppf", icon: Coins },
       { name: "NPS Calculator", href: "/nps", icon: TrendingUp },
-      { name: "SWP Calculator", href: "/swp", icon: ArrowDownLeft }
+      { name: "SWP Calculator", href: "/swp", icon: ArrowDownLeft },
+      { name: "SSY Calculator", href: "/ssy", icon: Coins },
+      { name: "EPF Calculator", href: "/epf", icon: Coins },
+      { name: "Gratuity Calculator", href: "/gratuity", icon: Coins },
+      { name: "APY Pension Simulator", href: "/apy", icon: Coins },
+      { name: "Post Office MIS", href: "/pomis", icon: Coins },
+      { name: "SCSS Calculator", href: "/scss", icon: Coins }
     ]
   },
   {
     category: "Portfolio & Tax",
     items: [
       { name: "Portfolio Allocator", href: "/portfolio", icon: PieChart },
-      { name: "Tax Regime Hub", href: "/tax", icon: Calculator }
+      { name: "Tax Regime Hub", href: "/tax", icon: Calculator },
+      { name: "HRA Exemption", href: "/hra", icon: Calculator },
+      { name: "Advanced Income Tax", href: "/income-tax", icon: Calculator },
+      { name: "TDS Calculator", href: "/tds", icon: Calculator },
+      { name: "NSC Calculator", href: "/nsc", icon: Coins }
     ]
   }
 ];
@@ -157,6 +171,17 @@ export default function Navigation() {
 
           {/* Theme Switch & Actions */}
           <div className="flex items-center gap-3">
+            {pathname !== "/" && (
+              <button
+                onClick={() => window.print()}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-emerald/30 bg-emerald/10 text-emerald hover:bg-emerald hover:text-navy-bg transition-all text-xs font-bold cursor-pointer"
+                title="Download PDF Report"
+              >
+                <Download size={14} />
+                <span className="hidden sm:inline">Download PDF</span>
+              </button>
+            )}
+            
             <button
               onClick={toggleTheme}
               className="p-2.5 rounded-xl border border-border-navy bg-navy-card/30 text-emerald hover:text-white hover:border-emerald/40 transition-all"

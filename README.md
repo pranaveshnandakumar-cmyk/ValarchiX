@@ -29,7 +29,21 @@
 
 ### 3. 🪙 Calculators & Planners Suite (with Math Audits)
 * **Calculation Transparency Panels**: Every calculator features a collapsible **"How This is Calculated & Excel Replication"** section displaying math formulas, variables, and step-by-step Excel/Google Sheets functions (e.g. `PMT`, `FV`).
-* **SIP & FD Simulators**: Model wealth creation paths comparing Systematic Investment Plans with fixed-yield structures.
+* **Multi-Frequency SIP Simulator**: Supports **Daily, Weekly, Monthly, Quarterly, and Yearly** SIP investing intervals with dynamic slider ranges, period-compounding calculations, and dynamically generated spreadsheet replication formulas.
+* **13 New Inflation-Adjusted Calculators**:
+  * **SSY (Sukanya Samriddhi Yojana)**: Models 21-year sovereign savings for girl children under the 8.2% tax-free rate.
+  * **EPF (Employee Provident Fund)**: Simulates 12% employee/employer splits, EPS ₹1,250 caps, annual pay raises, and discounts the final corpus.
+  * **RD (Recurring Deposit)**: Standard bank recurring deposits compounded quarterly.
+  * **ROI & CAGR**: Calculates absolute yields and compound annual growth rate with inflation-discounted real CAGRs.
+  * **HRA Exemption**: Calculates Section 10(13A) tax exemptions and projects rent inflation vs. salary apprasial efficiency.
+  * **NSC (National Savings Certificate)**: Compounding savings under the 7.7% rate with Year 1-4 Section 80C reinvested tax deductions.
+  * **Advanced Income Tax**: Old vs. New slabs comparison side-by-side with a **Bracket Creep Simulator** demonstrating how inflation-matching pay rises hike your real tax rate.
+  * **Gratuity**: Calculates gratuity benefits under the Payment of Gratuity Act and discounts future payouts.
+  * **APY (Atal Pension Yojana)**: Maps official contributions and maps the post-retirement fixed pension decay under inflation.
+  * **TDS**: Computes transactional tax deductions, limits, and PAN card missing penalty rates.
+  * **POMIS (Post Office Monthly Income Scheme)**: Models the erosion of both flat monthly interest income and the principal returned at 5 years.
+  * **SCSS (Senior Citizens Savings Scheme)**: Enforces the ₹30L limit and quarterly SCSS payouts, discounting both for inflation.
+  * **XIRR**: Computes the Extended Internal Rate of Return for irregular transaction cash flows using a Newton-Raphson numerical solver, showing nominal vs. real yields.
 * **Step Up SIP Simulator**: Compare the compounding power and maturity value of a flat monthly SIP against a Step Up SIP (increasing yearly by a percentage or a fixed amount) using interactive area charts.
 * **Loan EMI & Prepayment Simulator**: Calculate monthly EMIs and simulate interest savings/tenure reduction from extra monthly/annual prepayments.
 * **Emergency Fund & Liquid Runway Planner**: Determine risk-adjusted emergency reserve targets based on job sector stability and family dependent buffers.
@@ -37,6 +51,7 @@
 * **SWP Planner**: Simulate Systematic Withdrawal Plans (SWP) to design sustainable retirement cash flows, highlighting safe withdrawal rates (4% rule) and sequence of returns risk.
 * **Goal & Retirement Planners**: Plot future corpus requirements factoring in inflation, annual escalations, and target maturity horizons.
 * **NPS & PPF Simulators**: Run returns compounding models for public pension and provident schemes.
+* **Universal PDF Payout Download**: Features a responsive **"Download PDF"** button on every calculator page that utilizes custom print CSS styles. Hides interactive menus, sidebars, and input sliders to save clean, structured A4 PDF report files to phone or desktop.
 * **Macroeconomic Benchmarks**: Displays active G-Sec 10Y yields and baseline CPI inflation rates sourced dynamically.
 
 ### 4. ⚖️ Tax Regime Hub (Union Budget 2025)

@@ -189,3 +189,32 @@ input[type="range"]::-moz-range-thumb:hover {
 .animate-fadeIn {
   animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
+
+/* Print Overrides for Clean PDF Reports */
+@media print {
+  header,
+  aside,
+  footer,
+  button,
+  .no-print,
+  input[type="range"] {
+    display: none !important;
+  }
+
+  .md\:pl-64,
+  div.md\:pl-64 {
+    padding-left: 0 !important;
+  }
+
+  main {
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}

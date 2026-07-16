@@ -14,8 +14,25 @@ import {
 import { Info, HelpCircle, TrendingUp, AlertTriangle, Landmark, ShieldCheck, ChevronDown } from "lucide-react";
 import NumericInput from "@/components/NumericInput";
 
+const FREQUENCY_MAP = {
+  daily: { label: "Daily", periods: 365 },
+  weekly: { label: "Weekly", periods: 52 },
+  monthly: { label: "Monthly", periods: 12 },
+  quarterly: { label: "Quarterly", periods: 4 },
+  yearly: { label: "Yearly", periods: 1 }
+};
+
+const SIP_LIMITS_MAP = {
+  daily: { default: 500, min: 100, max: 20000, step: 100, minSlider: 100, maxSlider: 10000 },
+  weekly: { default: 2000, min: 200, max: 100000, step: 500, minSlider: 200, maxSlider: 50000 },
+  monthly: { default: 10000, min: 500, max: 2000000, step: 500, minSlider: 500, maxSlider: 100000 },
+  quarterly: { default: 25000, min: 1000, max: 5000000, step: 1000, minSlider: 1000, maxSlider: 250000 },
+  yearly: { default: 100000, min: 5000, max: 20000000, step: 5000, minSlider: 5000, maxSlider: 1000000 }
+};
+
 export default function SipCalculator() {
   const [calcMode, setCalcMode] = useState<"sip" | "lumpsum" | "fd-vs-mf">("sip");
+  const [sipFrequency, setSipFrequency] = useState<"daily" | "weekly" | "monthly" | "quarterly" | "yearly">("monthly");
   const [showAudit, setShowAudit] = useState(false);
   const [amount, setAmount] = useState(10000);
   const [rate, setRate] = useState(12);
@@ -36,11 +53,21 @@ export default function SipCalculator() {
       .catch((err) => console.error("Error loading rates", err));
   }, []);
 
-  // Update default amount on mode change to match standard scales
+  // Sync amount bounds when frequency or mode changes
+  useEffect(() => {
+    if (calcMode === "sip") {
+      const limits = SIP_LIMITS_MAP[sipFrequency];
+      setAmount(limits.default);
+    } else {
+      setAmount(100000);
+    }
+  }, [calcMode, sipFrequency]);
+
   const handleModeChange = (mode: "sip" | "lumpsum" | "fd-vs-mf") => {
     setCalcMode(mode);
     if (mode === "sip") {
-      setAmount(10000);
+      const limits = SIP_LIMITS_MAP[sipFrequency];
+      setAmount(limits.default);
       setRate(12);
     } else {
       setAmount(100000);
@@ -59,15 +86,17 @@ export default function SipCalculator() {
     const infRate = inflation / 100;
     
     if (calcMode === "sip") {
-      const monthlyRate = r / 12;
-      const monthlyInfRate = infRate / 12;
-      
+      const freqObj = FREQUENCY_MAP[sipFrequency];
+      const p = freqObj.periods;
+      const ratePerPeriod = r / p;
+      const infRatePerPeriod = infRate / p;
+      const realRatePerPeriod = (1 + ratePerPeriod) / (1 + infRatePerPeriod) - 1;
+
       for (let y = 1; y <= years; y++) {
-        const months = y * 12;
-        const fvValue = amount * (((Math.pow(1 + monthlyRate, months) - 1) / monthlyRate) * (1 + monthlyRate));
-        const invested = amount * months;
-        const realMonthlyRate = (1 + monthlyRate) / (1 + monthlyInfRate) - 1;
-        const infAdjustedFv = amount * (((Math.pow(1 + realMonthlyRate, months) - 1) / realMonthlyRate) * (1 + realMonthlyRate));
+        const totalPeriods = y * p;
+        const fvValue = amount * (((Math.pow(1 + ratePerPeriod, totalPeriods) - 1) / ratePerPeriod) * (1 + ratePerPeriod));
+        const invested = amount * totalPeriods;
+        const infAdjustedFv = amount * (((Math.pow(1 + realRatePerPeriod, totalPeriods) - 1) / realRatePerPeriod) * (1 + realRatePerPeriod));
 
         totalInvested = invested;
         futureValue = fvValue;
@@ -198,7 +227,7 @@ export default function SipCalculator() {
                   calcMode === "sip" ? "bg-emerald text-navy-bg" : "text-muted-grey hover:text-white"
                 }`}
               >
-                Monthly SIP
+                SIP Simulator
               </button>
               <button
                 onClick={() => handleModeChange("lumpsum")}
@@ -219,33 +248,64 @@ export default function SipCalculator() {
               </button>
             </div>
 
+            {/* SIP Frequency Selector */}
+            {calcMode === "sip" && (
+              <div className="space-y-2 pt-2 animate-fadeIn">
+                <label className="text-[10px] font-bold uppercase tracking-wider text-muted-grey block">
+                  SIP Frequency
+                </label>
+                <div className="grid grid-cols-5 gap-1 bg-navy-bg p-1 rounded-lg border border-border-navy text-[9px] font-bold">
+                  {(["daily", "weekly", "monthly", "quarterly", "yearly"] as const).map((freq) => (
+                    <button
+                      key={freq}
+                      type="button"
+                      onClick={() => setSipFrequency(freq)}
+                      className={`py-1.5 rounded capitalize transition-all cursor-pointer ${
+                        sipFrequency === freq 
+                          ? "bg-emerald text-navy-bg font-extrabold" 
+                          : "text-muted-grey hover:text-white"
+                      }`}
+                    >
+                      {freq}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Amount Slider */}
             <div className="space-y-2">
               <div className="flex justify-between items-center text-xs font-semibold">
                 <span className="text-muted-grey">
-                  {calcMode === "sip" ? "Monthly SIP Amount" : "Lumpsum Principal"}
+                  {calcMode === "sip" 
+                    ? `${FREQUENCY_MAP[sipFrequency].label} SIP Amount` 
+                    : "Lumpsum Principal"}
                 </span>
                 <NumericInput
                   value={amount}
                   onChange={setAmount}
-                  min={calcMode === "sip" ? 500 : 10000}
-                  max={calcMode === "sip" ? 1000000 : 100000000}
-                  step={calcMode === "sip" ? 500 : 10000}
+                  min={calcMode === "sip" ? SIP_LIMITS_MAP[sipFrequency].min : 10000}
+                  max={calcMode === "sip" ? SIP_LIMITS_MAP[sipFrequency].max : 100000000}
+                  step={calcMode === "sip" ? SIP_LIMITS_MAP[sipFrequency].step : 10000}
                   type="currency"
                 />
               </div>
               <input
                 type="range"
-                min={calcMode === "sip" ? 500 : 10000}
-                max={calcMode === "sip" ? 100000 : 2500000}
-                step={calcMode === "sip" ? 500 : 10000}
+                min={calcMode === "sip" ? SIP_LIMITS_MAP[sipFrequency].minSlider : 10000}
+                max={calcMode === "sip" ? SIP_LIMITS_MAP[sipFrequency].maxSlider : 2500000}
+                step={calcMode === "sip" ? SIP_LIMITS_MAP[sipFrequency].step : 10000}
                 value={amount}
                 onChange={(e) => setAmount(Number(e.target.value))}
                 className="w-full accent-emerald bg-navy-bg h-1 rounded-lg cursor-pointer"
               />
               <div className="flex justify-between text-[10px] text-muted-grey">
-                <span>{calcMode === "sip" ? "₹500" : "₹10K"}</span>
-                <span>{calcMode === "sip" ? "₹1L" : "₹25L"}</span>
+                <span>
+                  {formatCurrency(calcMode === "sip" ? SIP_LIMITS_MAP[sipFrequency].minSlider : 10000)}
+                </span>
+                <span>
+                  {formatCurrency(calcMode === "sip" ? SIP_LIMITS_MAP[sipFrequency].maxSlider : 2500000)}
+                </span>
               </div>
             </div>
 
@@ -682,11 +742,11 @@ export default function SipCalculator() {
                   <h4 className="font-semibold text-white">Mathematical Formulas</h4>
                   <div className="bg-navy-bg/50 p-3 rounded-xl space-y-2 font-mono">
                     <p>
-                      <strong>Monthly SIP Future Value:</strong>
+                      <strong>SIP Future Value ({FREQUENCY_MAP[sipFrequency].label}):</strong>
                       <br />
                       FV = P * [ ((1 + i)^n - 1) / i ] * (1 + i)
                       <br />
-                      <span className="text-[10px] text-muted-grey">where: P = monthly deposit, i = monthly interest rate (r / 12), n = number of months (years * 12).</span>
+                      <span className="text-[10px] text-muted-grey">where: P = deposit, i = period interest rate (r / {FREQUENCY_MAP[sipFrequency].periods}), n = number of periods (years * {FREQUENCY_MAP[sipFrequency].periods}).</span>
                     </p>
                     <p>
                       <strong>Lumpsum Future Value:</strong>
@@ -700,7 +760,7 @@ export default function SipCalculator() {
                       <br />
                       Real Rate (i_real) = (1 + nominal_rate) / (1 + inflation_rate) - 1
                       <br />
-                      <span className="text-[10px] text-muted-grey">where: nominal_rate is monthly or annual, and inflation_rate is the corresponding monthly or annual inflation.</span>
+                      <span className="text-[10px] text-muted-grey">where: nominal_rate is period or annual, and inflation_rate is the corresponding period or annual inflation.</span>
                     </p>
                   </div>
                 </div>
@@ -727,7 +787,7 @@ export default function SipCalculator() {
                     <tbody>
                       <tr>
                         <td className="border border-border-navy/80 p-2 font-medium text-white">SIP Future Value</td>
-                        <td className="border border-border-navy/80 p-2 font-mono text-emerald">=-FV({rate}%/12, {years}*12, {amount}, 0, 1)</td>
+                        <td className="border border-border-navy/80 p-2 font-mono text-emerald">=-FV({rate}%/{FREQUENCY_MAP[sipFrequency].periods}, {years}*{FREQUENCY_MAP[sipFrequency].periods}, {amount}, 0, 1)</td>
                       </tr>
                       <tr>
                         <td className="border border-border-navy/80 p-2 font-medium text-white">Lumpsum Future Value</td>
@@ -735,7 +795,7 @@ export default function SipCalculator() {
                       </tr>
                       <tr>
                         <td className="border border-border-navy/80 p-2 font-medium text-white">Inflation Real Value</td>
-                        <td className="border border-border-navy/80 p-2 font-mono text-emerald">=-FV(((1 + {rate}%/12)/(1 + {inflation}%/12) - 1), {years}*12, {amount}, 0, 1)</td>
+                        <td className="border border-border-navy/80 p-2 font-mono text-emerald">=-FV(((1 + {rate}%/{FREQUENCY_MAP[sipFrequency].periods})/(1 + {inflation}%/{FREQUENCY_MAP[sipFrequency].periods}) - 1), {years}*{FREQUENCY_MAP[sipFrequency].periods}, {amount}, 0, 1)</td>
                       </tr>
                     </tbody>
                   </table>

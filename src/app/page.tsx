@@ -23,7 +23,8 @@ import {
   BarChart2,
   Scissors,
   CreditCard,
-  HeartPulse
+  HeartPulse,
+  Zap
 } from "lucide-react";
 
 const STATS = [
@@ -254,6 +255,97 @@ const EXPLORE_CARDS = [
     href: "/portfolio",
     icon: PieChart,
     category: "Analysis"
+  },
+  {
+    name: "SSY Calculator",
+    desc: "Compounding savings for a girl child under the 8.2% tax-free government rate.",
+    href: "/ssy",
+    icon: Coins,
+    category: "Debt"
+  },
+  {
+    name: "EPF Calculator",
+    desc: "Accumulate employee provident retirement fund with appraisals and inflation-discounting.",
+    href: "/epf",
+    icon: Coins,
+    category: "Retirement"
+  },
+  {
+    name: "RD Calculator",
+    desc: "Calculate standard bank Recurring Deposits with quarterly compounding.",
+    href: "/rd",
+    icon: Percent,
+    category: "Debt"
+  },
+  {
+    name: "ROI & CAGR Calculator",
+    desc: "Calculate absolute returns and compound annual growth rate with inflation-discounting.",
+    href: "/roi",
+    icon: TrendingUp,
+    category: "Wealth"
+  },
+  {
+    name: "HRA Tax Exemption",
+    desc: "Determine tax-free vs. taxable house rent allowance splits under Section 10(13A).",
+    href: "/hra",
+    icon: Calculator,
+    category: "Tax"
+  },
+  {
+    name: "NSC Calculator",
+    desc: "Compounding savings under the 7.7% sovereign rate with 80C reinvestment.",
+    href: "/nsc",
+    icon: Coins,
+    category: "Debt"
+  },
+  {
+    name: "Advanced Income Tax",
+    desc: "Compare Old vs. New tax slabs side-by-side and simulate bracket creep inflation tax.",
+    href: "/income-tax",
+    icon: Calculator,
+    category: "Tax"
+  },
+  {
+    name: "Gratuity Calculator",
+    desc: "Calculate gratuity benefits under the Payment of Gratuity Act and inflation payouts.",
+    href: "/gratuity",
+    icon: Coins,
+    category: "Retirement"
+  },
+  {
+    name: "Atal Pension Yojana",
+    desc: "Model government pension contributions and check post-retirement purchasing power.",
+    href: "/apy",
+    icon: Coins,
+    category: "Retirement"
+  },
+  {
+    name: "TDS Calculator",
+    desc: "Calculate transactional tax deductions, limits, and PAN card penalty rates.",
+    href: "/tds",
+    icon: Calculator,
+    category: "Tax"
+  },
+  {
+    name: "Post Office MIS",
+    desc: "Model guaranteed monthly income scheme payouts and check real principal erosion.",
+    href: "/pomis",
+    icon: Coins,
+    category: "Retirement"
+  },
+  {
+    name: "SCSS Calculator",
+    desc: "Simulate Senior Citizens Savings Scheme quarterly interest income and principal decay.",
+    href: "/scss",
+    icon: Coins,
+    category: "Retirement"
+  },
+  {
+    name: "XIRR Calculator",
+    desc: "Calculate Extended Internal Rate of Return for irregular cash flows and real returns.",
+    href: "/xirr",
+    icon: Zap,
+    category: "Wealth"
   }
 ];
 
