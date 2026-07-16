@@ -12,14 +12,27 @@ export default function LatteFactorCalculator() {
   const [frequency, setFrequency] = useState<"daily" | "weekly" | "monthly">("daily");
   const [years, setYears] = useState(20);
   const [returnRate, setReturnRate] = useState(12);
+  const [inflation, setInflation] = useState(5.09);
+  const [adjustInflation, setAdjustInflation] = useState(true);
+  const [rates, setRates] = useState({ repoRate: 6.50, bondYield10Y: 6.95, inflationRate: 5.09 });
 
-  useEffect(() => setMounted(true), []);
+  useEffect(() => {
+    setMounted(true);
+    fetch("/api/rates")
+      .then((res) => res.json())
+      .then((data) => {
+        setRates(data);
+        setInflation(data.inflationRate);
+      })
+      .catch((err) => console.error("Error loading rates", err));
+  }, []);
 
-  const { chartData, totalSpent, totalIfInvested, opportunityCost } = useMemo(() => {
+  const { chartData, totalSpent, totalIfInvested, opportunityCost, nominalSpent, nominalIfInvested } = useMemo(() => {
     const multiplier = frequency === "daily" ? 365 : frequency === "weekly" ? 52 : 12;
     const annualSpend = dailySpend * multiplier;
     const monthlySpend = annualSpend / 12;
     const r = returnRate / 100 / 12;
+    const infRate = inflation / 100;
 
     let chartData = [];
     let runningInvested = 0;
@@ -27,20 +40,34 @@ export default function LatteFactorCalculator() {
 
     for (let y = 1; y <= years; y++) {
       runningSpent = annualSpend * y;
-      // FV of SIP: M × [(1+r)^n - 1] / r
       const n = y * 12;
       runningInvested = r > 0 ? monthlySpend * ((Math.pow(1 + r, n) - 1) / r) : monthlySpend * n;
+
+      const realSpent = runningSpent / Math.pow(1 + infRate, y);
+      const realInvested = runningInvested / Math.pow(1 + infRate, y);
+
       chartData.push({
         year: `Yr ${y}`,
-        "If Spent": Math.round(runningSpent),
-        "If Invested": Math.round(runningInvested),
+        "If Spent": Math.round(adjustInflation ? realSpent : runningSpent),
+        "If Invested": Math.round(adjustInflation ? realInvested : runningInvested),
       });
     }
 
-    const totalSpent = annualSpend * years;
-    const totalIfInvested = chartData[years - 1]["If Invested"];
-    return { chartData, totalSpent, totalIfInvested, opportunityCost: totalIfInvested - totalSpent };
-  }, [dailySpend, frequency, years, returnRate]);
+    const nominalSpent = annualSpend * years;
+    const nominalIfInvested = r > 0 ? monthlySpend * ((Math.pow(1 + r, years * 12) - 1) / r) : monthlySpend * years * 12;
+
+    const totalSpent = adjustInflation ? (nominalSpent / Math.pow(1 + infRate, years)) : nominalSpent;
+    const totalIfInvested = adjustInflation ? (nominalIfInvested / Math.pow(1 + infRate, years)) : nominalIfInvested;
+
+    return {
+      chartData,
+      totalSpent,
+      totalIfInvested,
+      opportunityCost: totalIfInvested - totalSpent,
+      nominalSpent,
+      nominalIfInvested
+    };
+  }, [dailySpend, frequency, years, returnRate, inflation, adjustInflation]);
 
   const fmt = (v: number) =>
     new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(v);
@@ -122,33 +149,90 @@ export default function LatteFactorCalculator() {
               <div className="flex justify-between text-[10px] text-muted-grey"><span>4%</span><span>20%</span></div>
               <p className="text-[9.5px] text-muted-grey">Historical Nifty 50 CAGR ≈ 12–14%</p>
             </div>
+
+            {/* Inflation Toggle */}
+            <div className="space-y-2 border-t border-border-navy/60 pt-4 flex items-center justify-between">
+              <label htmlFor="adjust-inflation" className="text-xs font-semibold text-muted-grey cursor-pointer flex items-center gap-1">
+                Adjust for Inflation
+                <span className="text-muted-grey/60 cursor-help inline-flex" title="Reduces the future value by the inflation rate to show today's purchasing power."><HelpCircle size={12} /></span>
+              </label>
+              <input
+                id="adjust-inflation"
+                type="checkbox"
+                checked={adjustInflation}
+                onChange={(e) => setAdjustInflation(e.target.checked)}
+                className="w-4 h-4 accent-emerald cursor-pointer rounded"
+              />
+            </div>
+
+            {adjustInflation && (
+              <div className="space-y-2 border-t border-border-navy/60 pt-4 animate-fadeIn">
+                <div className="flex justify-between items-center text-xs font-semibold">
+                  <span className="text-muted-grey">Expected Inflation Rate</span>
+                  <span className="text-emerald font-bold">{inflation}%</span>
+                </div>
+                <input
+                  type="range"
+                  min={2}
+                  max={15}
+                  step={0.1}
+                  value={inflation}
+                  onChange={(e) => setInflation(Number(e.target.value))}
+                  className="w-full accent-emerald bg-navy-bg h-1 rounded-lg cursor-pointer"
+                />
+                <div className="flex justify-between text-[10px] text-muted-grey">
+                  <span>2%</span>
+                  <span>15%</span>
+                </div>
+                <button
+                  onClick={() => setInflation(rates.inflationRate)}
+                  className="text-[9px] text-left text-emerald/80 hover:text-emerald block mt-1 hover:underline cursor-pointer animate-fadeIn"
+                >
+                  CPI Inflation Baseline ({rates.inflationRate}%)
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
         {/* Results */}
         <div className="lg:col-span-2 space-y-6">
           {/* Metrics */}
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="p-4 rounded-xl border border-border-navy bg-navy-card/45">
-              <span className="text-[10px] uppercase font-bold text-muted-grey block">Total Spent</span>
+              <span className="text-[10px] uppercase font-bold text-muted-grey block">
+                {adjustInflation ? "Total Spent (Real)" : "Total Spent"}
+              </span>
               <p className="text-lg font-bold text-red-400 mt-1">{fmtShort(totalSpent)}</p>
-              <span className="text-[9px] text-muted-grey block mt-0.5">Over {years} years</span>
+              <span className="text-[9px] text-muted-grey block mt-0.5">
+                {adjustInflation ? `Nominal: ${fmtShort(nominalSpent)}` : `Over ${years} years`}
+              </span>
             </div>
             <div className="p-4 rounded-xl border border-border-navy bg-navy-card/45">
-              <span className="text-[10px] uppercase font-bold text-emerald block">If Invested Instead</span>
+              <span className="text-[10px] uppercase font-bold text-emerald block">
+                {adjustInflation ? "If Invested (Real)" : "If Invested Instead"}
+              </span>
               <p className="text-lg font-bold text-emerald glow-emerald mt-1">{fmtShort(totalIfInvested)}</p>
-              <span className="text-[9px] text-muted-grey block mt-0.5">At {returnRate}% CAGR</span>
+              <span className="text-[9px] text-muted-grey block mt-0.5">
+                {adjustInflation ? `Nominal: ${fmtShort(nominalIfInvested)}` : `At ${returnRate}% CAGR`}
+              </span>
             </div>
             <div className="p-4 rounded-xl border border-amber-500/30 bg-amber-500/5">
-              <span className="text-[10px] uppercase font-bold text-amber-400 block">Opportunity Cost</span>
+              <span className="text-[10px] uppercase font-bold text-amber-400 block">
+                {adjustInflation ? "Opportunity Cost (Real)" : "Opportunity Cost"}
+              </span>
               <p className="text-lg font-bold text-amber-400 mt-1">{fmtShort(opportunityCost)}</p>
-              <span className="text-[9px] text-muted-grey block mt-0.5">Wealth you gave up</span>
+              <span className="text-[9px] text-muted-grey block mt-0.5">
+                {adjustInflation ? "Purchasing power lost" : "Wealth you gave up"}
+              </span>
             </div>
           </div>
 
           {/* Chart */}
           <div className="p-6 rounded-2xl border border-border-navy bg-navy-card/20 space-y-3">
-            <h3 className="text-xs font-bold text-white uppercase tracking-wider">Spend vs Invest — {years}-Year Trajectory</h3>
+            <h3 className="text-xs font-bold text-white uppercase tracking-wider">
+              Spend vs Invest — {years}-Year Trajectory {adjustInflation ? "(Adjusted for Inflation)" : "(Nominal)"}
+            </h3>
             <div className="h-[260px]">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={chartData} margin={{ top: 5, right: 5, left: 0, bottom: 5 }}>
@@ -202,6 +286,7 @@ export default function LatteFactorCalculator() {
               <p>Monthly Contribution = Annual Spend ÷ 12</p>
               <p>Future Value (SIP) = M × [(1 + r)^n − 1] / r</p>
               <p>where r = monthly rate, n = total months</p>
+              {adjustInflation && <p>Inflation Adjusted Real Value = Future Value ÷ (1 + Inflation Rate)^years</p>}
               <p>Opportunity Cost = Future Value − Total Spent</p>
             </div>
             <p className="text-[10px] text-amber-500">⚠️ <strong>Disclaimer:</strong> Returns are illustrative. Actual market returns vary.</p>

@@ -58,6 +58,16 @@ export default function MutualFundAnalyzer() {
   const [compareFund, setCompareFund] = useState<ParsedMetrics | null>(null);
   const [timeHorizon, setTimeHorizon] = useState<"1Y" | "3Y" | "5Y">("3Y");
 
+  // Inflation States
+  const [adjustInflation, setAdjustInflation] = useState(true);
+  const [inflation, setInflation] = useState(5.09);
+  const [rates, setRates] = useState({ repoRate: 6.50, bondYield10Y: 6.95, inflationRate: 5.09 });
+
+  const getRealCagr = (nominalCagr: number | null | undefined) => {
+    if (nominalCagr === null || nominalCagr === undefined) return null;
+    return ((1 + nominalCagr / 100) / (1 + inflation / 100) - 1) * 100;
+  };
+
   // Fetch screener data on mount
   useEffect(() => {
     setLoadingScreener(true);
@@ -74,6 +84,13 @@ export default function MutualFundAnalyzer() {
 
   useEffect(() => {
     setMounted(true);
+    fetch("/api/rates")
+      .then((res) => res.json())
+      .then((data) => {
+        setRates(data);
+        setInflation(data.inflationRate);
+      })
+      .catch((err) => console.error("Error loading rates", err));
   }, []);
 
   // Search Debounce Trigger
@@ -322,30 +339,70 @@ export default function MutualFundAnalyzer() {
         </div>
       </div>
 
-      {/* Tabs */}
-      <div className="flex border-b border-border-navy/60 pb-px">
-        <button
-          onClick={() => setViewMode("screener")}
-          className={`flex items-center gap-2 px-6 py-3 border-b-2 text-sm font-bold transition-all cursor-pointer ${
-            viewMode === "screener"
-              ? "border-emerald text-emerald bg-emerald/5"
-              : "border-transparent text-muted-grey hover:text-white"
-          }`}
-        >
-          <Filter size={16} />
-          <span>Mutual Fund Screener</span>
-        </button>
-        <button
-          onClick={() => setViewMode("analyzer")}
-          className={`flex items-center gap-2 px-6 py-3 border-b-2 text-sm font-bold transition-all cursor-pointer ${
-            viewMode === "analyzer"
-              ? "border-emerald text-emerald bg-emerald/5"
-              : "border-transparent text-muted-grey hover:text-white"
-          }`}
-        >
-          <Layers size={16} />
-          <span>Detail Fund Analyzer & Compare</span>
-        </button>
+      {/* Tabs & Inflation Toggle */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between border-b border-border-navy/60 pb-px gap-4">
+        <div className="flex">
+          <button
+            onClick={() => setViewMode("screener")}
+            className={`flex items-center gap-2 px-6 py-3 border-b-2 text-sm font-bold transition-all cursor-pointer ${
+              viewMode === "screener"
+                ? "border-emerald text-emerald bg-emerald/5"
+                : "border-transparent text-muted-grey hover:text-white"
+            }`}
+          >
+            <Filter size={16} />
+            <span>Mutual Fund Screener</span>
+          </button>
+          <button
+            onClick={() => setViewMode("analyzer")}
+            className={`flex items-center gap-2 px-6 py-3 border-b-2 text-sm font-bold transition-all cursor-pointer ${
+              viewMode === "analyzer"
+                ? "border-emerald text-emerald bg-emerald/5"
+                : "border-transparent text-muted-grey hover:text-white"
+            }`}
+          >
+            <Layers size={16} />
+            <span>Detail Fund Analyzer & Compare</span>
+          </button>
+        </div>
+
+        {/* Inflation Adjustment Switcher */}
+        <div className="flex items-center gap-4 px-4 py-2 bg-navy-card/25 border border-border-navy rounded-xl text-xs font-semibold self-end md:self-auto mb-2 md:mb-0">
+          <div className="flex items-center gap-1.5">
+            <input
+              id="mf-adjust-inflation"
+              type="checkbox"
+              checked={adjustInflation}
+              onChange={(e) => setAdjustInflation(e.target.checked)}
+              className="w-4 h-4 accent-emerald cursor-pointer rounded"
+            />
+            <label htmlFor="mf-adjust-inflation" className="text-muted-grey cursor-pointer flex items-center gap-1">
+              Adjust CAGRs for Inflation ({inflation}%)
+              <span className="text-muted-grey/60 cursor-help inline-flex" title="Subtracts CPI inflation from CAGRs to show real compound growth rates."><HelpCircle size={12} /></span>
+            </label>
+          </div>
+          {adjustInflation && (
+            <div className="flex items-center gap-1.5 border-l border-border-navy pl-3">
+              <input
+                type="range"
+                min={2}
+                max={12}
+                step={0.1}
+                value={inflation}
+                onChange={(e) => setInflation(Number(e.target.value))}
+                className="w-24 accent-emerald bg-navy-bg h-1 rounded-lg cursor-pointer animate-fadeIn"
+              />
+              <button
+                type="button"
+                onClick={() => setInflation(rates.inflationRate)}
+                className="text-[9px] text-emerald/80 hover:text-emerald hover:underline cursor-pointer"
+                title="Reset to India CPI Baseline"
+              >
+                Reset ({rates.inflationRate}%)
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
       {viewMode === "screener" ? (
@@ -397,9 +454,9 @@ export default function MutualFundAnalyzer() {
                       { label: "Fund Scheme Name", key: "name" },
                       { label: "Category", key: "category" },
                       { label: "NAV", key: "currentNav" },
-                      { label: "1Y CAGR", key: "cagr1Y" },
-                      { label: "3Y CAGR", key: "cagr3Y" },
-                      { label: "5Y CAGR", key: "cagr5Y" },
+                      { label: adjustInflation ? "1Y Real CAGR" : "1Y CAGR", key: "cagr1Y" },
+                      { label: adjustInflation ? "3Y Real CAGR" : "3Y CAGR", key: "cagr3Y" },
+                      { label: adjustInflation ? "5Y Real CAGR" : "5Y CAGR", key: "cagr5Y" },
                       { label: "Vol.", key: "volatility" },
                       { label: "Sharpe", key: "sharpe" },
                       { label: "Sortino", key: "sortino" }
@@ -427,7 +484,8 @@ export default function MutualFundAnalyzer() {
                 <tbody className="divide-y divide-border-navy/40">
                   {sortedAndFilteredScreenerFunds.length > 0 ? (
                     sortedAndFilteredScreenerFunds.map((fund) => {
-                      const isHighCagr = fund.cagr3Y && fund.cagr3Y >= 15;
+                      const displayCagr3Y = adjustInflation ? getRealCagr(fund.cagr3Y) : fund.cagr3Y;
+                      const isHighCagr = displayCagr3Y && displayCagr3Y >= 15;
                       return (
                         <tr key={fund.code} className="hover:bg-navy-light/20 transition-all font-semibold text-light-grey">
                           <td className="px-4 py-4">
@@ -445,13 +503,13 @@ export default function MutualFundAnalyzer() {
                           </td>
                           <td className="px-4 py-4 font-mono text-white">₹{fund.currentNav}</td>
                           <td className="px-4 py-4 font-mono">
-                            {fund.cagr1Y ? `${fund.cagr1Y}%` : "-"}
+                            {fund.cagr1Y ? `${(adjustInflation ? getRealCagr(fund.cagr1Y) : fund.cagr1Y)?.toFixed(2)}%` : "-"}
                           </td>
                           <td className={`px-4 py-4 font-mono ${isHighCagr ? "text-emerald font-bold" : ""}`}>
-                            {fund.cagr3Y ? `${fund.cagr3Y}%` : "-"}
+                            {fund.cagr3Y ? `${(adjustInflation ? getRealCagr(fund.cagr3Y) : fund.cagr3Y)?.toFixed(2)}%` : "-"}
                           </td>
                           <td className="px-4 py-4 font-mono">
-                            {fund.cagr5Y ? `${fund.cagr5Y}%` : "-"}
+                            {fund.cagr5Y ? `${(adjustInflation ? getRealCagr(fund.cagr5Y) : fund.cagr5Y)?.toFixed(2)}%` : "-"}
                           </td>
                           <td className="px-4 py-4 font-mono text-muted-grey">{fund.volatility}%</td>
                           <td className="px-4 py-4 font-mono">{fund.sharpe ?? "-"}</td>
@@ -680,8 +738,10 @@ export default function MutualFundAnalyzer() {
                       <span className="font-bold text-white block leading-snug">{compareFund.name}</span>
                       <div className="grid grid-cols-2 gap-2 pt-2 border-t border-border-navy/60 text-[10px]">
                         <div>
-                          <span className="text-muted-grey">CAGR (3Y)</span>
-                          <span className="text-white font-semibold block">{compareFund.cagr3Y ? `${compareFund.cagr3Y.toFixed(2)}%` : "N/A"}</span>
+                          <span className="text-muted-grey">{adjustInflation ? "Real CAGR (3Y)" : "CAGR (3Y)"}</span>
+                          <span className="text-white font-semibold block">
+                            {compareFund.cagr3Y ? `${(adjustInflation ? getRealCagr(compareFund.cagr3Y) : compareFund.cagr3Y)?.toFixed(2)}%` : "N/A"}
+                          </span>
                         </div>
                         <div>
                           <span className="text-muted-grey">Volatility</span>
@@ -709,15 +769,19 @@ export default function MutualFundAnalyzer() {
                 {/* CAGR returns and Volatilities */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div className="p-4 rounded-xl border border-border-navy bg-navy-card/30">
-                    <span className="text-[10px] uppercase font-bold text-muted-grey block">1Y CAGR return</span>
+                    <span className="text-[10px] uppercase font-bold text-muted-grey block">
+                      {adjustInflation ? "1Y Real CAGR return" : "1Y CAGR return"}
+                    </span>
                     <p className="text-lg font-bold text-white mt-1">
-                      {mainFund.cagr1Y ? `${mainFund.cagr1Y.toFixed(2)}%` : "N/A"}
+                      {mainFund.cagr1Y ? `${(adjustInflation ? getRealCagr(mainFund.cagr1Y) : mainFund.cagr1Y)?.toFixed(2)}%` : "N/A"}
                     </p>
                   </div>
                   <div className="p-4 rounded-xl border border-border-navy bg-navy-card/30">
-                    <span className="text-[10px] uppercase font-bold text-muted-grey block">3Y CAGR return</span>
+                    <span className="text-[10px] uppercase font-bold text-muted-grey block">
+                      {adjustInflation ? "3Y Real CAGR return" : "3Y CAGR return"}
+                    </span>
                     <p className="text-lg font-bold text-emerald mt-1">
-                      {mainFund.cagr3Y ? `${mainFund.cagr3Y.toFixed(2)}%` : "N/A"}
+                      {mainFund.cagr3Y ? `${(adjustInflation ? getRealCagr(mainFund.cagr3Y) : mainFund.cagr3Y)?.toFixed(2)}%` : "N/A"}
                     </p>
                   </div>
                   <div className="p-4 rounded-xl border border-border-navy bg-navy-card/30">

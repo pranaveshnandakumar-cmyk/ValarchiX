@@ -173,7 +173,7 @@ export default function NetWorthCalculator() {
           </div>
 
           {/* Metric Cards */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="p-4 rounded-xl border border-border-navy bg-navy-card/45">
               <span className="text-[10px] uppercase font-bold text-emerald block">Total Assets</span>
               <p className="text-xl font-bold text-white mt-1">{fmt(totalAssets)}</p>
@@ -208,7 +208,7 @@ export default function NetWorthCalculator() {
             <p className="text-xs text-muted-grey leading-relaxed">
               Income is a flow — it starts and stops. <strong className="text-white">Net worth is a stock</strong> — it compounds silently. A person earning ₹20L/year but spending ₹19L is less wealthy than someone earning ₹10L and investing ₹4L. Track your net worth quarterly to measure actual financial progress.
             </p>
-            <div className="grid grid-cols-3 gap-2 pt-1">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-2 pt-1">
               {[
                 { label: "Negative Net Worth", desc: "Debt > Assets. Focus on clearing high-interest loans before investing.", color: "text-red-400" },
                 { label: "Zero to ₹25L", desc: "Building phase. Consistency in SIPs + debt repayment is key.", color: "text-amber-400" },

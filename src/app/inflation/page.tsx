@@ -114,7 +114,7 @@ export default function InflationCalculator() {
         </div>
 
         <div className="lg:col-span-2 space-y-6">
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="p-4 rounded-xl border border-border-navy bg-navy-card/45">
               <span className="text-[10px] uppercase font-bold text-muted-grey block">Money Today</span>
               <p className="text-lg font-bold text-white mt-1">{fmtL(amount)}</p>
@@ -162,7 +162,7 @@ export default function InflationCalculator() {
             <p className="text-xs text-muted-grey leading-relaxed">
               Inflation at 6% means prices double every ~12 years. A ₹1 Lakh kept in a savings account (earning 3%) <strong className="text-white">loses real value every single day</strong>. The only way to preserve and grow purchasing power is by investing in assets that <strong className="text-white">return more than the inflation rate</strong> — ideally equities, which historically return 12–15% in India.
             </p>
-            <div className="grid grid-cols-3 gap-2 text-[10px]">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-[10px]">
               {[
                 { asset: "Savings Account", ret: "~3%", beat: false },
                 { asset: "Fixed Deposit", ret: "~7%", beat: inflation <= 7 },

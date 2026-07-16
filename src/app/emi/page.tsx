@@ -21,7 +21,22 @@ export default function LoanEmiCalculator() {
   const [years, setYears] = useState(20); // 20 years default
   const [prepaymentType, setPrepaymentType] = useState<"none" | "monthly" | "annual">("none");
   const [prepaymentValue, setPrepaymentValue] = useState(10000); // ₹10,000 monthly or ₹1,00,000 annual
-  
+  const [adjustInflation, setAdjustInflation] = useState(true);
+  const [inflation, setInflation] = useState(5.09);
+  const [rates, setRates] = useState({ repoRate: 6.50, bondYield10Y: 6.95, inflationRate: 5.09 });
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    fetch("/api/rates")
+      .then((res) => res.json())
+      .then((data) => {
+        setRates(data);
+        setInflation(data.inflationRate);
+      })
+      .catch((err) => console.error("Error loading rates", err));
+  }, []);
+
   // Sensible default values when prepayment type changes
   const handlePrepaymentTypeChange = (type: "none" | "monthly" | "annual") => {
     setPrepaymentType(type);
@@ -39,6 +54,8 @@ export default function LoanEmiCalculator() {
     const r = rate / 100;
     const monthlyRate = r / 12;
     const totalMonths = years * 12;
+    const infRate = inflation / 100;
+    const monthlyInfRate = infRate / 12;
 
     // Calculate monthly EMI
     let standardEmi = 0;
@@ -55,22 +72,27 @@ export default function LoanEmiCalculator() {
     const chartData = [];
     let standardBalance = amount;
     let standardTotalInterest = 0;
+    let nominalStandardPaidTotal = 0;
+    let realStandardPaidTotal = 0;
     
     let prepaidBalance = amount;
     let prepaidTotalInterest = 0;
+    let nominalPrepaidPaidTotal = 0;
+    let realPrepaidPaidTotal = 0;
     let monthsToPayOff = 0;
     let prepaidClosed = false;
 
     // Simulate standard schedule
-    const standardSchedule = [];
     for (let m = 1; m <= totalMonths; m++) {
       if (standardBalance > 0) {
         const interest = standardBalance * monthlyRate;
         const principal = Math.min(standardEmi - interest, standardBalance);
+        const paidThisMonth = principal + interest;
         standardBalance -= principal;
         standardTotalInterest += interest;
+        nominalStandardPaidTotal += paidThisMonth;
+        realStandardPaidTotal += paidThisMonth / Math.pow(1 + monthlyInfRate, m);
       }
-      standardSchedule.push(standardBalance);
     }
 
     // Reset standard balance to walk through comparison in a single loop for the chart
@@ -92,6 +114,8 @@ export default function LoanEmiCalculator() {
       if (prepaidBalance > 0 && !prepaidClosed) {
         const interest = prepaidBalance * monthlyRate;
         const principal = Math.min(standardEmi - interest, prepaidBalance);
+        let actualExtra = 0;
+        
         prepaidBalance -= principal;
         prepaidTotalInterest += interest;
 
@@ -104,15 +128,21 @@ export default function LoanEmiCalculator() {
         }
 
         if (extraAmount > 0 && prepaidBalance > 0) {
-          const actualExtra = Math.min(extraAmount, prepaidBalance);
+          actualExtra = Math.min(extraAmount, prepaidBalance);
           prepaidBalance -= actualExtra;
         }
+
+        const paidThisMonth = principal + interest + actualExtra;
+        nominalPrepaidPaidTotal += paidThisMonth;
+        realPrepaidPaidTotal += paidThisMonth / Math.pow(1 + monthlyInfRate, m);
 
         if (prepaidBalance <= 0) {
           monthsToPayOff = m;
           prepaidClosed = true;
         }
         currentPrepaidBal = prepaidBalance;
+      } else {
+        currentPrepaidBal = 0;
       }
 
       // Record year-end data points or final closure month for the chart
@@ -120,8 +150,8 @@ export default function LoanEmiCalculator() {
         const yearNum = Math.ceil(m / 12);
         chartData.push({
           year: `Yr ${yearNum}`,
-          "Standard Balance": Math.round(currentStandardBal),
-          "Prepaid Balance": Math.round(currentPrepaidBal),
+          "Standard Balance": Math.round(adjustInflation ? (currentStandardBal / Math.pow(1 + infRate, yearNum)) : currentStandardBal),
+          "Prepaid Balance": Math.round(adjustInflation ? (currentPrepaidBal / Math.pow(1 + infRate, yearNum)) : currentPrepaidBal),
         });
       }
     }
@@ -142,9 +172,13 @@ export default function LoanEmiCalculator() {
       tenureSavedMonths,
       tenureSavedYears,
       monthsToPayOff,
-      chartData
+      chartData,
+      realStandardPaidTotal: Math.round(realStandardPaidTotal),
+      realPrepaidPaidTotal: Math.round(realPrepaidPaidTotal),
+      nominalStandardPaidTotal: Math.round(nominalStandardPaidTotal),
+      nominalPrepaidPaidTotal: Math.round(nominalPrepaidPaidTotal),
     };
-  }, [amount, rate, years, prepaymentType, prepaymentValue]);
+  }, [amount, rate, years, prepaymentType, prepaymentValue, inflation, adjustInflation]);
 
   const formatCurrency = (val: number) => {
     return new Intl.NumberFormat("en-IN", {
@@ -153,11 +187,6 @@ export default function LoanEmiCalculator() {
       maximumFractionDigits: 0
     }).format(val);
   };
-
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   if (!mounted) {
     return (
@@ -334,10 +363,50 @@ export default function LoanEmiCalculator() {
                   onChange={(e) => setPrepaymentValue(Number(e.target.value))}
                   className="w-full accent-emerald bg-navy-bg h-1 rounded-lg cursor-pointer"
                 />
-                <div className="flex justify-between text-[10px] text-muted-grey">
-                  <span>{prepaymentType === "monthly" ? "₹500" : "₹5K"}</span>
-                  <span>{prepaymentType === "monthly" ? "₹50K" : "₹5L"}</span>
+              </div>
+            )}
+
+            {/* Inflation Toggle */}
+            <div className="space-y-2 border-t border-border-navy/60 pt-4 flex items-center justify-between">
+              <label htmlFor="adjust-inflation" className="text-xs font-semibold text-muted-grey cursor-pointer flex items-center gap-1">
+                Adjust for Inflation
+                <span className="text-muted-grey/60 cursor-help inline-flex" title="Reduces future outstanding balances and payments by the inflation rate to show real purchasing power over time."><HelpCircle size={12} /></span>
+              </label>
+              <input
+                id="adjust-inflation"
+                type="checkbox"
+                checked={adjustInflation}
+                onChange={(e) => setAdjustInflation(e.target.checked)}
+                className="w-4 h-4 accent-emerald cursor-pointer rounded"
+              />
+            </div>
+
+            {adjustInflation && (
+              <div className="space-y-2 border-t border-border-navy/60 pt-4 animate-fadeIn">
+                <div className="flex justify-between items-center text-xs font-semibold">
+                  <span className="text-muted-grey">Expected Inflation Rate</span>
+                  <span className="text-emerald font-bold">{inflation}%</span>
                 </div>
+                <input
+                  type="range"
+                  min={2}
+                  max={15}
+                  step={0.1}
+                  value={inflation}
+                  onChange={(e) => setInflation(Number(e.target.value))}
+                  className="w-full accent-emerald bg-navy-bg h-1 rounded-lg cursor-pointer"
+                />
+                <div className="flex justify-between text-[10px] text-muted-grey">
+                  <span>2%</span>
+                  <span>15%</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setInflation(rates.inflationRate)}
+                  className="text-[9px] text-left text-emerald/80 hover:text-emerald block mt-1 hover:underline cursor-pointer"
+                >
+                  CPI Inflation Baseline ({rates.inflationRate}%)
+                </button>
               </div>
             )}
           </div>
@@ -382,7 +451,7 @@ export default function LoanEmiCalculator() {
           <div className="p-6 rounded-2xl border border-border-navy bg-navy-card/20 space-y-4">
             <div className="flex justify-between items-center">
               <h3 className="text-xs font-bold text-white uppercase tracking-wider">
-                Amortization Path: Standard vs. Prepaid Loan Balance
+                Amortization Path: Standard vs. Prepaid Loan Balance {adjustInflation ? "(Adjusted for Inflation)" : "(Nominal)"}
               </h3>
               <span className="text-[10px] text-muted-grey bg-navy-bg px-2 py-0.5 border border-border-navy rounded font-mono">
                 {years} Yr Timeline
@@ -446,6 +515,33 @@ export default function LoanEmiCalculator() {
               </ResponsiveContainer>
             </div>
           </div>
+
+          {/* Real Cost of Loan Card */}
+          {adjustInflation && (
+            <div className="p-5 rounded-2xl border border-emerald/20 bg-emerald/5 space-y-3 animate-fadeIn">
+              <h4 className="text-xs font-bold text-emerald uppercase tracking-wider">
+                The Inflation Discount: Nominal vs. Real Repayment
+              </h4>
+              <p className="text-xs text-muted-grey leading-relaxed">
+                Because of inflation, a fixed EMI payment shrinks in real purchasing power over time. While you pay a total of <strong className="text-white">{formatCurrency(calculations.nominalStandardPaidTotal)}</strong> in nominal cash to the bank, the real economic burden in today's purchasing power is only <strong className="text-emerald">{formatCurrency(calculations.realStandardPaidTotal)}</strong>.
+              </p>
+              <div className="grid grid-cols-2 gap-4 pt-2 border-t border-border-navy/40 text-xs">
+                <div>
+                  <span className="text-[10px] text-muted-grey block uppercase font-bold">Standard Real Cost</span>
+                  <p className="text-base font-bold text-white mt-0.5">{formatCurrency(calculations.realStandardPaidTotal)}</p>
+                  <span className="text-[9px] text-muted-grey">Nominal: {formatCurrency(calculations.nominalStandardPaidTotal)}</span>
+                </div>
+                <div>
+                  <span className="text-[10px] text-muted-grey block uppercase font-bold">Prepaid Real Cost</span>
+                  <p className="text-base font-bold text-emerald mt-0.5">{formatCurrency(calculations.realPrepaidPaidTotal)}</p>
+                  <span className="text-[9px] text-muted-grey">Nominal: {formatCurrency(calculations.nominalPrepaidPaidTotal)}</span>
+                </div>
+              </div>
+              <p className="text-[10px] text-muted-grey italic mt-1">
+                💡 Lesson: Inflation works in favor of the borrower! A ₹{calculations.standardEmi.toLocaleString("en-IN")} EMI paid {years} years from now feels like only ₹{Math.round(calculations.standardEmi / Math.pow(1 + inflation/100, years)).toLocaleString("en-IN")} in today's purchasing power.
+              </p>
+            </div>
+          )}
 
           {/* Educational Concept Section */}
           <div className="p-6 rounded-2xl border border-border-navy bg-navy-card/45 space-y-4">

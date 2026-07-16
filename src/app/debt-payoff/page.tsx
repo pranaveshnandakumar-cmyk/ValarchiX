@@ -15,7 +15,7 @@ interface Debt {
 
 let uid = 10;
 
-function simulatePayoff(debts: Debt[], strategy: "snowball" | "avalanche", extraPayment: number) {
+function simulatePayoff(debts: Debt[], strategy: "snowball" | "avalanche", extraPayment: number, adjustInflation: boolean, inflation: number) {
   // Deep copy
   let active = debts.filter(d => d.balance > 0).map(d => ({ ...d, balance: d.balance }));
 
@@ -29,6 +29,7 @@ function simulatePayoff(debts: Debt[], strategy: "snowball" | "avalanche", extra
   let totalInterest = 0;
   let months = 0;
   const MAX_MONTHS = 600;
+  const monthlyInfRate = inflation / 100 / 12;
 
   while (active.length > 0 && months < MAX_MONTHS) {
     months++;
@@ -36,7 +37,7 @@ function simulatePayoff(debts: Debt[], strategy: "snowball" | "avalanche", extra
     active.forEach(d => {
       const interest = d.balance * (d.rate / 100 / 12);
       d.balance += interest;
-      totalInterest += interest;
+      totalInterest += adjustInflation ? (interest / Math.pow(1 + monthlyInfRate, months)) : interest;
     });
 
     // Apply min payments to all
@@ -64,6 +65,9 @@ export default function DebtPayoffCalculator() {
   const [mounted, setMounted] = useState(false);
   const [strategy, setStrategy] = useState<"snowball" | "avalanche">("avalanche");
   const [extraPayment, setExtraPayment] = useState(5000);
+  const [adjustInflation, setAdjustInflation] = useState(true);
+  const [inflation, setInflation] = useState(5.09);
+  const [rates, setRates] = useState({ repoRate: 6.50, bondYield10Y: 6.95, inflationRate: 5.09 });
 
   const [debts, setDebts] = useState<Debt[]>([
     { id: 1, name: "Credit Card", balance: 100000, rate: 36, minPayment: 3000 },
@@ -71,7 +75,16 @@ export default function DebtPayoffCalculator() {
     { id: 3, name: "Car Loan", balance: 500000, rate: 9.5, minPayment: 12000 },
   ]);
 
-  useEffect(() => setMounted(true), []);
+  useEffect(() => {
+    setMounted(true);
+    fetch("/api/rates")
+      .then((res) => res.json())
+      .then((data) => {
+        setRates(data);
+        setInflation(data.inflationRate);
+      })
+      .catch((err) => console.error("Error loading rates", err));
+  }, []);
 
   const addDebt = () => setDebts(p => [...p, { id: ++uid, name: "", balance: 100000, rate: 12, minPayment: 3000 }]);
   const removeDebt = (id: number) => setDebts(p => p.filter(d => d.id !== id));
@@ -79,8 +92,8 @@ export default function DebtPayoffCalculator() {
     setDebts(p => p.map(d => d.id === id ? { ...d, [field]: val } : d));
 
   const { snowball, avalanche, chartData, totalBalance } = useMemo(() => {
-    const snowball = simulatePayoff(debts, "snowball", extraPayment);
-    const avalanche = simulatePayoff(debts, "avalanche", extraPayment);
+    const snowball = simulatePayoff(debts, "snowball", extraPayment, adjustInflation, inflation);
+    const avalanche = simulatePayoff(debts, "avalanche", extraPayment, adjustInflation, inflation);
     const totalBalance = debts.reduce((s, d) => s + d.balance, 0);
     const totalMin = debts.reduce((s, d) => s + d.minPayment, 0);
 
@@ -90,7 +103,7 @@ export default function DebtPayoffCalculator() {
     ];
 
     return { snowball, avalanche, chartData, totalBalance, totalMin };
-  }, [debts, extraPayment]);
+  }, [debts, extraPayment, adjustInflation, inflation]);
 
   const fmt = (v: number) =>
     new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(v);
@@ -160,13 +173,57 @@ export default function DebtPayoffCalculator() {
             <h2 className="text-sm font-bold text-white">Extra Monthly Payment</h2>
             <NumericInput value={extraPayment} onChange={setExtraPayment} min={0} max={500000} step={500} type="currency" />
             <p className="text-[9.5px] text-muted-grey">Amount you can pay above all minimum payments combined. This is the engine of both strategies.</p>
+
+            {/* Inflation Toggle */}
+            <div className="space-y-2 border-t border-border-navy/60 pt-4 flex items-center justify-between">
+              <label htmlFor="adjust-inflation" className="text-xs font-semibold text-muted-grey cursor-pointer flex items-center gap-1">
+                Adjust Interest for Inflation
+                <span className="text-muted-grey/60 cursor-help inline-flex" title="Reduces the future interest paid by the inflation rate to show its value in today's purchasing power."><HelpCircle size={12} /></span>
+              </label>
+              <input
+                id="adjust-inflation"
+                type="checkbox"
+                checked={adjustInflation}
+                onChange={(e) => setAdjustInflation(e.target.checked)}
+                className="w-4 h-4 accent-emerald cursor-pointer rounded"
+              />
+            </div>
+
+            {adjustInflation && (
+              <div className="space-y-2 border-t border-border-navy/60 pt-4 animate-fadeIn">
+                <div className="flex justify-between items-center text-xs font-semibold">
+                  <span className="text-muted-grey">Expected Inflation Rate</span>
+                  <span className="text-emerald font-bold">{inflation}%</span>
+                </div>
+                <input
+                  type="range"
+                  min={2}
+                  max={15}
+                  step={0.1}
+                  value={inflation}
+                  onChange={(e) => setInflation(Number(e.target.value))}
+                  className="w-full accent-emerald bg-navy-bg h-1 rounded-lg cursor-pointer"
+                />
+                <div className="flex justify-between text-[10px] text-muted-grey">
+                  <span>2%</span>
+                  <span>15%</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setInflation(rates.inflationRate)}
+                  className="text-[9px] text-left text-emerald/80 hover:text-emerald block mt-1 hover:underline cursor-pointer font-semibold animate-fadeIn"
+                >
+                  CPI Inflation Baseline ({rates.inflationRate}%)
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
         {/* Results */}
         <div className="lg:col-span-2 space-y-6">
           {/* Strategy selector + winner */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {[
               { key: "avalanche" as const, label: "🏔️ Avalanche", sub: "Highest interest rate first", months: avalanche.months, interest: avalanche.totalInterest, winner: interestSaved > 0 },
               { key: "snowball" as const, label: "⛄ Snowball", sub: "Lowest balance first", months: snowball.months, interest: snowball.totalInterest, winner: interestSaved < 0 },
@@ -179,7 +236,7 @@ export default function DebtPayoffCalculator() {
                 </div>
                 <p className="text-[10px] text-muted-grey">{s.sub}</p>
                 <p className="text-xs font-bold text-white mt-2">{s.months} months to debt-free</p>
-                <p className="text-[10px] text-red-400">Total interest: {fmt(s.interest)}</p>
+                <p className="text-[10px] text-red-400">{adjustInflation ? "Total interest (Real):" : "Total interest:"} {fmt(s.interest)}</p>
               </button>
             ))}
           </div>
@@ -190,7 +247,7 @@ export default function DebtPayoffCalculator() {
               <Zap className="text-emerald shrink-0" size={24} />
               <div>
                 <p className="text-sm font-bold text-white">
-                  Avalanche saves <span className="text-emerald">{fmt(Math.abs(interestSaved))}</span> in interest
+                  Avalanche saves <span className="text-emerald">{fmt(Math.abs(interestSaved))}</span> in {adjustInflation ? "real interest" : "interest"}
                   {Math.abs(monthsSaved) > 0 && <> and <span className="text-emerald">{Math.abs(monthsSaved)} months</span> vs Snowball</>}
                 </p>
                 <p className="text-[10px] text-muted-grey">But Snowball gives faster early wins, boosting motivation. Choose based on your psychology.</p>
@@ -200,7 +257,7 @@ export default function DebtPayoffCalculator() {
 
           {/* Chart */}
           <div className="p-6 rounded-2xl border border-border-navy bg-navy-card/20 space-y-3">
-            <h3 className="text-xs font-bold text-white uppercase tracking-wider">Strategy Comparison</h3>
+            <h3 className="text-xs font-bold text-white uppercase tracking-wider">Strategy Comparison {adjustInflation ? "(Adjusted for Inflation)" : "(Nominal)"}</h3>
             <div className="h-[220px]">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={chartData} margin={{ top: 5, right: 5, left: 0, bottom: 5 }}>
@@ -243,6 +300,7 @@ export default function DebtPayoffCalculator() {
           <div className="text-xs text-muted-grey pt-4 border-t border-border-navy/60 animate-fadeIn">
             <div className="bg-navy-bg/50 p-3 rounded-xl font-mono space-y-1">
               <p>Each month: Balance += Balance × (rate/12)</p>
+              {adjustInflation && <p>Real Interest accrued at month m = Nominal Interest ÷ (1 + monthly_inflation)^m</p>}
               <p>Then: Balance −= min payment</p>
               <p>Extra payment applied to priority debt (per strategy)</p>
               <p>Simulation runs until all balances reach zero</p>

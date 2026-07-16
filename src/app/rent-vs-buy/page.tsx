@@ -181,7 +181,7 @@ export default function RentVsBuyCalculator() {
           </div>
 
           {/* Summary Cards */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="p-4 rounded-xl border border-blue-500/30 bg-blue-500/5 space-y-2">
               <h3 className="text-xs font-bold text-blue-400">🏠 Renting Scenario</h3>
               <div className="space-y-1 text-[11px]">

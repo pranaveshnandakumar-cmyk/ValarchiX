@@ -11,6 +11,8 @@ export default function CostOfDelayCalculator() {
   const [monthlySIP, setMonthlySIP] = useState(10000);
   const [rate, setRate] = useState(12);
   const [totalYears, setTotalYears] = useState(30);
+  const [inflation, setInflation] = useState(6);
+  const [adjustInflation, setAdjustInflation] = useState(true);
 
   useEffect(() => setMounted(true), []);
 
@@ -25,34 +27,52 @@ export default function CostOfDelayCalculator() {
     const colors = ["#22c55e", "#f59e0b", "#ef4444"];
     const labels = ["Start Today", "Delay 3 Years", "Delay 5 Years"];
 
-    const maxLen = totalYears + 1;
     const chartData: any[] = [];
+    const infRate = inflation / 100;
 
     for (let y = 1; y <= totalYears; y++) {
       const entry: any = { year: `Yr ${y}` };
       delays.forEach((delay, i) => {
         const yearsInvesting = Math.max(0, y - delay);
-        entry[labels[i]] = yearsInvesting > 0 ? Math.round(sipFV(monthlySIP, rate, yearsInvesting)) : 0;
+        let val = yearsInvesting > 0 ? sipFV(monthlySIP, rate, yearsInvesting) : 0;
+        if (adjustInflation) {
+          val = val / Math.pow(1 + infRate, y);
+        }
+        entry[labels[i]] = Math.round(val);
       });
       chartData.push(entry);
     }
 
     const scenarios = delays.map((delay, i) => {
       const yearsActual = Math.max(0, totalYears - delay);
-      const corpus = sipFV(monthlySIP, rate, yearsActual);
-      const invested = monthlySIP * 12 * yearsActual;
+      const nominalCorpus = sipFV(monthlySIP, rate, yearsActual);
+      const corpus = adjustInflation
+        ? nominalCorpus / Math.pow(1 + infRate, totalYears)
+        : nominalCorpus;
+      
+      const nominalInvested = monthlySIP * 12 * yearsActual;
+      const invested = adjustInflation
+        ? nominalInvested / Math.pow(1 + infRate, totalYears)
+        : nominalInvested;
+
+      const nominalTodayCorpus = sipFV(monthlySIP, rate, totalYears);
+      const todayCorpus = adjustInflation
+        ? nominalTodayCorpus / Math.pow(1 + infRate, totalYears)
+        : nominalTodayCorpus;
+
       return {
         label: labels[i],
         color: colors[i],
         delay,
         corpus: Math.round(corpus),
         invested: Math.round(invested),
-        wealthLost: i === 0 ? 0 : Math.round(sipFV(monthlySIP, rate, totalYears) - corpus),
+        wealthLost: i === 0 ? 0 : Math.round(todayCorpus - corpus),
+        nominalCorpus: Math.round(nominalCorpus),
       };
     });
 
     return { chartData, scenarios };
-  }, [monthlySIP, rate, totalYears]);
+  }, [monthlySIP, rate, totalYears, inflation, adjustInflation]);
 
   const fmt = (v: number) =>
     new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(v);
@@ -105,22 +125,44 @@ export default function CostOfDelayCalculator() {
             <input type="range" min={10} max={45} step={1} value={totalYears} onChange={(e) => setTotalYears(Number(e.target.value))} className="w-full accent-emerald bg-navy-bg h-1 rounded-lg cursor-pointer" />
           </div>
 
+          <div className="space-y-4 border-t border-border-navy/60 pt-4">
+            <div className="flex items-center justify-between">
+              <label htmlFor="adjust-inflation" className="text-xs font-semibold text-muted-grey cursor-pointer">Adjust for Inflation</label>
+              <input
+                id="adjust-inflation"
+                type="checkbox"
+                checked={adjustInflation}
+                onChange={(e) => setAdjustInflation(e.target.checked)}
+                className="w-4 h-4 accent-emerald cursor-pointer"
+              />
+            </div>
+            {adjustInflation && (
+              <div className="space-y-2">
+                <div className="flex justify-between text-xs font-semibold">
+                  <span className="text-muted-grey">Inflation Rate (%)</span>
+                  <span className="text-red-400 font-bold">{inflation}%</span>
+                </div>
+                <input type="range" min={2} max={15} step={0.5} value={inflation} onChange={(e) => setInflation(Number(e.target.value))} className="w-full accent-emerald bg-navy-bg h-1 rounded-lg cursor-pointer" />
+              </div>
+            )}
+          </div>
+
           {/* Wealth lost callout */}
           <div className="p-3 rounded-xl border border-red-500/30 bg-red-500/5 space-y-1">
-            <p className="text-[10px] font-bold text-red-400 uppercase">Wealth Lost by 3-Year Delay</p>
+            <p className="text-[10px] font-bold text-red-400 uppercase">Real Wealth Lost (3Y Delay)</p>
             <p className="text-xl font-extrabold text-red-400">{fmtL(scenarios[1].wealthLost)}</p>
-            <p className="text-[9px] text-muted-grey">You lose this by waiting just 3 years</p>
+            <p className="text-[9px] text-muted-grey">{adjustInflation ? "In today's purchasing power" : "Nominal value lost"}</p>
           </div>
           <div className="p-3 rounded-xl border border-amber-500/30 bg-amber-500/5 space-y-1">
-            <p className="text-[10px] font-bold text-amber-400 uppercase">Wealth Lost by 5-Year Delay</p>
+            <p className="text-[10px] font-bold text-amber-400 uppercase">Real Wealth Lost (5Y Delay)</p>
             <p className="text-xl font-extrabold text-amber-400">{fmtL(scenarios[2].wealthLost)}</p>
-            <p className="text-[9px] text-muted-grey">By delaying just 5 years more</p>
+            <p className="text-[9px] text-muted-grey">{adjustInflation ? "In today's purchasing power" : "Nominal value lost"}</p>
           </div>
         </div>
 
         <div className="lg:col-span-2 space-y-6">
           {/* Scenario Cards */}
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             {scenarios.map((s) => (
               <div key={s.label} className="p-4 rounded-xl border border-border-navy bg-navy-card/45">
                 <div className="w-2.5 h-2.5 rounded-full mb-2" style={{ background: s.color }} />

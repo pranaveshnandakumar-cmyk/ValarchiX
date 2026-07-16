@@ -17,6 +17,10 @@ export default function EmergencyFundCalculator() {
   const [discretionary, setDiscretionary] = useState(15000); // lifestyle, shopping
   const [debt, setDebt] = useState(10000);                   // EMIs, premiums
   const [targetMonths, setTargetMonths] = useState(6);       // 3 = minimum, 6 = ideal
+  const [adjustInflation, setAdjustInflation] = useState(true);
+  const [inflation, setInflation] = useState(5.09);
+  const [projectionYears, setProjectionYears] = useState(3);
+  const [rates, setRates] = useState({ repoRate: 6.50, bondYield10Y: 6.95, inflationRate: 5.09 });
 
   const calculations = useMemo(() => {
     // Total monthly expense (whole family) — emergency fund must cover this in full
@@ -31,9 +35,23 @@ export default function EmergencyFundCalculator() {
     // User-selected target
     const targetCorpus = totalMonthlyExpense * targetMonths;
 
+    // Future inflated target values
+    const inf = inflation / 100;
+    const futureTargetCorpus = adjustInflation ? Math.round(targetCorpus * Math.pow(1 + inf, projectionYears)) : targetCorpus;
+    const futureMinCorpus = adjustInflation ? Math.round(minCorpus * Math.pow(1 + inf, projectionYears)) : minCorpus;
+    const futureIdealCorpus = adjustInflation ? Math.round(idealCorpus * Math.pow(1 + inf, projectionYears)) : idealCorpus;
+
+    // Safe return yield on emergency fund savings (like sweep-in FD at 6% p.a.)
+    const safeReturn = 0.06; // 6%
+    const r = safeReturn / 12;
+    const n = projectionYears * 12;
+    const monthlySavingsNeeded = (adjustInflation && n > 0)
+      ? Math.round((futureTargetCorpus * r) / (Math.pow(1 + r, n) - 1))
+      : Math.round(targetCorpus / (n > 0 ? n : 12));
+
     // Split recommended allocations
-    const cashAllocation = Math.round(targetCorpus * 0.20);        // 20% instant-access savings
-    const liquidFundAllocation = Math.round(targetCorpus * 0.80);  // 80% sweep FDs / liquid funds
+    const cashAllocation = Math.round(futureTargetCorpus * 0.20);        // 20% instant-access savings
+    const liquidFundAllocation = Math.round(futureTargetCorpus * 0.80);  // 80% sweep FDs / liquid funds
 
     const pieData = [
       { name: "Savings Account (20%)", value: cashAllocation, color: "#3b82f6" },
@@ -45,11 +63,15 @@ export default function EmergencyFundCalculator() {
       targetCorpus,
       minCorpus,
       idealCorpus,
+      futureTargetCorpus,
+      futureMinCorpus,
+      futureIdealCorpus,
+      monthlySavingsNeeded,
       cashAllocation,
       liquidFundAllocation,
       pieData
     };
-  }, [essential, discretionary, debt, targetMonths]);
+  }, [essential, discretionary, debt, targetMonths, inflation, adjustInflation, projectionYears]);
 
   const formatCurrency = (val: number) => {
     return new Intl.NumberFormat("en-IN", {
@@ -62,6 +84,13 @@ export default function EmergencyFundCalculator() {
   const [mounted, setMounted] = useState(false);
   useEffect(() => {
     setMounted(true);
+    fetch("/api/rates")
+      .then((res) => res.json())
+      .then((data) => {
+        setRates(data);
+        setInflation(data.inflationRate);
+      })
+      .catch((err) => console.error("Error loading rates", err));
   }, []);
 
   if (!mounted) {
@@ -250,6 +279,76 @@ export default function EmergencyFundCalculator() {
                 ))}
               </div>
             </div>
+
+            {/* Inflation Projection Controls */}
+            <div className="space-y-3 border-t border-border-navy/60 pt-4">
+              <div className="flex items-center justify-between">
+                <label htmlFor="adjust-inflation" className="text-xs font-semibold text-muted-grey cursor-pointer flex items-center gap-1">
+                  Project for Inflation
+                  <span className="text-muted-grey/60 cursor-help inline-flex" title="Inflates the target corpus based on the time horizon to reflect future prices."><HelpCircle size={12} /></span>
+                </label>
+                <input
+                  id="adjust-inflation"
+                  type="checkbox"
+                  checked={adjustInflation}
+                  onChange={(e) => setAdjustInflation(e.target.checked)}
+                  className="w-4 h-4 accent-emerald cursor-pointer rounded"
+                />
+              </div>
+            </div>
+
+            {adjustInflation && (
+              <div className="space-y-4 border-t border-border-navy/60 pt-4 animate-fadeIn">
+                {/* Horizon slider */}
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center text-xs font-semibold">
+                    <span className="text-muted-grey">Years to Build Fund</span>
+                    <span className="text-emerald font-bold">{projectionYears} yrs</span>
+                  </div>
+                  <input
+                    type="range"
+                    min={1}
+                    max={5}
+                    step={1}
+                    value={projectionYears}
+                    onChange={(e) => setProjectionYears(Number(e.target.value))}
+                    className="w-full accent-emerald bg-navy-bg h-1 rounded-lg cursor-pointer"
+                  />
+                  <div className="flex justify-between text-[10px] text-muted-grey">
+                    <span>1 yr</span>
+                    <span>5 yrs</span>
+                  </div>
+                </div>
+
+                {/* Inflation rate slider */}
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center text-xs font-semibold">
+                    <span className="text-muted-grey">Expected Inflation Rate</span>
+                    <span className="text-emerald font-bold">{inflation}%</span>
+                  </div>
+                  <input
+                    type="range"
+                    min={2}
+                    max={15}
+                    step={0.1}
+                    value={inflation}
+                    onChange={(e) => setInflation(Number(e.target.value))}
+                    className="w-full accent-emerald bg-navy-bg h-1 rounded-lg cursor-pointer"
+                  />
+                  <div className="flex justify-between text-[10px] text-muted-grey">
+                    <span>2%</span>
+                    <span>15%</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setInflation(rates.inflationRate)}
+                    className="text-[9px] text-left text-emerald/80 hover:text-emerald block mt-1 hover:underline cursor-pointer"
+                  >
+                    CPI Inflation Baseline ({rates.inflationRate}%)
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -258,35 +357,63 @@ export default function EmergencyFundCalculator() {
           {/* Key Metrics Grid */}
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             <div className="p-4 rounded-xl border border-border-navy bg-navy-card/45">
-              <span className="text-[10px] uppercase font-bold text-muted-grey block">Your Target Fund</span>
+              <span className="text-[10px] uppercase font-bold text-muted-grey block">
+                {adjustInflation ? "Future Target Fund" : "Your Target Fund"}
+              </span>
               <p className="text-xl font-bold text-emerald mt-1">
-                {formatCurrency(calculations.targetCorpus)}
+                {formatCurrency(calculations.futureTargetCorpus)}
               </p>
               <span className="text-[9px] text-muted-grey block mt-0.5 leading-none">
-                {targetMonths}M × {formatCurrency(calculations.totalMonthlyExpense)}/mo
+                {adjustInflation ? `Today's value: ${formatCurrency(calculations.targetCorpus)}` : `${targetMonths}M × ${formatCurrency(calculations.totalMonthlyExpense)}/mo`}
               </span>
             </div>
 
             <div className="p-4 rounded-xl border border-border-navy bg-navy-card/45">
-              <span className="text-[10px] uppercase font-bold text-muted-grey block">Minimum Floor (3M)</span>
+              <span className="text-[10px] uppercase font-bold text-muted-grey block">
+                {adjustInflation ? "Future Minimum Floor" : "Minimum Floor (3M)"}
+              </span>
               <p className="text-xl font-bold text-amber-400 mt-1">
-                {formatCurrency(calculations.minCorpus)}
+                {formatCurrency(calculations.futureMinCorpus)}
               </p>
               <span className="text-[9px] text-muted-grey block mt-0.5 leading-none">
-                Never go below this
+                {adjustInflation ? `Today's value: ${formatCurrency(calculations.minCorpus)}` : "Never go below this"}
               </span>
             </div>
 
             <div className="p-4 rounded-xl border border-border-navy bg-navy-card/45 col-span-2 md:col-span-1">
-              <span className="text-[10px] uppercase font-bold text-emerald block">Ideal Target (6M)</span>
+              <span className="text-[10px] uppercase font-bold text-emerald block">
+                {adjustInflation ? "Future Ideal Target" : "Ideal Target (6M)"}
+              </span>
               <p className="text-xl font-bold text-emerald glow-emerald mt-1">
-                {formatCurrency(calculations.idealCorpus)}
+                {formatCurrency(calculations.futureIdealCorpus)}
               </p>
               <span className="text-[9px] text-muted-grey block mt-0.5 leading-none">
-                Full peace-of-mind buffer
+                {adjustInflation ? `Today's value: ${formatCurrency(calculations.idealCorpus)}` : "Full peace-of-mind buffer"}
               </span>
             </div>
           </div>
+
+          {/* Monthly Savings Goal Banner */}
+          {adjustInflation && (
+            <div className="p-4 rounded-xl border border-emerald/20 bg-emerald/5 flex justify-between items-center text-xs font-semibold animate-fadeIn">
+              <div>
+                <span className="text-[10px] text-muted-grey uppercase block">Monthly Savings Goal</span>
+                <p className="text-base font-bold text-white mt-0.5">
+                  Save <span className="text-emerald font-extrabold">{formatCurrency(calculations.monthlySavingsNeeded)}</span> / month
+                </p>
+                <span className="text-[9px] text-muted-grey leading-none">
+                  Accumulated in liquid sweep FDs at 6% yield over {projectionYears} years
+                </span>
+              </div>
+              <div className="text-right">
+                <span className="text-[10px] text-muted-grey uppercase block">Future Inflated Target</span>
+                <p className="text-sm font-bold text-white mt-0.5">{formatCurrency(calculations.futureTargetCorpus)}</p>
+                <span className="text-[9px] text-muted-grey leading-none">
+                  For {targetMonths} months coverage
+                </span>
+              </div>
+            </div>
+          )}
 
           {/* Allocation visual donut chart */}
           <div className="p-6 rounded-2xl border border-border-navy bg-navy-card/20 grid md:grid-cols-5 gap-6 items-center">
@@ -330,7 +457,7 @@ export default function EmergencyFundCalculator() {
               </ResponsiveContainer>
               <div className="absolute inset-0 flex flex-col justify-center items-center pointer-events-none">
                 <span className="text-[10px] text-muted-grey uppercase font-bold">Total Reserve</span>
-                <span className="text-sm font-extrabold text-white">{formatCurrency(calculations.targetCorpus)}</span>
+                <span className="text-sm font-extrabold text-white">{formatCurrency(calculations.futureTargetCorpus)}</span>
               </div>
             </div>
           </div>
@@ -394,14 +521,27 @@ export default function EmergencyFundCalculator() {
                       Total Monthly Expense = Essential + Discretionary + Debt_EMIs
                     </p>
                     <p>
-                      Minimum Emergency Fund = Total Monthly Expense × 3
+                      Minimum Emergency Fund (Nominal) = Total Monthly Expense × 3
                     </p>
                     <p>
-                      Ideal Emergency Fund = Total Monthly Expense × 6
+                      Ideal Emergency Fund (Nominal) = Total Monthly Expense × 6
                     </p>
                     <p>
-                      Your Target = Total Monthly Expense × {targetMonths}
+                      Your Target (Nominal) = Total Monthly Expense × {targetMonths}
                     </p>
+                    {adjustInflation && (
+                      <>
+                        <p>
+                          Future Inflated Target = Your Target × (1 + Inflation Rate)^Years
+                        </p>
+                        <p>
+                          Monthly Savings Needed = (Future Target × r) / ((1 + r)^n − 1)
+                        </p>
+                        <p>
+                          where r = 6% / 12 (0.005), n = Years × 12
+                        </p>
+                      </>
+                    )}
                   </div>
                 </div>
 

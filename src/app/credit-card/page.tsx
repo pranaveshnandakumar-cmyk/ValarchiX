@@ -12,10 +12,24 @@ export default function CreditCardPayoffCalculator() {
   const [annualRate, setAnnualRate] = useState(36);
   const [paymentMode, setPaymentMode] = useState<"minimum" | "fixed" | "aggressive">("fixed");
   const [fixedPayment, setFixedPayment] = useState(5000);
+  const [adjustInflation, setAdjustInflation] = useState(true);
+  const [inflation, setInflation] = useState(5.09);
+  const [rates, setRates] = useState({ repoRate: 6.50, bondYield10Y: 6.95, inflationRate: 5.09 });
 
-  useEffect(() => setMounted(true), []);
+  useEffect(() => {
+    setMounted(true);
+    fetch("/api/rates")
+      .then((res) => res.json())
+      .then((data) => {
+        setRates(data);
+        setInflation(data.inflationRate);
+      })
+      .catch((err) => console.error("Error loading rates", err));
+  }, []);
 
-  const { scenarios } = useMemo(() => {
+  const { scenarios, chartData } = useMemo(() => {
+    const monthlyInfRate = inflation / 100 / 12;
+
     const simulate = (monthlyPayment: number | "min") => {
       let bal = balance;
       let totalInterest = 0;
@@ -26,12 +40,12 @@ export default function CreditCardPayoffCalculator() {
       while (bal > 0 && months < MAX) {
         months++;
         const interest = bal * (annualRate / 100 / 12);
-        totalInterest += interest;
+        totalInterest += adjustInflation ? (interest / Math.pow(1 + monthlyInfRate, months)) : interest;
         bal += interest;
 
         const payment = monthlyPayment === "min" ? Math.max(bal * 0.02, 500) : monthlyPayment;
         bal = Math.max(0, bal - payment);
-        chartPoints.push(Math.round(bal));
+        chartPoints.push(Math.round(adjustInflation ? (bal / Math.pow(1 + monthlyInfRate, months)) : bal));
       }
 
       return { months, totalInterest: Math.round(totalInterest), chartPoints };
@@ -58,7 +72,7 @@ export default function CreditCardPayoffCalculator() {
       ],
       chartData,
     };
-  }, [balance, annualRate, fixedPayment]);
+  }, [balance, annualRate, fixedPayment, inflation, adjustInflation]);
 
   function fmt(v: number) {
     return new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(v);
@@ -114,6 +128,50 @@ export default function CreditCardPayoffCalculator() {
             <p className="text-xl font-extrabold text-red-400">{fmt(Math.round(balance * annualRate / 100 / 12))}</p>
             <p className="text-[9px] text-muted-grey">Just to stay in place each month</p>
           </div>
+
+          {/* Inflation Toggle */}
+          <div className="space-y-2 border-t border-border-navy/60 pt-4 flex items-center justify-between">
+            <label htmlFor="adjust-inflation" className="text-xs font-semibold text-muted-grey cursor-pointer flex items-center gap-1">
+              Adjust for Inflation
+              <span className="text-muted-grey/60 cursor-help inline-flex" title="Reduces the future remaining balance and interest paid to show their value in today's purchasing power."><HelpCircle size={12} /></span>
+            </label>
+            <input
+              id="adjust-inflation"
+              type="checkbox"
+              checked={adjustInflation}
+              onChange={(e) => setAdjustInflation(e.target.checked)}
+              className="w-4 h-4 accent-emerald cursor-pointer rounded"
+            />
+          </div>
+
+          {adjustInflation && (
+            <div className="space-y-2 border-t border-border-navy/60 pt-4 animate-fadeIn">
+              <div className="flex justify-between items-center text-xs font-semibold">
+                <span className="text-muted-grey">Expected Inflation Rate</span>
+                <span className="text-emerald font-bold">{inflation}%</span>
+              </div>
+              <input
+                type="range"
+                min={2}
+                max={15}
+                step={0.1}
+                value={inflation}
+                onChange={(e) => setInflation(Number(e.target.value))}
+                className="w-full accent-emerald bg-navy-bg h-1 rounded-lg cursor-pointer"
+              />
+              <div className="flex justify-between text-[10px] text-muted-grey">
+                <span>2%</span>
+                <span>15%</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setInflation(rates.inflationRate)}
+                className="text-[9px] text-left text-emerald/80 hover:text-emerald block mt-1 hover:underline cursor-pointer font-semibold animate-fadeIn"
+              >
+                CPI Inflation Baseline ({rates.inflationRate}%)
+              </button>
+            </div>
+          )}
         </div>
 
         <div className="lg:col-span-2 space-y-6">
@@ -144,16 +202,22 @@ export default function CreditCardPayoffCalculator() {
 
           {/* Chart */}
           <div className="p-6 rounded-2xl border border-border-navy bg-navy-card/20 space-y-3">
-            <h3 className="text-xs font-bold text-white uppercase tracking-wider">Balance Paydown — 3 Strategies</h3>
+            <h3 className="text-xs font-bold text-white uppercase tracking-wider">
+              Balance Paydown — 3 Strategies {adjustInflation ? "(Adjusted for Inflation)" : "(Nominal)"}
+            </h3>
             <p className="text-[10px] text-muted-grey">Truncated to first 60 months for readability</p>
             <div className="h-[260px]">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart
-                  data={scenarios[0].months > 0 ? Array.from({ length: Math.min(60, scenarios[0].months) }, (_, i) => ({
-                    month: `M${i + 1}`,
-                    "Minimum Payment": Math.max(0, balance * Math.pow(1 + annualRate / 100 / 12, i) * Math.pow(0.98, i)),
-                    [`Fixed ${fmt(fixedPayment)}`]: Math.max(0, balance * Math.pow(1 + annualRate / 100 / 12, i) - fixedPayment * ((Math.pow(1 + annualRate / 100 / 12, i) - 1) / (annualRate / 100 / 12))),
-                  })) : []}
+                  data={scenarios[0].months > 0 ? Array.from({ length: Math.min(60, scenarios[0].months) }, (_, i) => {
+                    const monthlyInfRate = inflation / 100 / 12;
+                    const discountFactor = adjustInflation ? Math.pow(1 + monthlyInfRate, i) : 1;
+                    return {
+                      month: `M${i + 1}`,
+                      "Minimum Payment": Math.max(0, balance * Math.pow(1 + annualRate / 100 / 12, i) * Math.pow(0.98, i)) / discountFactor,
+                      [`Fixed ${fmt(fixedPayment)}`]: (Math.max(0, balance * Math.pow(1 + annualRate / 100 / 12, i) - fixedPayment * ((Math.pow(1 + annualRate / 100 / 12, i) - 1) / (annualRate / 100 / 12)))) / discountFactor,
+                    };
+                  }) : []}
                   margin={{ top: 5, right: 5, left: 0, bottom: 5 }}
                 >
                   <defs>
@@ -195,6 +259,7 @@ export default function CreditCardPayoffCalculator() {
             <div className="bg-navy-bg/50 p-3 rounded-xl font-mono space-y-1">
               <p>Monthly Interest = Balance × (Annual Rate / 12)</p>
               <p>New Balance = (Balance + Interest) − Payment</p>
+              {adjustInflation && <p>Real Balance at month m = Nominal Balance ÷ (1 + monthly_inflation)^m</p>}
               <p>Minimum payment = max(2% of balance, ₹500)</p>
               <p>Months to payoff = iterations until balance ≤ 0</p>
             </div>
