@@ -303,7 +303,7 @@ export default function EmergencyFundCalculator() {
                 <div className="space-y-2">
                   <div className="flex justify-between items-center text-xs font-semibold">
                     <span className="text-muted-grey">Years to Build Fund</span>
-                    <span className="text-emerald font-bold">{projectionYears} yrs</span>
+                    <NumericInput value={projectionYears} onChange={setProjectionYears} min={1} max={10} step={1} type="years" />
                   </div>
                   <input
                     type="range"
@@ -324,7 +324,7 @@ export default function EmergencyFundCalculator() {
                 <div className="space-y-2">
                   <div className="flex justify-between items-center text-xs font-semibold">
                     <span className="text-muted-grey">Expected Inflation Rate</span>
-                    <span className="text-emerald font-bold">{inflation}%</span>
+                    <NumericInput value={inflation} onChange={setInflation} min={0} max={25} step={0.1} type="percent" />
                   </div>
                   <input
                     type="range"

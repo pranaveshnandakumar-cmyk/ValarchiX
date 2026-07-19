@@ -81,26 +81,26 @@ export default function InflationCalculator() {
           </div>
 
           <div className="space-y-2">
-            <div className="flex justify-between text-xs font-semibold">
+            <div className="flex justify-between items-center text-xs font-semibold">
               <span className="text-muted-grey">Inflation Rate (%)</span>
-              <span className="text-red-400">{inflation}%</span>
+              <NumericInput value={inflation} onChange={setInflation} min={0} max={25} step={0.1} type="percent" className="text-red-400 focus-within:border-red-400/50" />
             </div>
             <input type="range" min={2} max={15} step={0.1} value={inflation} onChange={(e) => setInflation(Number(e.target.value))} className="w-full accent-emerald bg-navy-bg h-1 rounded-lg cursor-pointer" />
             <p className="text-[9.5px] text-muted-grey">India CPI inflation averages ~5–6%</p>
           </div>
 
           <div className="space-y-2">
-            <div className="flex justify-between text-xs font-semibold">
+            <div className="flex justify-between items-center text-xs font-semibold">
               <span className="text-muted-grey">Investment Return (%)</span>
-              <span className="text-emerald">{investReturn}%</span>
+              <NumericInput value={investReturn} onChange={setInvestReturn} min={1} max={50} step={0.5} type="percent" />
             </div>
             <input type="range" min={4} max={20} step={0.5} value={investReturn} onChange={(e) => setInvestReturn(Number(e.target.value))} className="w-full accent-emerald bg-navy-bg h-1 rounded-lg cursor-pointer" />
           </div>
 
           <div className="space-y-2">
-            <div className="flex justify-between text-xs font-semibold">
+            <div className="flex justify-between items-center text-xs font-semibold">
               <span className="text-muted-grey">Years</span>
-              <span className="text-emerald">{years} yrs</span>
+              <NumericInput value={years} onChange={setYears} min={1} max={50} step={1} type="years" />
             </div>
             <input type="range" min={1} max={40} step={1} value={years} onChange={(e) => setYears(Number(e.target.value))} className="w-full accent-emerald bg-navy-bg h-1 rounded-lg cursor-pointer" />
           </div>

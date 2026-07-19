@@ -157,29 +157,50 @@ export default function FireCalculator() {
             <h2 className="text-lg font-bold text-white">FIRE Parameters</h2>
 
             {/* Current Age & Target Age */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-4">
               <div className="space-y-2">
-                <label className="text-[10px] font-bold text-muted-grey uppercase block">Current Age</label>
-                <NumericInput
-                  value={currentAge}
-                  onChange={setCurrentAge}
+                <div className="flex justify-between items-center text-xs font-semibold">
+                  <span className="text-muted-grey">Current Age</span>
+                  <NumericInput
+                    value={currentAge}
+                    onChange={(val) => setCurrentAge(Math.max(18, Math.min(targetAge - 1, val)))}
+                    min={18}
+                    max={70}
+                    step={1}
+                    type="years"
+                  />
+                </div>
+                <input
+                  type="range"
                   min={18}
-                  max={70}
+                  max={60}
                   step={1}
-                  type="years"
-                  className="w-full"
+                  value={currentAge}
+                  onChange={(e) => setCurrentAge(Math.max(18, Math.min(targetAge - 1, Number(e.target.value))))}
+                  className="w-full accent-emerald bg-navy-bg h-1 rounded-lg cursor-pointer"
                 />
               </div>
+
               <div className="space-y-2">
-                <label className="text-[10px] font-bold text-muted-grey uppercase block">Target FIRE Age</label>
-                <NumericInput
-                  value={targetAge}
-                  onChange={setTargetAge}
-                  min={currentAge + 1}
-                  max={80}
+                <div className="flex justify-between items-center text-xs font-semibold">
+                  <span className="text-muted-grey">Target FIRE Age</span>
+                  <NumericInput
+                    value={targetAge}
+                    onChange={(val) => setTargetAge(Math.max(currentAge + 1, Math.min(80, val)))}
+                    min={currentAge + 1}
+                    max={80}
+                    step={1}
+                    type="years"
+                  />
+                </div>
+                <input
+                  type="range"
+                  min={25}
+                  max={75}
                   step={1}
-                  type="years"
-                  className="w-full"
+                  value={targetAge}
+                  onChange={(e) => setTargetAge(Math.max(currentAge + 1, Math.min(80, Number(e.target.value))))}
+                  className="w-full accent-emerald bg-navy-bg h-1 rounded-lg cursor-pointer"
                 />
               </div>
             </div>

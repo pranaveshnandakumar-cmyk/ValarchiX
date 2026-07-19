@@ -385,7 +385,7 @@ export default function LoanEmiCalculator() {
               <div className="space-y-2 border-t border-border-navy/60 pt-4 animate-fadeIn">
                 <div className="flex justify-between items-center text-xs font-semibold">
                   <span className="text-muted-grey">Expected Inflation Rate</span>
-                  <span className="text-emerald font-bold">{inflation}%</span>
+                  <NumericInput value={inflation} onChange={setInflation} min={0} max={25} step={0.1} type="percent" />
                 </div>
                 <input
                   type="range"

@@ -134,13 +134,25 @@ export default function TaxLearningHub() {
 
             {/* Income Input */}
             <div className="space-y-2">
-              <label className="text-xs font-semibold text-muted-grey">Gross Annual Salary / Income</label>
+              <div className="flex justify-between items-center text-xs font-semibold">
+                <span className="text-muted-grey">Gross Annual Salary / Income</span>
+                <NumericInput
+                  value={grossIncome}
+                  onChange={setGrossIncome}
+                  min={0}
+                  max={50000000}
+                  step={25000}
+                  type="currency"
+                />
+              </div>
               <input
-                type="number"
+                type="range"
+                min={300000}
+                max={5000000}
+                step={50000}
                 value={grossIncome}
-                step={25000}
-                onChange={(e) => setGrossIncome(Math.max(0, Number(e.target.value)))}
-                className="w-full glass-input text-base font-bold text-emerald"
+                onChange={(e) => setGrossIncome(Number(e.target.value))}
+                className="w-full accent-emerald bg-navy-bg h-1 rounded-lg cursor-pointer"
               />
               <span className="text-[10px] text-muted-grey block">
                 Includes basic, HRA, special allowances, and other income sources.

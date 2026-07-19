@@ -1,7 +1,6 @@
 {
-  "name": "ValarchiX - Financial Calculators & Education",
+  "name": "ValarchiX - Financial Calculators with infaltion adjusted",
   "short_name": "ValarchiX",
-  "description": "Operating System for Financial Knowledge. Learn. Analyze. Invest Smarter.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#030a16",

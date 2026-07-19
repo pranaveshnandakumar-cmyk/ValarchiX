@@ -130,7 +130,7 @@ export default function LatteFactorCalculator() {
             <div className="space-y-2 border-t border-border-navy/60 pt-4">
               <div className="flex justify-between items-center text-xs font-semibold">
                 <span className="text-muted-grey">Period (Years)</span>
-                <span className="text-emerald font-bold">{years} yrs</span>
+                <NumericInput value={years} onChange={setYears} min={1} max={50} step={1} type="years" />
               </div>
               <input type="range" min={1} max={40} step={1} value={years}
                 onChange={(e) => setYears(Number(e.target.value))}
@@ -141,7 +141,7 @@ export default function LatteFactorCalculator() {
             <div className="space-y-2 border-t border-border-navy/60 pt-4">
               <div className="flex justify-between items-center text-xs font-semibold">
                 <span className="text-muted-grey">Expected Return Rate</span>
-                <span className="text-emerald font-bold">{returnRate}%</span>
+                <NumericInput value={returnRate} onChange={setReturnRate} min={1} max={50} step={0.5} type="percent" />
               </div>
               <input type="range" min={4} max={20} step={0.5} value={returnRate}
                 onChange={(e) => setReturnRate(Number(e.target.value))}
@@ -169,7 +169,7 @@ export default function LatteFactorCalculator() {
               <div className="space-y-2 border-t border-border-navy/60 pt-4 animate-fadeIn">
                 <div className="flex justify-between items-center text-xs font-semibold">
                   <span className="text-muted-grey">Expected Inflation Rate</span>
-                  <span className="text-emerald font-bold">{inflation}%</span>
+                  <NumericInput value={inflation} onChange={setInflation} min={0} max={25} step={0.1} type="percent" />
                 </div>
                 <input
                   type="range"

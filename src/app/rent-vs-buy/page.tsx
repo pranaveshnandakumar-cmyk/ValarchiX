@@ -121,9 +121,9 @@ export default function RentVsBuyCalculator() {
           <div className="p-5 glass-card space-y-5">
             <h2 className="text-base font-bold text-white">Comparison Period</h2>
             <div className="space-y-2">
-              <div className="flex justify-between text-xs font-semibold">
+              <div className="flex justify-between items-center text-xs font-semibold">
                 <span className="text-muted-grey">Years to compare</span>
-                <span className="text-emerald">{years} yrs</span>
+                <NumericInput value={years} onChange={setYears} min={1} max={50} step={1} type="years" />
               </div>
               <input type="range" min={5} max={35} step={1} value={years} onChange={(e) => setYears(Number(e.target.value))} className="w-full accent-emerald bg-navy-bg h-1 rounded-lg cursor-pointer" />
             </div>
@@ -132,13 +132,16 @@ export default function RentVsBuyCalculator() {
           <div className="p-5 glass-card space-y-4">
             <h2 className="text-base font-bold text-blue-400 flex items-center gap-2"><Landmark size={15} /> Renting Parameters</h2>
             {[
-              { label: "Monthly Rent", value: monthlyRent, set: setMonthlyRent, min: 5000, max: 200000, step: 1000, type: "currency" as const },
-              { label: "Annual Rent Increase (%)", value: rentIncrease, set: setRentIncrease, min: 0, max: 20, step: 0.5, type: "number" as const },
-              { label: "Down Payment Return (%)", value: rentInvestmentReturn, set: setRentInvestmentReturn, min: 4, max: 20, step: 0.5, type: "number" as const },
+              { label: "Monthly Rent", value: monthlyRent, set: setMonthlyRent, min: 5000, max: 200000, sliderMin: 5000, sliderMax: 100000, step: 1000, type: "currency" as const },
+              { label: "Annual Rent Increase (%)", value: rentIncrease, set: setRentIncrease, min: 0, max: 20, sliderMin: 0, sliderMax: 15, step: 0.5, type: "percent" as const },
+              { label: "Down Payment Return (%)", value: rentInvestmentReturn, set: setRentInvestmentReturn, min: 4, max: 20, sliderMin: 4, sliderMax: 20, step: 0.5, type: "percent" as const },
             ].map((f) => (
-              <div key={f.label} className="flex justify-between items-center text-xs font-semibold">
-                <span className="text-muted-grey">{f.label}</span>
-                <NumericInput value={f.value} onChange={f.set} min={f.min} max={f.max} step={f.step} type={f.type} />
+              <div key={f.label} className="space-y-1.5">
+                <div className="flex justify-between items-center text-xs font-semibold">
+                  <span className="text-muted-grey">{f.label}</span>
+                  <NumericInput value={f.value} onChange={f.set} min={f.min} max={f.max} step={f.step} type={f.type} />
+                </div>
+                <input type="range" min={f.sliderMin} max={f.sliderMax} step={f.step} value={f.value} onChange={(e) => f.set(Number(e.target.value))} className="w-full accent-emerald bg-navy-bg h-1 rounded-lg cursor-pointer" />
               </div>
             ))}
           </div>
@@ -146,17 +149,20 @@ export default function RentVsBuyCalculator() {
           <div className="p-5 glass-card space-y-4">
             <h2 className="text-base font-bold text-emerald flex items-center gap-2"><Home size={15} /> Buying Parameters</h2>
             {[
-              { label: "Property Price", value: propertyPrice, set: setPropertyPrice, min: 1000000, max: 100000000, step: 100000, type: "currency" as const },
-              { label: "Down Payment", value: downPayment, set: setDownPayment, min: 100000, max: 30000000, step: 100000, type: "currency" as const },
-              { label: "Home Loan Rate (%)", value: loanRate, set: setLoanRate, min: 6, max: 15, step: 0.1, type: "number" as const },
-              { label: "Loan Tenure (yrs)", value: loanTenure, set: setLoanTenure, min: 5, max: 30, step: 1, type: "number" as const },
-              { label: "Property Appreciation (%)", value: propertyAppreciation, set: setPropertyAppreciation, min: 0, max: 20, step: 0.5, type: "number" as const },
-              { label: "Annual Maintenance (%)", value: maintenancePercent, set: setMaintenancePercent, min: 0, max: 3, step: 0.1, type: "number" as const },
-              { label: "Stamp Duty + Registration", value: registrationCost, set: setRegistrationCost, min: 0, max: 3000000, step: 50000, type: "currency" as const },
+              { label: "Property Price", value: propertyPrice, set: setPropertyPrice, min: 1000000, max: 100000000, sliderMin: 1000000, sliderMax: 30000000, step: 100000, type: "currency" as const },
+              { label: "Down Payment", value: downPayment, set: setDownPayment, min: 100000, max: 30000000, sliderMin: 100000, sliderMax: 10000000, step: 100000, type: "currency" as const },
+              { label: "Home Loan Rate (%)", value: loanRate, set: setLoanRate, min: 6, max: 15, sliderMin: 6, sliderMax: 15, step: 0.1, type: "percent" as const },
+              { label: "Loan Tenure (yrs)", value: loanTenure, set: setLoanTenure, min: 5, max: 30, sliderMin: 5, sliderMax: 30, step: 1, type: "years" as const },
+              { label: "Property Appreciation (%)", value: propertyAppreciation, set: setPropertyAppreciation, min: 0, max: 20, sliderMin: 0, sliderMax: 15, step: 0.5, type: "percent" as const },
+              { label: "Annual Maintenance (%)", value: maintenancePercent, set: setMaintenancePercent, min: 0, max: 3, sliderMin: 0, sliderMax: 3, step: 0.1, type: "percent" as const },
+              { label: "Stamp Duty + Registration", value: registrationCost, set: setRegistrationCost, min: 0, max: 3000000, sliderMin: 0, sliderMax: 1500000, step: 50000, type: "currency" as const },
             ].map((f) => (
-              <div key={f.label} className="flex justify-between items-center text-xs font-semibold">
-                <span className="text-muted-grey">{f.label}</span>
-                <NumericInput value={f.value} onChange={f.set} min={f.min} max={f.max} step={f.step} type={f.type} />
+              <div key={f.label} className="space-y-1.5">
+                <div className="flex justify-between items-center text-xs font-semibold">
+                  <span className="text-muted-grey">{f.label}</span>
+                  <NumericInput value={f.value} onChange={f.set} min={f.min} max={f.max} step={f.step} type={f.type} />
+                </div>
+                <input type="range" min={f.sliderMin} max={f.sliderMax} step={f.step} value={f.value} onChange={(e) => f.set(Number(e.target.value))} className="w-full accent-emerald bg-navy-bg h-1 rounded-lg cursor-pointer" />
               </div>
             ))}
           </div>

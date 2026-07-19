@@ -144,27 +144,50 @@ export default function RetirementPlanner() {
             <h2 className="text-lg font-bold text-white">Retirement Details</h2>
 
             {/* Age Sliders */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-1">
-                <label className="text-xs text-muted-grey">Current Age</label>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <div className="flex justify-between items-center text-xs font-semibold">
+                  <span className="text-muted-grey">Current Age</span>
+                  <NumericInput
+                    value={currentAge}
+                    onChange={(val) => setCurrentAge(Math.max(18, Math.min(retireAge - 1, val)))}
+                    min={18}
+                    max={75}
+                    step={1}
+                    type="years"
+                  />
+                </div>
                 <input
-                  type="number"
-                  value={currentAge}
+                  type="range"
                   min={18}
-                  max={retireAge - 1}
-                  onChange={(e) => setCurrentAge(Math.max(18, Number(e.target.value)))}
-                  className="w-full glass-input text-sm text-center font-bold"
+                  max={60}
+                  step={1}
+                  value={currentAge}
+                  onChange={(e) => setCurrentAge(Math.max(18, Math.min(retireAge - 1, Number(e.target.value))))}
+                  className="w-full accent-emerald bg-navy-bg h-1 rounded-lg cursor-pointer"
                 />
               </div>
-              <div className="space-y-1">
-                <label className="text-xs text-muted-grey">Retirement Age</label>
+
+              <div className="space-y-2">
+                <div className="flex justify-between items-center text-xs font-semibold">
+                  <span className="text-muted-grey">Retirement Age</span>
+                  <NumericInput
+                    value={retireAge}
+                    onChange={(val) => setRetireAge(Math.max(currentAge + 1, Math.min(80, val)))}
+                    min={20}
+                    max={80}
+                    step={1}
+                    type="years"
+                  />
+                </div>
                 <input
-                  type="number"
+                  type="range"
+                  min={40}
+                  max={75}
+                  step={1}
                   value={retireAge}
-                  min={currentAge + 1}
-                  max={80}
-                  onChange={(e) => setRetireAge(Math.min(80, Number(e.target.value)))}
-                  className="w-full glass-input text-sm text-center font-bold"
+                  onChange={(e) => setRetireAge(Math.max(currentAge + 1, Math.min(80, Number(e.target.value))))}
+                  className="w-full accent-emerald bg-navy-bg h-1 rounded-lg cursor-pointer"
                 />
               </div>
             </div>

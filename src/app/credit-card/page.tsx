@@ -109,17 +109,20 @@ export default function CreditCardPayoffCalculator() {
           </div>
 
           <div className="space-y-2">
-            <div className="flex justify-between text-xs font-semibold">
+            <div className="flex justify-between items-center text-xs font-semibold">
               <span className="text-muted-grey">Annual Interest Rate (%)</span>
-              <span className="text-red-400">{annualRate}%</span>
+              <NumericInput value={annualRate} onChange={setAnnualRate} min={1} max={60} step={0.5} type="percent" className="text-red-400 focus-within:border-red-400/50" />
             </div>
             <input type="range" min={12} max={48} step={0.5} value={annualRate} onChange={(e) => setAnnualRate(Number(e.target.value))} className="w-full accent-emerald bg-navy-bg h-1 rounded-lg cursor-pointer" />
             <p className="text-[9.5px] text-muted-grey">Most Indian credit cards: 36–42% p.a.</p>
           </div>
 
-          <div className="space-y-3 border-t border-border-navy/60 pt-4">
-            <label className="text-xs font-semibold text-muted-grey block">Fixed Monthly Payment Amount</label>
-            <NumericInput value={fixedPayment} onChange={setFixedPayment} min={500} max={500000} step={500} type="currency" />
+          <div className="space-y-2 border-t border-border-navy/60 pt-4">
+            <div className="flex justify-between items-center text-xs font-semibold">
+              <span className="text-muted-grey">Fixed Monthly Payment Amount</span>
+              <NumericInput value={fixedPayment} onChange={setFixedPayment} min={500} max={500000} step={500} type="currency" />
+            </div>
+            <input type="range" min={500} max={100000} step={500} value={fixedPayment} onChange={(e) => setFixedPayment(Number(e.target.value))} className="w-full accent-emerald bg-navy-bg h-1 rounded-lg cursor-pointer" />
           </div>
 
           {/* Danger meter */}
@@ -148,7 +151,7 @@ export default function CreditCardPayoffCalculator() {
             <div className="space-y-2 border-t border-border-navy/60 pt-4 animate-fadeIn">
               <div className="flex justify-between items-center text-xs font-semibold">
                 <span className="text-muted-grey">Expected Inflation Rate</span>
-                <span className="text-emerald font-bold">{inflation}%</span>
+                <NumericInput value={inflation} onChange={setInflation} min={0} max={25} step={0.1} type="percent" />
               </div>
               <input
                 type="range"

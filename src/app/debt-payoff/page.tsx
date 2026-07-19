@@ -170,9 +170,22 @@ export default function DebtPayoffCalculator() {
           </div>
 
           <div className="p-5 glass-card space-y-4">
-            <h2 className="text-sm font-bold text-white">Extra Monthly Payment</h2>
-            <NumericInput value={extraPayment} onChange={setExtraPayment} min={0} max={500000} step={500} type="currency" />
-            <p className="text-[9.5px] text-muted-grey">Amount you can pay above all minimum payments combined. This is the engine of both strategies.</p>
+            <div className="space-y-2">
+              <div className="flex justify-between items-center text-xs font-semibold">
+                <span className="text-sm font-bold text-white">Extra Monthly Payment</span>
+                <NumericInput value={extraPayment} onChange={setExtraPayment} min={0} max={500000} step={500} type="currency" />
+              </div>
+              <input
+                type="range"
+                min={0}
+                max={100000}
+                step={500}
+                value={extraPayment}
+                onChange={(e) => setExtraPayment(Number(e.target.value))}
+                className="w-full accent-emerald bg-navy-bg h-1 rounded-lg cursor-pointer"
+              />
+              <p className="text-[9.5px] text-muted-grey">Amount you can pay above all minimum payments combined. This is the engine of both strategies.</p>
+            </div>
 
             {/* Inflation Toggle */}
             <div className="space-y-2 border-t border-border-navy/60 pt-4 flex items-center justify-between">
@@ -193,7 +206,7 @@ export default function DebtPayoffCalculator() {
               <div className="space-y-2 border-t border-border-navy/60 pt-4 animate-fadeIn">
                 <div className="flex justify-between items-center text-xs font-semibold">
                   <span className="text-muted-grey">Expected Inflation Rate</span>
-                  <span className="text-emerald font-bold">{inflation}%</span>
+                  <NumericInput value={inflation} onChange={setInflation} min={0} max={25} step={0.1} type="percent" />
                 </div>
                 <input
                   type="range"

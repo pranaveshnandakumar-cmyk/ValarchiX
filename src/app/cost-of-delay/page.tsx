@@ -110,17 +110,17 @@ export default function CostOfDelayCalculator() {
           </div>
 
           <div className="space-y-2">
-            <div className="flex justify-between text-xs font-semibold">
+            <div className="flex justify-between items-center text-xs font-semibold">
               <span className="text-muted-grey">Expected CAGR (%)</span>
-              <span className="text-emerald">{rate}%</span>
+              <NumericInput value={rate} onChange={setRate} min={1} max={50} step={0.5} type="percent" />
             </div>
             <input type="range" min={6} max={20} step={0.5} value={rate} onChange={(e) => setRate(Number(e.target.value))} className="w-full accent-emerald bg-navy-bg h-1 rounded-lg cursor-pointer" />
           </div>
 
           <div className="space-y-2">
-            <div className="flex justify-between text-xs font-semibold">
+            <div className="flex justify-between items-center text-xs font-semibold">
               <span className="text-muted-grey">Total Horizon</span>
-              <span className="text-emerald">{totalYears} yrs</span>
+              <NumericInput value={totalYears} onChange={setTotalYears} min={1} max={50} step={1} type="years" />
             </div>
             <input type="range" min={10} max={45} step={1} value={totalYears} onChange={(e) => setTotalYears(Number(e.target.value))} className="w-full accent-emerald bg-navy-bg h-1 rounded-lg cursor-pointer" />
           </div>
@@ -138,9 +138,9 @@ export default function CostOfDelayCalculator() {
             </div>
             {adjustInflation && (
               <div className="space-y-2">
-                <div className="flex justify-between text-xs font-semibold">
+                <div className="flex justify-between items-center text-xs font-semibold">
                   <span className="text-muted-grey">Inflation Rate (%)</span>
-                  <span className="text-red-400 font-bold">{inflation}%</span>
+                  <NumericInput value={inflation} onChange={setInflation} min={0} max={25} step={0.5} type="percent" className="text-red-400 focus-within:border-red-400/50" />
                 </div>
                 <input type="range" min={2} max={15} step={0.5} value={inflation} onChange={(e) => setInflation(Number(e.target.value))} className="w-full accent-emerald bg-navy-bg h-1 rounded-lg cursor-pointer" />
               </div>
