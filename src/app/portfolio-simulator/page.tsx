@@ -528,16 +528,16 @@ export default function PortfolioStrategySimulatorPage() {
                   <YAxis stroke="var(--text-muted-color)" tick={{ fontSize: 9 }} tickFormatter={(val) => formatINR(val)} />
                   <Tooltip
                     contentStyle={{
-                      backgroundColor: "#081c3a",
-                      borderColor: "var(--border-color)",
-                      color: "var(--text-main-color)",
+                      backgroundColor: "var(--tooltip-bg)",
+                      borderColor: "var(--tooltip-border)",
+                      color: "var(--tooltip-text)",
                       borderRadius: "8px",
                       fontSize: "11px",
-                      boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.5)"
+                      boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.15)"
                     }}
-                    itemStyle={{ color: "var(--text-main-color)" }}
-                    labelStyle={{ color: "var(--text-muted-color)", fontWeight: "600" }}
-                    cursor={{ stroke: "rgba(255, 255, 255, 0.2)", strokeDasharray: "3 3" }}
+                    itemStyle={{ color: "var(--tooltip-text)" }}
+                    labelStyle={{ color: "var(--tooltip-muted)", fontWeight: "600" }}
+                    cursor={{ stroke: "var(--tooltip-muted)", strokeDasharray: "3 3" }}
                     formatter={(val: any) => [formatINR(Number(val)), ""]}
                   />
                   <Legend wrapperStyle={{ fontSize: "11px" }} />
@@ -573,16 +573,16 @@ export default function PortfolioStrategySimulatorPage() {
                     <YAxis stroke="var(--text-muted-color)" tick={{ fontSize: 9 }} tickFormatter={(val) => `-${val}%`} />
                     <Tooltip
                       contentStyle={{
-                        backgroundColor: "#081c3a",
-                        borderColor: "var(--border-color)",
-                        color: "var(--text-main-color)",
+                        backgroundColor: "var(--tooltip-bg)",
+                        borderColor: "var(--tooltip-border)",
+                        color: "var(--tooltip-text)",
                         borderRadius: "8px",
                         fontSize: "11px",
-                        boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.5)"
+                        boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.15)"
                       }}
-                      itemStyle={{ color: "var(--text-main-color)" }}
-                      labelStyle={{ color: "var(--text-muted-color)", fontWeight: "600" }}
-                      cursor={{ stroke: "rgba(245, 158, 11, 0.3)", strokeDasharray: "3 3" }}
+                      itemStyle={{ color: "var(--tooltip-text)" }}
+                      labelStyle={{ color: "var(--tooltip-muted)", fontWeight: "600" }}
+                      cursor={{ stroke: "rgba(245, 158, 11, 0.5)", strokeDasharray: "3 3" }}
                       formatter={(val: any) => [`-${val}%`, "Drawdown"]}
                     />
                     <Area type="monotone" dataKey="drawdownPct" name="Drawdown %" stroke="#f59e0b" fill="#f59e0b" fillOpacity={0.2} strokeWidth={1.5} />
@@ -607,16 +607,16 @@ export default function PortfolioStrategySimulatorPage() {
                     <YAxis stroke="var(--text-muted-color)" tick={{ fontSize: 9 }} tickFormatter={(val) => `${val}%`} />
                     <Tooltip
                       contentStyle={{
-                        backgroundColor: "#081c3a",
-                        borderColor: "var(--border-color)",
-                        color: "var(--text-main-color)",
+                        backgroundColor: "var(--tooltip-bg)",
+                        borderColor: "var(--tooltip-border)",
+                        color: "var(--tooltip-text)",
                         borderRadius: "8px",
                         fontSize: "11px",
-                        boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.5)"
+                        boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.15)"
                       }}
-                      itemStyle={{ color: "var(--text-main-color)" }}
-                      labelStyle={{ color: "var(--text-muted-color)", fontWeight: "600" }}
-                      cursor={{ fill: "rgba(255, 255, 255, 0.08)", radius: 4 }}
+                      itemStyle={{ color: "var(--tooltip-text)" }}
+                      labelStyle={{ color: "var(--tooltip-muted)", fontWeight: "600" }}
+                      cursor={{ fill: "var(--tooltip-cursor)", radius: 4 }}
                       formatter={(val: any) => [`${val}%`, "Annual Return"]}
                     />
                     <Bar dataKey="annualReturnPct" name="Return %">
@@ -1085,16 +1085,16 @@ export default function PortfolioStrategySimulatorPage() {
                   <YAxis stroke="var(--text-muted-color)" tick={{ fontSize: 9 }} tickFormatter={(val) => formatINR(val)} />
                   <Tooltip
                     contentStyle={{
-                      backgroundColor: "#081c3a",
-                      borderColor: "var(--border-color)",
-                      color: "var(--text-main-color)",
+                      backgroundColor: "var(--tooltip-bg)",
+                      borderColor: "var(--tooltip-border)",
+                      color: "var(--tooltip-text)",
                       borderRadius: "8px",
                       fontSize: "11px",
-                      boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.5)"
+                      boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.15)"
                     }}
-                    itemStyle={{ color: "var(--text-main-color)" }}
-                    labelStyle={{ color: "var(--text-muted-color)", fontWeight: "600" }}
-                    cursor={{ stroke: "rgba(255, 255, 255, 0.2)", strokeDasharray: "3 3" }}
+                    itemStyle={{ color: "var(--tooltip-text)" }}
+                    labelStyle={{ color: "var(--tooltip-muted)", fontWeight: "600" }}
+                    cursor={{ stroke: "var(--tooltip-muted)", strokeDasharray: "3 3" }}
                     formatter={(val: any) => [formatINR(Number(val)), ""]}
                   />
                   <Area type="monotone" dataKey="p90" name="Best Case (90th)" stroke="#22c55e" fill="#22c55e" fillOpacity={0.15} strokeWidth={1.5} />

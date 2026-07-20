@@ -23,6 +23,11 @@
   --text-main-color: #f8fafc; /* Brighter white/slate for high readability */
   --text-muted-color: #cbd5e1; /* Brighter secondary grey/slate */
   --footer-bg-color: #040d1c;
+  --tooltip-bg: #091a34;
+  --tooltip-border: rgba(30, 58, 95, 0.8);
+  --tooltip-text: #f8fafc;
+  --tooltip-muted: #cbd5e1;
+  --tooltip-cursor: rgba(255, 255, 255, 0.08);
 }
 
 /* Light mode overrides */
@@ -35,6 +40,11 @@
   --text-main-color: #0f172a; /* Slate 900 */
   --text-muted-color: #475569; /* Slate 600 */
   --footer-bg-color: #e2e8f0; /* Slate 200 */
+  --tooltip-bg: #ffffff;
+  --tooltip-border: #cbd5e1;
+  --tooltip-text: #0f172a;
+  --tooltip-muted: #64748b;
+  --tooltip-cursor: rgba(15, 23, 42, 0.06);
 }
 
 /* Custom Scrollbar */
