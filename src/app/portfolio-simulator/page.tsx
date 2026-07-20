@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useMemo, useEffect } from "react";
-import { motion } from "framer-motion";
 import {
   TrendingUp,
   Shield,
@@ -226,38 +225,38 @@ export default function PortfolioStrategySimulatorPage() {
 
   if (!mounted || !simOutput) {
     return (
-      <div className="min-h-screen bg-navy-bg text-white flex items-center justify-center p-6">
-        <div className="flex flex-col items-center space-y-4">
+      <div className="min-h-screen bg-navy-bg text-white flex items-center justify-center p-4">
+        <div className="flex flex-col items-center space-y-4 text-center">
           <RefreshCw className="w-8 h-8 text-emerald animate-spin" />
-          <p className="text-muted-grey text-sm">Initializing ValarchiX Historical Simulation Engine...</p>
+          <p className="text-muted-grey text-xs sm:text-sm">Initializing ValarchiX Historical Simulation Engine...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-navy-bg text-white font-sans selection:bg-emerald selection:text-white pb-20 space-y-8 py-4">
+    <div className="min-h-screen bg-navy-bg text-white font-sans selection:bg-emerald selection:text-white pb-20 space-y-6 sm:space-y-8 py-3 sm:py-6 px-2 sm:px-4 lg:px-6">
       {/* Header & Core Philosophy Banner */}
-      <header className="border-b border-border-navy bg-navy-card/80 backdrop-blur-md rounded-2xl p-4 sm:p-6 shadow-lg">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div className="flex items-center space-x-3">
-            <div className="p-3 rounded-xl bg-gradient-to-tr from-emerald-600 to-blue-600 shadow-md text-white">
-              <PieIcon className="w-6 h-6" />
+      <header className="border border-border-navy bg-navy-card/80 backdrop-blur-md rounded-2xl p-4 sm:p-6 shadow-lg">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+          <div className="flex items-start sm:items-center space-x-3">
+            <div className="p-2.5 sm:p-3 rounded-xl bg-gradient-to-tr from-emerald-600 to-blue-600 shadow-md text-white shrink-0">
+              <PieIcon className="w-5 h-5 sm:w-6 sm:h-6" />
             </div>
             <div>
-              <div className="flex items-center space-x-2">
-                <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white">Portfolio Strategy Simulator</h1>
-                <span className="px-2.5 py-0.5 text-xs font-semibold rounded-full bg-emerald/10 text-emerald border border-emerald/20">
+              <div className="flex flex-wrap items-center gap-2">
+                <h1 className="text-lg sm:text-2xl font-bold tracking-tight text-white">Portfolio Strategy Simulator</h1>
+                <span className="px-2.5 py-0.5 text-[11px] sm:text-xs font-semibold rounded-full bg-emerald/10 text-emerald border border-emerald/20">
                   v2.0 Historical Engine
                 </span>
               </div>
-              <p className="text-xs text-muted-grey">ValarchiX Financial Learning Operating System</p>
+              <p className="text-xs text-muted-grey mt-0.5">ValarchiX Financial Learning Operating System</p>
             </div>
           </div>
 
-          <div className="flex items-center space-x-3 bg-navy-bg px-4 py-2 rounded-xl border border-border-navy">
+          <div className="flex items-center space-x-2.5 bg-navy-bg px-3.5 py-2 rounded-xl border border-border-navy text-xs">
             <Info className="w-4 h-4 text-amber-500 shrink-0" />
-            <span className="text-xs text-muted-grey">
+            <span className="text-muted-grey leading-tight">
               <strong className="text-white">Core Principle:</strong> &ldquo;We don&apos;t tell what to pick, we tell how to pick.&rdquo; Purely educational, backtested evidence.
             </span>
           </div>
@@ -265,10 +264,10 @@ export default function PortfolioStrategySimulatorPage() {
       </header>
 
       {/* Input Controls & Asset Sliders Panel */}
-      <section className="glass-card p-6 space-y-6">
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 pb-4 border-b border-border-navy">
+      <section className="glass-card p-4 sm:p-6 space-y-6">
+        <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4 pb-4 border-b border-border-navy">
           <div>
-            <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+            <h2 className="text-base sm:text-lg font-semibold text-white flex items-center gap-2">
               <Sliders className="w-5 h-5 text-emerald" /> Backtest Parameters & Asset Allocation
             </h2>
             <p className="text-xs text-muted-grey mt-0.5">
@@ -277,13 +276,13 @@ export default function PortfolioStrategySimulatorPage() {
           </div>
 
           {/* Quick Preset Buttons */}
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-xs font-medium text-muted-grey mr-1">Presets:</span>
+          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+            <span className="text-xs font-medium text-muted-grey mr-1 hidden sm:inline">Presets:</span>
             {Object.entries(PRESET_ALLOCATIONS).map(([key, preset]) => (
               <button
                 key={key}
                 onClick={() => setAllocation(preset.config)}
-                className="px-3 py-1.5 rounded-lg text-xs font-medium bg-navy-light hover:bg-emerald/10 text-white transition border border-border-navy"
+                className="px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-lg text-xs font-medium bg-navy-light hover:bg-emerald/10 text-white transition border border-border-navy"
               >
                 {preset.label}
               </button>
@@ -292,8 +291,8 @@ export default function PortfolioStrategySimulatorPage() {
         </div>
 
         {/* Investment Amount & Year Selectors */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="space-y-1.5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+          <div className="space-y-1">
             <label className="text-xs font-medium text-white flex items-center gap-1.5">
               Monthly SIP (₹)
             </label>
@@ -303,12 +302,12 @@ export default function PortfolioStrategySimulatorPage() {
               step="1000"
               value={monthlySip}
               onChange={(e) => setMonthlySip(Math.max(0, Number(e.target.value)))}
-              className="w-full bg-navy-bg border border-border-navy rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald font-mono"
+              className="w-full bg-navy-bg border border-border-navy rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-emerald font-mono min-h-[42px]"
             />
             <span className="text-[11px] text-muted-grey">{formatINR(monthlySip)} / month</span>
           </div>
 
-          <div className="space-y-1.5">
+          <div className="space-y-1">
             <label className="text-xs font-medium text-white flex items-center gap-1.5">
               Initial Lump Sum (₹)
             </label>
@@ -318,12 +317,12 @@ export default function PortfolioStrategySimulatorPage() {
               step="10000"
               value={lumpSum}
               onChange={(e) => setLumpSum(Math.max(0, Number(e.target.value)))}
-              className="w-full bg-navy-bg border border-border-navy rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald font-mono"
+              className="w-full bg-navy-bg border border-border-navy rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-emerald font-mono min-h-[42px]"
             />
             <span className="text-[11px] text-muted-grey">{formatINR(lumpSum)} initial</span>
           </div>
 
-          <div className="space-y-1.5">
+          <div className="space-y-1">
             <label className="text-xs font-medium text-white">Start Year</label>
             <select
               value={startYear}
@@ -332,7 +331,7 @@ export default function PortfolioStrategySimulatorPage() {
                 setStartYear(yr);
                 if (yr >= endYear) setEndYear(Math.min(2025, yr + 1));
               }}
-              className="w-full bg-navy-bg border border-border-navy rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald"
+              className="w-full bg-navy-bg border border-border-navy rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-emerald min-h-[42px]"
             >
               {availableYears.map((yr) => (
                 <option key={yr} value={yr} className="bg-navy-bg text-white">
@@ -343,12 +342,12 @@ export default function PortfolioStrategySimulatorPage() {
             <span className="text-[11px] text-muted-grey">Historical start</span>
           </div>
 
-          <div className="space-y-1.5">
+          <div className="space-y-1">
             <label className="text-xs font-medium text-white">End Year</label>
             <select
               value={endYear}
               onChange={(e) => setEndYear(Number(e.target.value))}
-              className="w-full bg-navy-bg border border-border-navy rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald"
+              className="w-full bg-navy-bg border border-border-navy rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-emerald min-h-[42px]"
             >
               {availableYears
                 .filter((yr) => yr > startYear)
@@ -364,11 +363,11 @@ export default function PortfolioStrategySimulatorPage() {
 
         {/* Allocation Sliders */}
         <div className="space-y-3 pt-2">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-wrap items-center justify-between gap-2">
             <span className="text-xs font-semibold text-white">Asset Allocation Breakdown</span>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3">
               <span
-                className={`text-xs font-mono font-bold px-3 py-1 rounded-md border ${
+                className={`text-xs font-mono font-bold px-2.5 py-1 rounded-md border ${
                   totalAllocationPct === 100
                     ? "bg-emerald/10 text-emerald border-emerald/30"
                     : "bg-amber-500/10 text-amber-500 border-amber-500/30 animate-pulse"
@@ -387,7 +386,7 @@ export default function PortfolioStrategySimulatorPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             {(Object.keys(ASSET_METADATA) as AssetClassKey[]).map((key) => {
               const meta = ASSET_METADATA[key];
               const val = allocation[key] || 0;
@@ -417,7 +416,7 @@ export default function PortfolioStrategySimulatorPage() {
                       const nextVal = Number(e.target.value);
                       setAllocation((prev) => ({ ...prev, [key]: nextVal }));
                     }}
-                    className="w-full h-1.5 rounded-lg appearance-none cursor-pointer accent-emerald"
+                    className="w-full h-2 rounded-lg appearance-none cursor-pointer accent-emerald"
                   />
 
                   <p className="text-[10px] text-muted-grey truncate">{meta.description}</p>
@@ -428,8 +427,8 @@ export default function PortfolioStrategySimulatorPage() {
         </div>
       </section>
 
-      {/* Tab Navigation */}
-      <div className="flex items-center space-x-2 border-b border-border-navy overflow-x-auto pb-1 scrollbar-none">
+      {/* Tab Navigation (Scrollable & Responsive) */}
+      <div className="flex items-center space-x-1.5 sm:space-x-2 border-b border-border-navy overflow-x-auto pb-1 scrollbar-none touch-pan-x">
         {[
           { id: "overview", label: "Overview & Backtest", icon: BarChart3 },
           { id: "compare", label: "Compare Strategies", icon: Layers },
@@ -445,13 +444,13 @@ export default function PortfolioStrategySimulatorPage() {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
-              className={`flex items-center space-x-2 px-4 py-2.5 rounded-t-xl text-xs font-semibold transition border-t border-x whitespace-nowrap ${
+              className={`flex items-center space-x-1.5 sm:space-x-2 px-3 py-2 sm:px-4 sm:py-2.5 rounded-t-xl text-xs font-semibold transition border-t border-x whitespace-nowrap shrink-0 ${
                 isActive
                   ? "bg-navy-card text-emerald border-border-navy border-b-transparent shadow-md"
                   : "text-muted-grey hover:text-white border-transparent hover:bg-navy-light/40"
               }`}
             >
-              <Icon className="w-4 h-4" />
+              <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
               <span>{tab.label}</span>
             </button>
           );
@@ -460,60 +459,60 @@ export default function PortfolioStrategySimulatorPage() {
 
       {/* TAB 1: OVERVIEW & BACKTEST RESULTS */}
       {activeTab === "overview" && (
-        <div className="space-y-8">
+        <div className="space-y-6 sm:space-y-8">
           {/* KPI Summary Cards */}
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            <div className="glass-card p-4 space-y-1">
-              <span className="text-[11px] font-medium text-muted-grey">Total Invested</span>
-              <div className="text-lg font-bold font-mono text-white">{formatINR(simOutput.totalInvested)}</div>
-              <p className="text-[10px] text-muted-grey">{endYear - startYear} years cumulative</p>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
+            <div className="glass-card p-3.5 sm:p-4 space-y-1">
+              <span className="text-[10px] sm:text-[11px] font-medium text-muted-grey">Total Invested</span>
+              <div className="text-base sm:text-lg font-bold font-mono text-white truncate">{formatINR(simOutput.totalInvested)}</div>
+              <p className="text-[10px] text-muted-grey truncate">{endYear - startYear} yrs cumulative</p>
             </div>
 
-            <div className="glass-card p-4 space-y-1">
-              <span className="text-[11px] font-medium text-muted-grey">Final Portfolio Value</span>
-              <div className="text-lg font-bold font-mono text-emerald">{formatINR(simOutput.finalValue)}</div>
-              <p className="text-[10px] text-emerald font-mono">+{formatINR(simOutput.totalGain)} profit</p>
+            <div className="glass-card p-3.5 sm:p-4 space-y-1">
+              <span className="text-[10px] sm:text-[11px] font-medium text-muted-grey">Final Portfolio Value</span>
+              <div className="text-base sm:text-lg font-bold font-mono text-emerald truncate">{formatINR(simOutput.finalValue)}</div>
+              <p className="text-[10px] text-emerald font-mono truncate">+{formatINR(simOutput.totalGain)} profit</p>
             </div>
 
-            <div className="glass-card p-4 space-y-1">
-              <span className="text-[11px] font-medium text-muted-grey">CAGR (Annual Return)</span>
-              <div className="text-lg font-bold font-mono text-blue-500">{simOutput.cagrPct}%</div>
-              <p className="text-[10px] text-muted-grey">Abs Return: {simOutput.absoluteReturnPct}%</p>
+            <div className="glass-card p-3.5 sm:p-4 space-y-1">
+              <span className="text-[10px] sm:text-[11px] font-medium text-muted-grey">CAGR (Annual)</span>
+              <div className="text-base sm:text-lg font-bold font-mono text-blue-500">{simOutput.cagrPct}%</div>
+              <p className="text-[10px] text-muted-grey truncate">Abs: {simOutput.absoluteReturnPct}%</p>
             </div>
 
-            <div className="glass-card p-4 space-y-1">
-              <span className="text-[11px] font-medium text-muted-grey">XIRR (SIP Return)</span>
-              <div className="text-lg font-bold font-mono text-purple-500">{simOutput.xirrPct}%</div>
-              <p className="text-[10px] text-muted-grey">Exact cash flow yield</p>
+            <div className="glass-card p-3.5 sm:p-4 space-y-1">
+              <span className="text-[10px] sm:text-[11px] font-medium text-muted-grey">XIRR (SIP Return)</span>
+              <div className="text-base sm:text-lg font-bold font-mono text-purple-500">{simOutput.xirrPct}%</div>
+              <p className="text-[10px] text-muted-grey truncate">Cash flow yield</p>
             </div>
 
-            <div className="glass-card p-4 space-y-1">
-              <span className="text-[11px] font-medium text-muted-grey">Max Drawdown</span>
-              <div className="text-lg font-bold font-mono text-amber-500">-{simOutput.maxDrawdownPct}%</div>
-              <p className="text-[10px] text-muted-grey">Recovery: {simOutput.maxRecoveryMonths} months</p>
+            <div className="glass-card p-3.5 sm:p-4 space-y-1">
+              <span className="text-[10px] sm:text-[11px] font-medium text-muted-grey">Max Drawdown</span>
+              <div className="text-base sm:text-lg font-bold font-mono text-amber-500">-{simOutput.maxDrawdownPct}%</div>
+              <p className="text-[10px] text-muted-grey truncate">Recovery: {simOutput.maxRecoveryMonths} m</p>
             </div>
 
-            <div className="glass-card p-4 space-y-1">
-              <span className="text-[11px] font-medium text-muted-grey">Sharpe / Volatility</span>
-              <div className="text-lg font-bold font-mono text-cyan-500">{simOutput.sharpeRatio}</div>
-              <p className="text-[10px] text-muted-grey">Vol: {simOutput.annualizedVolatilityPct}%</p>
+            <div className="glass-card p-3.5 sm:p-4 space-y-1">
+              <span className="text-[10px] sm:text-[11px] font-medium text-muted-grey">Sharpe / Volatility</span>
+              <div className="text-base sm:text-lg font-bold font-mono text-cyan-500">{simOutput.sharpeRatio}</div>
+              <p className="text-[10px] text-muted-grey truncate">Vol: {simOutput.annualizedVolatilityPct}%</p>
             </div>
           </div>
 
           {/* Main Growth Chart */}
-          <div className="glass-card p-6 space-y-4">
+          <div className="glass-card p-4 sm:p-6 space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
               <div>
-                <h3 className="text-base font-semibold text-white flex items-center gap-2">
-                  <TrendingUp className="w-4 h-4 text-emerald" /> Historical Wealth Trajectory (Invested vs Portfolio Value)
+                <h3 className="text-sm sm:text-base font-semibold text-white flex items-center gap-2">
+                  <TrendingUp className="w-4 h-4 text-emerald shrink-0" /> Historical Wealth Trajectory (Invested vs Portfolio Value)
                 </h3>
                 <p className="text-xs text-muted-grey">Month-by-month backtest performance from {startYear} to {endYear}</p>
               </div>
             </div>
 
-            <div className="h-80 w-full">
+            <div className="h-[280px] sm:h-[350px] w-full">
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={simOutput.timeline}>
+                <AreaChart data={simOutput.timeline} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
                   <defs>
                     <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="5%" stopColor="#22c55e" stopOpacity={0.4} />
@@ -525,13 +524,13 @@ export default function PortfolioStrategySimulatorPage() {
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
-                  <XAxis dataKey="dateStr" stroke="var(--text-muted-color)" tick={{ fontSize: 10 }} tickFormatter={(str) => str.split("-")[0]} />
-                  <YAxis stroke="var(--text-muted-color)" tick={{ fontSize: 10 }} tickFormatter={(val) => formatINR(val)} />
+                  <XAxis dataKey="dateStr" stroke="var(--text-muted-color)" tick={{ fontSize: 9 }} tickFormatter={(str) => str.split("-")[0]} />
+                  <YAxis stroke="var(--text-muted-color)" tick={{ fontSize: 9 }} tickFormatter={(val) => formatINR(val)} />
                   <Tooltip
-                    contentStyle={{ backgroundColor: "var(--card-bg-color)", borderColor: "var(--border-color)", color: "var(--text-main-color)", borderRadius: "8px" }}
+                    contentStyle={{ backgroundColor: "var(--card-bg-color)", borderColor: "var(--border-color)", color: "var(--text-main-color)", borderRadius: "8px", fontSize: "11px" }}
                     formatter={(val: any) => [formatINR(Number(val)), ""]}
                   />
-                  <Legend />
+                  <Legend wrapperStyle={{ fontSize: "11px" }} />
                   <Area type="monotone" dataKey="portfolioValue" name="Portfolio Value" stroke="#22c55e" fillOpacity={1} fill="url(#colorValue)" strokeWidth={2} />
                   <Area type="monotone" dataKey="cumulativeInvested" name="Total Invested" stroke="#3b82f6" fillOpacity={1} fill="url(#colorInvested)" strokeWidth={1.5} strokeDasharray="4 4" />
                 </AreaChart>
@@ -539,11 +538,11 @@ export default function PortfolioStrategySimulatorPage() {
             </div>
 
             {/* AI Mentor Note */}
-            <div className="bg-navy-bg/70 border border-border-navy rounded-xl p-4 flex items-start space-x-3">
+            <div className="bg-navy-bg/70 border border-border-navy rounded-xl p-3.5 sm:p-4 flex items-start space-x-3">
               <Sparkles className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
               <div className="space-y-1">
                 <h4 className="text-xs font-semibold text-amber-500">AI Mentor Insight: Compounding & Long-Term Growth</h4>
-                <p className="text-xs text-muted-grey">{generateChartInsight("growth", simOutput).content}</p>
+                <p className="text-xs text-muted-grey leading-relaxed">{generateChartInsight("growth", simOutput).content}</p>
               </div>
             </div>
           </div>
@@ -551,39 +550,39 @@ export default function PortfolioStrategySimulatorPage() {
           {/* Secondary Charts Grid: Drawdown & Annual Returns */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Drawdown Timeline Chart */}
-            <div className="glass-card p-6 space-y-4">
-              <h3 className="text-base font-semibold text-white flex items-center gap-2">
-                <AlertTriangle className="w-4 h-4 text-amber-500" /> Drawdown & Panic Resistance Timeline (%)
+            <div className="glass-card p-4 sm:p-6 space-y-4">
+              <h3 className="text-sm sm:text-base font-semibold text-white flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0" /> Drawdown & Panic Resistance Timeline (%)
               </h3>
 
-              <div className="h-64 w-full">
+              <div className="h-[220px] sm:h-[260px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={simOutput.timeline}>
+                  <AreaChart data={simOutput.timeline} margin={{ top: 10, right: 10, left: -15, bottom: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
-                    <XAxis dataKey="dateStr" stroke="var(--text-muted-color)" tick={{ fontSize: 10 }} tickFormatter={(str) => str.split("-")[0]} />
-                    <YAxis stroke="var(--text-muted-color)" tick={{ fontSize: 10 }} tickFormatter={(val) => `-${val}%`} />
-                    <Tooltip contentStyle={{ backgroundColor: "var(--card-bg-color)", borderColor: "var(--border-color)", color: "var(--text-main-color)" }} formatter={(val: any) => [`-${val}%`, "Drawdown"]} />
+                    <XAxis dataKey="dateStr" stroke="var(--text-muted-color)" tick={{ fontSize: 9 }} tickFormatter={(str) => str.split("-")[0]} />
+                    <YAxis stroke="var(--text-muted-color)" tick={{ fontSize: 9 }} tickFormatter={(val) => `-${val}%`} />
+                    <Tooltip contentStyle={{ backgroundColor: "var(--card-bg-color)", borderColor: "var(--border-color)", color: "var(--text-main-color)", fontSize: "11px" }} formatter={(val: any) => [`-${val}%`, "Drawdown"]} />
                     <Area type="monotone" dataKey="drawdownPct" name="Drawdown %" stroke="#f59e0b" fill="#f59e0b" fillOpacity={0.2} strokeWidth={1.5} />
                   </AreaChart>
                 </ResponsiveContainer>
               </div>
 
-              <p className="text-xs text-muted-grey">{generateChartInsight("drawdown", simOutput).content}</p>
+              <p className="text-xs text-muted-grey leading-relaxed">{generateChartInsight("drawdown", simOutput).content}</p>
             </div>
 
             {/* Annual Returns Bar Chart */}
-            <div className="glass-card p-6 space-y-4">
-              <h3 className="text-base font-semibold text-white flex items-center gap-2">
-                <BarChart3 className="w-4 h-4 text-blue-500" /> Year-by-Year Calendar Returns (%)
+            <div className="glass-card p-4 sm:p-6 space-y-4">
+              <h3 className="text-sm sm:text-base font-semibold text-white flex items-center gap-2">
+                <BarChart3 className="w-4 h-4 text-blue-500 shrink-0" /> Year-by-Year Calendar Returns (%)
               </h3>
 
-              <div className="h-64 w-full">
+              <div className="h-[220px] sm:h-[260px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={simOutput.annualBreakdown}>
+                  <BarChart data={simOutput.annualBreakdown} margin={{ top: 10, right: 10, left: -15, bottom: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
-                    <XAxis dataKey="year" stroke="var(--text-muted-color)" tick={{ fontSize: 10 }} />
-                    <YAxis stroke="var(--text-muted-color)" tick={{ fontSize: 10 }} tickFormatter={(val) => `${val}%`} />
-                    <Tooltip contentStyle={{ backgroundColor: "var(--card-bg-color)", borderColor: "var(--border-color)", color: "var(--text-main-color)" }} formatter={(val: any) => [`${val}%`, "Annual Return"]} />
+                    <XAxis dataKey="year" stroke="var(--text-muted-color)" tick={{ fontSize: 9 }} />
+                    <YAxis stroke="var(--text-muted-color)" tick={{ fontSize: 9 }} tickFormatter={(val) => `${val}%`} />
+                    <Tooltip contentStyle={{ backgroundColor: "var(--card-bg-color)", borderColor: "var(--border-color)", color: "var(--text-main-color)", fontSize: "11px" }} formatter={(val: any) => [`${val}%`, "Annual Return"]} />
                     <Bar dataKey="annualReturnPct" name="Return %">
                       {simOutput.annualBreakdown.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={entry.annualReturnPct >= 0 ? "#22c55e" : "#ef4444"} />
@@ -593,32 +592,32 @@ export default function PortfolioStrategySimulatorPage() {
                 </ResponsiveContainer>
               </div>
 
-              <p className="text-xs text-muted-grey">{generateChartInsight("annual", simOutput).content}</p>
+              <p className="text-xs text-muted-grey leading-relaxed">{generateChartInsight("annual", simOutput).content}</p>
             </div>
           </div>
 
-          {/* Rolling Returns & Year-wise Table */}
-          <div className="glass-card p-6 space-y-4">
-            <h3 className="text-base font-semibold text-white flex items-center gap-2">
-              <Calendar className="w-4 h-4 text-purple-500" /> Rolling Return Analysis & Consistency
+          {/* Rolling Returns & Risk Ratios */}
+          <div className="glass-card p-4 sm:p-6 space-y-4">
+            <h3 className="text-sm sm:text-base font-semibold text-white flex items-center gap-2">
+              <Calendar className="w-4 h-4 text-purple-500 shrink-0" /> Rolling Return Analysis & Consistency
             </h3>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="bg-navy-bg/80 p-4 rounded-xl border border-border-navy space-y-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+              <div className="bg-navy-bg/80 p-3.5 sm:p-4 rounded-xl border border-border-navy space-y-2">
                 <span className="text-xs font-semibold text-blue-500">3-Year Rolling Return</span>
                 <div className="text-sm font-mono text-white">Average: <strong className="text-emerald">{simOutput.rollingReturns.threeYear.average}%</strong></div>
                 <div className="text-xs text-muted-grey font-mono">Range: {simOutput.rollingReturns.threeYear.min}% to {simOutput.rollingReturns.threeYear.max}%</div>
-                <div className="text-[11px] text-emerald">Positive in {simOutput.rollingReturns.threeYear.positiveRatioPct}% of periods</div>
+                <div className="text-[11px] text-emerald font-medium">Positive in {simOutput.rollingReturns.threeYear.positiveRatioPct}% of periods</div>
               </div>
 
-              <div className="bg-navy-bg/80 p-4 rounded-xl border border-border-navy space-y-2">
+              <div className="bg-navy-bg/80 p-3.5 sm:p-4 rounded-xl border border-border-navy space-y-2">
                 <span className="text-xs font-semibold text-purple-500">5-Year Rolling Return</span>
                 <div className="text-sm font-mono text-white">Average: <strong className="text-emerald">{simOutput.rollingReturns.fiveYear.average}%</strong></div>
                 <div className="text-xs text-muted-grey font-mono">Range: {simOutput.rollingReturns.fiveYear.min}% to {simOutput.rollingReturns.fiveYear.max}%</div>
-                <div className="text-[11px] text-emerald">Positive in {simOutput.rollingReturns.fiveYear.positiveRatioPct}% of periods</div>
+                <div className="text-[11px] text-emerald font-medium">Positive in {simOutput.rollingReturns.fiveYear.positiveRatioPct}% of periods</div>
               </div>
 
-              <div className="bg-navy-bg/80 p-4 rounded-xl border border-border-navy space-y-2">
+              <div className="bg-navy-bg/80 p-3.5 sm:p-4 rounded-xl border border-border-navy space-y-2 sm:col-span-2 lg:col-span-1">
                 <span className="text-xs font-semibold text-cyan-500">Risk Ratios</span>
                 <div className="text-sm font-mono text-white">Sharpe Ratio: <strong className="text-emerald">{simOutput.sharpeRatio}</strong></div>
                 <div className="text-sm font-mono text-white">Sortino Ratio: <strong className="text-emerald">{simOutput.sortinoRatio}</strong></div>
@@ -631,11 +630,11 @@ export default function PortfolioStrategySimulatorPage() {
 
       {/* TAB 2: COMPARE STRATEGIES */}
       {activeTab === "compare" && simComparisonOutput && (
-        <div className="space-y-8">
-          <div className="glass-card p-6 space-y-6">
+        <div className="space-y-6 sm:space-y-8">
+          <div className="glass-card p-4 sm:p-6 space-y-6">
             <div>
               <h3 className="text-base font-semibold text-white flex items-center gap-2">
-                <Layers className="w-5 h-5 text-emerald" /> Side-by-Side Portfolio Strategy Comparator
+                <Layers className="w-5 h-5 text-emerald shrink-0" /> Side-by-Side Portfolio Strategy Comparator
               </h3>
               <p className="text-xs text-muted-grey mt-1">
                 Compare your current allocation (Portfolio A) against benchmark Strategy (Portfolio B).
@@ -643,13 +642,13 @@ export default function PortfolioStrategySimulatorPage() {
             </div>
 
             {/* Selector for Portfolio B */}
-            <div className="flex flex-wrap items-center gap-3 bg-navy-bg p-3.5 rounded-xl border border-border-navy">
-              <span className="text-xs font-medium text-white">Select Benchmark Strategy (Portfolio B):</span>
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3 bg-navy-bg p-3.5 rounded-xl border border-border-navy">
+              <span className="text-xs font-medium text-white w-full sm:w-auto">Select Benchmark Strategy (Portfolio B):</span>
               {Object.entries(PRESET_ALLOCATIONS).map(([key, preset]) => (
                 <button
                   key={key}
                   onClick={() => setComparisonAllocation(preset.config)}
-                  className="px-3 py-1.5 rounded-lg text-xs font-medium bg-navy-light hover:bg-emerald/10 text-white border border-border-navy transition"
+                  className="px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-lg text-xs font-medium bg-navy-light hover:bg-emerald/10 text-white border border-border-navy transition"
                 >
                   {preset.label}
                 </button>
@@ -657,10 +656,10 @@ export default function PortfolioStrategySimulatorPage() {
             </div>
 
             {/* Comparison Table */}
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs border-collapse">
+            <div className="overflow-x-auto rounded-xl border border-border-navy">
+              <table className="w-full text-left text-xs border-collapse min-w-[500px]">
                 <thead>
-                  <tr className="border-b border-border-navy text-muted-grey">
+                  <tr className="border-b border-border-navy text-muted-grey bg-navy-bg/50">
                     <th className="py-3 px-4">Metric Parameter</th>
                     <th className="py-3 px-4 text-emerald">Portfolio A (User Custom)</th>
                     <th className="py-3 px-4 text-purple-500">Portfolio B (Benchmark)</th>
@@ -713,7 +712,7 @@ export default function PortfolioStrategySimulatorPage() {
               <Sparkles className="w-5 h-5 text-emerald shrink-0 mt-0.5" />
               <div className="space-y-1">
                 <h4 className="text-xs font-semibold text-emerald">Non-Judgmental AI Comparative Observation</h4>
-                <p className="text-xs text-muted-grey">{generateComparisonInsight(simOutput, simComparisonOutput)}</p>
+                <p className="text-xs text-muted-grey leading-relaxed">{generateComparisonInsight(simOutput, simComparisonOutput)}</p>
               </div>
             </div>
           </div>
@@ -722,29 +721,29 @@ export default function PortfolioStrategySimulatorPage() {
 
       {/* TAB 3: RISK HEALTH SCORE */}
       {activeTab === "health" && healthReport && (
-        <div className="space-y-8">
-          <div className="glass-card p-6 space-y-6">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+        <div className="space-y-6 sm:space-y-8">
+          <div className="glass-card p-4 sm:p-6 space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div className="flex items-center space-x-4">
-                <div className="w-20 h-20 rounded-2xl bg-gradient-to-tr from-emerald-600 to-blue-600 flex items-center justify-center text-white text-3xl font-black font-mono shadow-xl">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-tr from-emerald-600 to-blue-600 flex items-center justify-center text-white text-2xl sm:text-3xl font-black font-mono shadow-xl shrink-0">
                   {healthReport.overallScore}
                 </div>
                 <div>
                   <div className="flex items-center space-x-2">
-                    <h3 className="text-lg font-bold text-white">Portfolio Health Score</h3>
-                    <span className="px-3 py-0.5 rounded-full text-xs font-bold bg-emerald/10 text-emerald border border-emerald/30">
+                    <h3 className="text-base sm:text-lg font-bold text-white">Portfolio Health Score</h3>
+                    <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald/10 text-emerald border border-emerald/30">
                       Grade {healthReport.grade}
                     </span>
                   </div>
-                  <p className="text-xs text-muted-grey mt-1">{healthReport.summaryText}</p>
+                  <p className="text-xs text-muted-grey mt-1 leading-relaxed">{healthReport.summaryText}</p>
                 </div>
               </div>
             </div>
 
             {/* 8 Health Metrics Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
               {healthReport.metrics.map((metric) => (
-                <div key={metric.id} className="bg-navy-bg/80 p-4 rounded-xl border border-border-navy space-y-2">
+                <div key={metric.id} className="bg-navy-bg/80 p-3.5 sm:p-4 rounded-xl border border-border-navy space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-semibold text-white">{metric.name}</span>
                     <span className="text-xs font-mono font-bold text-emerald">{metric.score} / 100</span>
@@ -757,7 +756,7 @@ export default function PortfolioStrategySimulatorPage() {
                     />
                   </div>
 
-                  <p className="text-[11px] text-muted-grey">{metric.explanation}</p>
+                  <p className="text-[11px] text-muted-grey leading-relaxed">{metric.explanation}</p>
                   <p className="text-[10px] text-emerald font-medium">💡 {metric.recommendation}</p>
                 </div>
               ))}
@@ -768,24 +767,24 @@ export default function PortfolioStrategySimulatorPage() {
 
       {/* TAB 4: CRISIS STRESS TEST */}
       {activeTab === "stress" && (
-        <div className="space-y-8">
-          <div className="glass-card p-6 space-y-6">
+        <div className="space-y-6 sm:space-y-8">
+          <div className="glass-card p-4 sm:p-6 space-y-6">
             <div>
               <h3 className="text-base font-semibold text-white flex items-center gap-2">
-                <AlertTriangle className="w-5 h-5 text-amber-500" /> Historical Crisis Stress Testing Engine
+                <AlertTriangle className="w-5 h-5 text-amber-500 shrink-0" /> Historical Crisis Stress Testing Engine
               </h3>
               <p className="text-xs text-muted-grey mt-1">
                 Replays your exact portfolio allocation under iconic historical financial market crashes.
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
               {stressResults.map((scen) => (
-                <div key={scen.id} className="bg-navy-bg/80 p-5 rounded-xl border border-border-navy space-y-3 flex flex-col justify-between">
+                <div key={scen.id} className="bg-navy-bg/80 p-4 sm:p-5 rounded-xl border border-border-navy space-y-3 flex flex-col justify-between">
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
                       <h4 className="text-sm font-bold text-white">{scen.name}</h4>
-                      <span className="text-[10px] font-mono text-muted-grey bg-navy-card px-2 py-0.5 rounded border border-border-navy">
+                      <span className="text-[10px] font-mono text-muted-grey bg-navy-card px-2 py-0.5 rounded border border-border-navy shrink-0">
                         {scen.periodLabel}
                       </span>
                     </div>
@@ -796,7 +795,7 @@ export default function PortfolioStrategySimulatorPage() {
                         <span className="font-mono font-bold text-red-500">-{scen.marketDropPct}%</span>
                       </div>
                       <div className="bg-navy-card p-2 rounded border border-border-navy">
-                        <span className="text-[10px] text-muted-grey block">Your Portfolio Drop</span>
+                        <span className="text-[10px] text-muted-grey block">Your Drop</span>
                         <span className="font-mono font-bold text-amber-500">-{scen.portfolioDropPct}%</span>
                       </div>
                     </div>
@@ -806,7 +805,7 @@ export default function PortfolioStrategySimulatorPage() {
 
                   <div className="pt-2 border-t border-border-navy">
                     <span className="text-[11px] text-emerald font-medium block">Key Educational Takeaway:</span>
-                    <p className="text-[11px] text-muted-grey">{scen.keyTakeaway}</p>
+                    <p className="text-[11px] text-muted-grey leading-relaxed">{scen.keyTakeaway}</p>
                   </div>
                 </div>
               ))}
@@ -817,24 +816,24 @@ export default function PortfolioStrategySimulatorPage() {
 
       {/* TAB 5: WHAT-IF SIMULATOR */}
       {activeTab === "whatif" && whatIfResult && (
-        <div className="space-y-8">
-          <div className="glass-card p-6 space-y-6">
+        <div className="space-y-6 sm:space-y-8">
+          <div className="glass-card p-4 sm:p-6 space-y-6">
             <div>
               <h3 className="text-base font-semibold text-white flex items-center gap-2">
-                <Zap className="w-5 h-5 text-purple-500" /> Interactive What-If Scenario Modifier
+                <Zap className="w-5 h-5 text-purple-500 shrink-0" /> Interactive What-If Scenario Modifier
               </h3>
               <p className="text-xs text-muted-grey mt-1">
                 Adjust SIP step-up rates, pause durations, or top-up bonuses to see immediate wealth impacts.
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
               <div className="space-y-1">
                 <label className="text-xs font-medium text-white">Annual SIP Step-Up (%)</label>
                 <select
                   value={whatIfStepUp}
                   onChange={(e) => setWhatIfStepUp(Number(e.target.value))}
-                  className="w-full bg-navy-bg border border-border-navy rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald"
+                  className="w-full bg-navy-bg border border-border-navy rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-emerald min-h-[42px]"
                 >
                   <option value={0} className="bg-navy-bg text-white">0% (Flat SIP)</option>
                   <option value={5} className="bg-navy-bg text-white">5% Step-Up</option>
@@ -848,7 +847,7 @@ export default function PortfolioStrategySimulatorPage() {
                 <select
                   value={whatIfPauseMonths}
                   onChange={(e) => setWhatIfPauseMonths(Number(e.target.value))}
-                  className="w-full bg-navy-bg border border-border-navy rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald"
+                  className="w-full bg-navy-bg border border-border-navy rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-emerald min-h-[42px]"
                 >
                   <option value={0} className="bg-navy-bg text-white">No Pause (Continuous)</option>
                   <option value={6} className="bg-navy-bg text-white">6 Months Pause</option>
@@ -862,7 +861,7 @@ export default function PortfolioStrategySimulatorPage() {
                 <select
                   value={whatIfBonus}
                   onChange={(e) => setWhatIfBonus(Number(e.target.value))}
-                  className="w-full bg-navy-bg border border-border-navy rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald"
+                  className="w-full bg-navy-bg border border-border-navy rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-emerald min-h-[42px]"
                 >
                   <option value={0} className="bg-navy-bg text-white">₹0</option>
                   <option value={25000} className="bg-navy-bg text-white">₹25,000 / year</option>
@@ -876,7 +875,7 @@ export default function PortfolioStrategySimulatorPage() {
                 <select
                   value={whatIfRebalance ? "true" : "false"}
                   onChange={(e) => setWhatIfRebalance(e.target.value === "true")}
-                  className="w-full bg-navy-bg border border-border-navy rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald"
+                  className="w-full bg-navy-bg border border-border-navy rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-emerald min-h-[42px]"
                 >
                   <option value="true" className="bg-navy-bg text-white">Enabled (Annual)</option>
                   <option value="false" className="bg-navy-bg text-white">Buy & Hold (No rebalance)</option>
@@ -885,27 +884,27 @@ export default function PortfolioStrategySimulatorPage() {
             </div>
 
             {/* Result Comparison */}
-            <div className="bg-navy-bg/80 p-5 rounded-xl border border-border-navy space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="bg-navy-bg/80 p-4 sm:p-5 rounded-xl border border-border-navy space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
                 <div>
                   <span className="text-xs text-muted-grey block">Baseline Final Wealth</span>
-                  <span className="text-base font-bold font-mono text-white">{formatINR(whatIfResult.baseline.finalValue)}</span>
+                  <span className="text-base sm:text-lg font-bold font-mono text-white">{formatINR(whatIfResult.baseline.finalValue)}</span>
                 </div>
 
                 <div>
                   <span className="text-xs text-muted-grey block">Modified Strategy Wealth</span>
-                  <span className="text-base font-bold font-mono text-emerald">{formatINR(whatIfResult.modified.finalValue)}</span>
+                  <span className="text-base sm:text-lg font-bold font-mono text-emerald">{formatINR(whatIfResult.modified.finalValue)}</span>
                 </div>
 
                 <div>
                   <span className="text-xs text-muted-grey block">Wealth Difference</span>
-                  <span className="text-base font-bold font-mono text-blue-500">
+                  <span className="text-base sm:text-lg font-bold font-mono text-blue-500">
                     {whatIfResult.diffWealth >= 0 ? "+" : ""}{formatINR(whatIfResult.diffWealth)} ({whatIfResult.diffWealthPct}%)
                   </span>
                 </div>
               </div>
 
-              <p className="text-xs text-muted-grey bg-navy-card p-3 rounded-lg border border-border-navy">
+              <p className="text-xs text-muted-grey bg-navy-card p-3 rounded-lg border border-border-navy leading-relaxed">
                 💡 <strong>Scenario Insight:</strong> {whatIfResult.insight}
               </p>
             </div>
@@ -915,18 +914,18 @@ export default function PortfolioStrategySimulatorPage() {
 
       {/* TAB 6: GOAL PLANNING */}
       {activeTab === "goal" && goalResult && (
-        <div className="space-y-8">
-          <div className="glass-card p-6 space-y-6">
+        <div className="space-y-6 sm:space-y-8">
+          <div className="glass-card p-4 sm:p-6 space-y-6">
             <div>
               <h3 className="text-base font-semibold text-white flex items-center gap-2">
-                <Target className="w-5 h-5 text-emerald" /> Goal Planning & Inflation Adjustment Engine
+                <Target className="w-5 h-5 text-emerald shrink-0" /> Goal Planning & Inflation Adjustment Engine
               </h3>
               <p className="text-xs text-muted-grey mt-1">
                 Integrate inflation forecasts to evaluate goal achievement probability based on strategy CAGR.
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
               <div className="space-y-1">
                 <label className="text-xs font-medium text-white">Goal Target Cost Today (₹)</label>
                 <input
@@ -934,7 +933,7 @@ export default function PortfolioStrategySimulatorPage() {
                   step="500000"
                   value={goalTargetToday}
                   onChange={(e) => setGoalTargetToday(Math.max(0, Number(e.target.value)))}
-                  className="w-full bg-navy-bg border border-border-navy rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald font-mono"
+                  className="w-full bg-navy-bg border border-border-navy rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-emerald font-mono min-h-[42px]"
                 />
                 <span className="text-[11px] text-muted-grey">{formatINR(goalTargetToday)} in today&apos;s money</span>
               </div>
@@ -947,7 +946,7 @@ export default function PortfolioStrategySimulatorPage() {
                   max="40"
                   value={goalHorizonYears}
                   onChange={(e) => setGoalHorizonYears(Math.max(1, Number(e.target.value)))}
-                  className="w-full bg-navy-bg border border-border-navy rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald font-mono"
+                  className="w-full bg-navy-bg border border-border-navy rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-emerald font-mono min-h-[42px]"
                 />
                 <span className="text-[11px] text-muted-grey">Target year: {new Date().getFullYear() + goalHorizonYears}</span>
               </div>
@@ -959,42 +958,42 @@ export default function PortfolioStrategySimulatorPage() {
                   step="0.5"
                   value={goalInflationPct}
                   onChange={(e) => setGoalInflationPct(Number(e.target.value))}
-                  className="w-full bg-navy-bg border border-border-navy rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald font-mono"
+                  className="w-full bg-navy-bg border border-border-navy rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-emerald font-mono min-h-[42px]"
                 />
                 <span className="text-[11px] text-muted-grey">Historical CPI avg: 6.0%</span>
               </div>
             </div>
 
             {/* Goal Calculation Output Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="bg-navy-bg/80 p-4 rounded-xl border border-border-navy space-y-1">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+              <div className="bg-navy-bg/80 p-3.5 sm:p-4 rounded-xl border border-border-navy space-y-1">
                 <span className="text-[11px] text-muted-grey block">Inflation-Adjusted Target</span>
-                <span className="text-lg font-bold font-mono text-amber-500">{formatINR(goalResult.futureInflationAdjustedTarget)}</span>
+                <span className="text-base sm:text-lg font-bold font-mono text-amber-500 truncate block">{formatINR(goalResult.futureInflationAdjustedTarget)}</span>
                 <span className="text-[10px] text-muted-grey block">Cost in {goalHorizonYears} years</span>
               </div>
 
-              <div className="bg-navy-bg/80 p-4 rounded-xl border border-border-navy space-y-1">
+              <div className="bg-navy-bg/80 p-3.5 sm:p-4 rounded-xl border border-border-navy space-y-1">
                 <span className="text-[11px] text-muted-grey block">Projected Portfolio Wealth</span>
-                <span className="text-lg font-bold font-mono text-emerald">{formatINR(goalResult.projectedFutureWealth)}</span>
+                <span className="text-base sm:text-lg font-bold font-mono text-emerald truncate block">{formatINR(goalResult.projectedFutureWealth)}</span>
                 <span className="text-[10px] text-muted-grey block">Based on strategy CAGR ({simOutput.cagrPct}%)</span>
               </div>
 
-              <div className="bg-navy-bg/80 p-4 rounded-xl border border-border-navy space-y-1">
+              <div className="bg-navy-bg/80 p-3.5 sm:p-4 rounded-xl border border-border-navy space-y-1">
                 <span className="text-[11px] text-muted-grey block">Shortfall / Surplus</span>
-                <span className={`text-lg font-bold font-mono ${goalResult.isGoalAchievable ? "text-emerald" : "text-red-500"}`}>
+                <span className={`text-base sm:text-lg font-bold font-mono truncate block ${goalResult.isGoalAchievable ? "text-emerald" : "text-red-500"}`}>
                   {goalResult.shortfallOrSurplus >= 0 ? "+" : ""}{formatINR(goalResult.shortfallOrSurplus)}
                 </span>
                 <span className="text-[10px] text-muted-grey block">{goalResult.isGoalAchievable ? "Goal On Track" : "Action Needed"}</span>
               </div>
 
-              <div className="bg-navy-bg/80 p-4 rounded-xl border border-border-navy space-y-1">
+              <div className="bg-navy-bg/80 p-3.5 sm:p-4 rounded-xl border border-border-navy space-y-1">
                 <span className="text-[11px] text-muted-grey block">Recommended Monthly SIP</span>
-                <span className="text-lg font-bold font-mono text-blue-500">{formatINR(goalResult.recommendedMonthlySip)}</span>
+                <span className="text-base sm:text-lg font-bold font-mono text-blue-500 truncate block">{formatINR(goalResult.recommendedMonthlySip)}</span>
                 <span className="text-[10px] text-muted-grey block">Required to bridge goal</span>
               </div>
             </div>
 
-            <div className="bg-navy-bg/80 p-4 rounded-xl border border-border-navy text-xs text-muted-grey">
+            <div className="bg-navy-bg/80 p-4 rounded-xl border border-border-navy text-xs text-muted-grey leading-relaxed">
               💡 <strong>Goal Mentor Guidance:</strong> {goalResult.educationalNote}
             </div>
           </div>
@@ -1003,47 +1002,47 @@ export default function PortfolioStrategySimulatorPage() {
 
       {/* TAB 7: MONTE CARLO ENGINE */}
       {activeTab === "montecarlo" && monteCarloResult && (
-        <div className="space-y-8">
-          <div className="glass-card p-6 space-y-6">
+        <div className="space-y-6 sm:space-y-8">
+          <div className="glass-card p-4 sm:p-6 space-y-6">
             <div>
               <h3 className="text-base font-semibold text-white flex items-center gap-2">
-                <Dices className="w-5 h-5 text-purple-500" /> Monte Carlo Simulation Engine (1,000+ Random Scenarios)
+                <Dices className="w-5 h-5 text-purple-500 shrink-0" /> Monte Carlo Simulation Engine (1,000+ Random Scenarios)
               </h3>
               <p className="text-xs text-muted-grey mt-1">
                 Models statistical probability distributions based on historical return mean ({simOutput.cagrPct}%) and variance ({simOutput.annualizedVolatilityPct}%).
               </p>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="bg-navy-bg/80 p-4 rounded-xl border border-border-navy space-y-1">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+              <div className="bg-navy-bg/80 p-3.5 sm:p-4 rounded-xl border border-border-navy space-y-1">
                 <span className="text-[11px] text-muted-grey block">Median Outcome (50th Pct)</span>
-                <span className="text-lg font-bold font-mono text-white">{formatINR(monteCarloResult.medianFinalWealth)}</span>
+                <span className="text-base sm:text-lg font-bold font-mono text-white truncate block">{formatINR(monteCarloResult.medianFinalWealth)}</span>
               </div>
 
-              <div className="bg-navy-bg/80 p-4 rounded-xl border border-border-navy space-y-1">
+              <div className="bg-navy-bg/80 p-3.5 sm:p-4 rounded-xl border border-border-navy space-y-1">
                 <span className="text-[11px] text-muted-grey block">Best Case (90th Pct)</span>
-                <span className="text-lg font-bold font-mono text-emerald">{formatINR(monteCarloResult.bestCase90th)}</span>
+                <span className="text-base sm:text-lg font-bold font-mono text-emerald truncate block">{formatINR(monteCarloResult.bestCase90th)}</span>
               </div>
 
-              <div className="bg-navy-bg/80 p-4 rounded-xl border border-border-navy space-y-1">
+              <div className="bg-navy-bg/80 p-3.5 sm:p-4 rounded-xl border border-border-navy space-y-1">
                 <span className="text-[11px] text-muted-grey block">Worst Case (10th Pct)</span>
-                <span className="text-lg font-bold font-mono text-amber-500">{formatINR(monteCarloResult.worstCase10th)}</span>
+                <span className="text-base sm:text-lg font-bold font-mono text-amber-500 truncate block">{formatINR(monteCarloResult.worstCase10th)}</span>
               </div>
 
-              <div className="bg-navy-bg/80 p-4 rounded-xl border border-border-navy space-y-1">
+              <div className="bg-navy-bg/80 p-3.5 sm:p-4 rounded-xl border border-border-navy space-y-1">
                 <span className="text-[11px] text-muted-grey block">Probability of Success</span>
-                <span className="text-lg font-bold font-mono text-blue-500">{monteCarloResult.successProbabilityPct}%</span>
+                <span className="text-base sm:text-lg font-bold font-mono text-blue-500 truncate block">{monteCarloResult.successProbabilityPct}%</span>
               </div>
             </div>
 
             {/* Monte Carlo Fan Chart */}
-            <div className="h-80 w-full">
+            <div className="h-[280px] sm:h-[350px] w-full">
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={monteCarloResult.timeline}>
+                <AreaChart data={monteCarloResult.timeline} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
-                  <XAxis dataKey="year" stroke="var(--text-muted-color)" tick={{ fontSize: 10 }} tickFormatter={(yr) => `Yr ${yr}`} />
-                  <YAxis stroke="var(--text-muted-color)" tick={{ fontSize: 10 }} tickFormatter={(val) => formatINR(val)} />
-                  <Tooltip contentStyle={{ backgroundColor: "var(--card-bg-color)", borderColor: "var(--border-color)", color: "var(--text-main-color)" }} formatter={(val: any) => [formatINR(Number(val)), ""]} />
+                  <XAxis dataKey="year" stroke="var(--text-muted-color)" tick={{ fontSize: 9 }} tickFormatter={(yr) => `Yr ${yr}`} />
+                  <YAxis stroke="var(--text-muted-color)" tick={{ fontSize: 9 }} tickFormatter={(val) => formatINR(val)} />
+                  <Tooltip contentStyle={{ backgroundColor: "var(--card-bg-color)", borderColor: "var(--border-color)", color: "var(--text-main-color)", fontSize: "11px" }} formatter={(val: any) => [formatINR(Number(val)), ""]} />
                   <Area type="monotone" dataKey="p90" name="Best Case (90th)" stroke="#22c55e" fill="#22c55e" fillOpacity={0.15} strokeWidth={1.5} />
                   <Area type="monotone" dataKey="p50" name="Median Outcome (50th)" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.3} strokeWidth={2} />
                   <Area type="monotone" dataKey="p10" name="Worst Case (10th)" stroke="#f59e0b" fill="#f59e0b" fillOpacity={0.15} strokeWidth={1.5} />
@@ -1051,7 +1050,7 @@ export default function PortfolioStrategySimulatorPage() {
               </ResponsiveContainer>
             </div>
 
-            <p className="text-xs text-muted-grey bg-navy-card p-3 rounded-lg border border-border-navy">
+            <p className="text-xs text-muted-grey bg-navy-card p-3 rounded-lg border border-border-navy leading-relaxed">
               🔒 {monteCarloResult.educationalDisclaimer}
             </p>
           </div>
