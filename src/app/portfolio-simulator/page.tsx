@@ -527,7 +527,17 @@ export default function PortfolioStrategySimulatorPage() {
                   <XAxis dataKey="dateStr" stroke="var(--text-muted-color)" tick={{ fontSize: 9 }} tickFormatter={(str) => str.split("-")[0]} />
                   <YAxis stroke="var(--text-muted-color)" tick={{ fontSize: 9 }} tickFormatter={(val) => formatINR(val)} />
                   <Tooltip
-                    contentStyle={{ backgroundColor: "var(--card-bg-color)", borderColor: "var(--border-color)", color: "var(--text-main-color)", borderRadius: "8px", fontSize: "11px" }}
+                    contentStyle={{
+                      backgroundColor: "#081c3a",
+                      borderColor: "var(--border-color)",
+                      color: "var(--text-main-color)",
+                      borderRadius: "8px",
+                      fontSize: "11px",
+                      boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.5)"
+                    }}
+                    itemStyle={{ color: "var(--text-main-color)" }}
+                    labelStyle={{ color: "var(--text-muted-color)", fontWeight: "600" }}
+                    cursor={{ stroke: "rgba(255, 255, 255, 0.2)", strokeDasharray: "3 3" }}
                     formatter={(val: any) => [formatINR(Number(val)), ""]}
                   />
                   <Legend wrapperStyle={{ fontSize: "11px" }} />
@@ -561,7 +571,20 @@ export default function PortfolioStrategySimulatorPage() {
                     <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
                     <XAxis dataKey="dateStr" stroke="var(--text-muted-color)" tick={{ fontSize: 9 }} tickFormatter={(str) => str.split("-")[0]} />
                     <YAxis stroke="var(--text-muted-color)" tick={{ fontSize: 9 }} tickFormatter={(val) => `-${val}%`} />
-                    <Tooltip contentStyle={{ backgroundColor: "var(--card-bg-color)", borderColor: "var(--border-color)", color: "var(--text-main-color)", fontSize: "11px" }} formatter={(val: any) => [`-${val}%`, "Drawdown"]} />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: "#081c3a",
+                        borderColor: "var(--border-color)",
+                        color: "var(--text-main-color)",
+                        borderRadius: "8px",
+                        fontSize: "11px",
+                        boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.5)"
+                      }}
+                      itemStyle={{ color: "var(--text-main-color)" }}
+                      labelStyle={{ color: "var(--text-muted-color)", fontWeight: "600" }}
+                      cursor={{ stroke: "rgba(245, 158, 11, 0.3)", strokeDasharray: "3 3" }}
+                      formatter={(val: any) => [`-${val}%`, "Drawdown"]}
+                    />
                     <Area type="monotone" dataKey="drawdownPct" name="Drawdown %" stroke="#f59e0b" fill="#f59e0b" fillOpacity={0.2} strokeWidth={1.5} />
                   </AreaChart>
                 </ResponsiveContainer>
@@ -582,7 +605,20 @@ export default function PortfolioStrategySimulatorPage() {
                     <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
                     <XAxis dataKey="year" stroke="var(--text-muted-color)" tick={{ fontSize: 9 }} />
                     <YAxis stroke="var(--text-muted-color)" tick={{ fontSize: 9 }} tickFormatter={(val) => `${val}%`} />
-                    <Tooltip contentStyle={{ backgroundColor: "var(--card-bg-color)", borderColor: "var(--border-color)", color: "var(--text-main-color)", fontSize: "11px" }} formatter={(val: any) => [`${val}%`, "Annual Return"]} />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: "#081c3a",
+                        borderColor: "var(--border-color)",
+                        color: "var(--text-main-color)",
+                        borderRadius: "8px",
+                        fontSize: "11px",
+                        boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.5)"
+                      }}
+                      itemStyle={{ color: "var(--text-main-color)" }}
+                      labelStyle={{ color: "var(--text-muted-color)", fontWeight: "600" }}
+                      cursor={{ fill: "rgba(255, 255, 255, 0.08)", radius: 4 }}
+                      formatter={(val: any) => [`${val}%`, "Annual Return"]}
+                    />
                     <Bar dataKey="annualReturnPct" name="Return %">
                       {simOutput.annualBreakdown.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={entry.annualReturnPct >= 0 ? "#22c55e" : "#ef4444"} />
@@ -592,7 +628,12 @@ export default function PortfolioStrategySimulatorPage() {
                 </ResponsiveContainer>
               </div>
 
-              <p className="text-xs text-muted-grey leading-relaxed">{generateChartInsight("annual", simOutput).content}</p>
+              <div className="space-y-1.5">
+                <p className="text-xs text-muted-grey leading-relaxed">{generateChartInsight("annual", simOutput).content}</p>
+                <p className="text-[11px] text-amber-500/90 bg-amber-500/10 border border-amber-500/20 p-2.5 rounded-lg leading-relaxed">
+                  💡 <strong>Educational Note on 2020:</strong> While the market suffered a historic <strong>-38.4% crash in March 2020</strong> (visible in the <em>Drawdown Timeline</em> chart), a massive central bank & economic recovery rally pushed full-year 2020 calendar returns positive (<strong>+14.9%</strong>) by Dec 31, 2020.
+                </p>
+              </div>
             </div>
           </div>
 
@@ -1042,7 +1083,20 @@ export default function PortfolioStrategySimulatorPage() {
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
                   <XAxis dataKey="year" stroke="var(--text-muted-color)" tick={{ fontSize: 9 }} tickFormatter={(yr) => `Yr ${yr}`} />
                   <YAxis stroke="var(--text-muted-color)" tick={{ fontSize: 9 }} tickFormatter={(val) => formatINR(val)} />
-                  <Tooltip contentStyle={{ backgroundColor: "var(--card-bg-color)", borderColor: "var(--border-color)", color: "var(--text-main-color)", fontSize: "11px" }} formatter={(val: any) => [formatINR(Number(val)), ""]} />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "#081c3a",
+                      borderColor: "var(--border-color)",
+                      color: "var(--text-main-color)",
+                      borderRadius: "8px",
+                      fontSize: "11px",
+                      boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.5)"
+                    }}
+                    itemStyle={{ color: "var(--text-main-color)" }}
+                    labelStyle={{ color: "var(--text-muted-color)", fontWeight: "600" }}
+                    cursor={{ stroke: "rgba(255, 255, 255, 0.2)", strokeDasharray: "3 3" }}
+                    formatter={(val: any) => [formatINR(Number(val)), ""]}
+                  />
                   <Area type="monotone" dataKey="p90" name="Best Case (90th)" stroke="#22c55e" fill="#22c55e" fillOpacity={0.15} strokeWidth={1.5} />
                   <Area type="monotone" dataKey="p50" name="Median Outcome (50th)" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.3} strokeWidth={2} />
                   <Area type="monotone" dataKey="p10" name="Worst Case (10th)" stroke="#f59e0b" fill="#f59e0b" fillOpacity={0.15} strokeWidth={1.5} />
