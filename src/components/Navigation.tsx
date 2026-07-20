@@ -33,7 +33,8 @@ import {
   HeartPulse,
   TrendingDown,
   Zap,
-  Download
+  Download,
+  Sliders
 } from "lucide-react";
 
 const NAV_ITEMS = [
@@ -102,6 +103,7 @@ const NAV_ITEMS = [
   {
     category: "Portfolio & Tax",
     items: [
+      { name: "Strategy Simulator (v2.0)", href: "/portfolio-simulator", icon: Sliders },
       { name: "Portfolio Allocator", href: "/portfolio", icon: PieChart },
       { name: "Tax Regime Hub", href: "/tax", icon: Calculator },
       { name: "HRA Exemption", href: "/hra", icon: Calculator },
