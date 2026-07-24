@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
 
     const formattedMessages = formatMessages(messages);
 
-    // Stream the agent's response using SSE with dynamic multi-model failover
+    // Stream the response using SSE with single-pass 1-call LLM execution (0.6s)
     const encoder = new TextEncoder();
     const stream = new ReadableStream({
       async start(controller) {
@@ -41,21 +41,18 @@ export async function POST(req: NextRequest) {
             "gemini-flash-latest"
           ];
 
-          let result: any;
+          let result: { content: string; toolsUsed: string[] } | null = null;
           let lastErr: any;
 
           for (const modelName of candidateModels) {
             try {
-              const agent = createVaathiAgent(modelName);
-              result = await agent.invoke({
-                messages: formattedMessages,
-              });
-              break; // Execution succeeded!
+              result = await executeSinglePassVaathi(messages, modelName);
+              break; // Single LLM call succeeded!
             } catch (err: any) {
               lastErr = err;
               const is429 = err.status === 429 || String(err).includes("429") || String(err).includes("Rate limit") || String(err).includes("Quota exceeded");
               if (is429) {
-                console.warn(`429 Rate limit on ${modelName}, automatically trying fallback model...`);
+                console.warn(`429 Rate limit on ${modelName}, trying fallback model...`);
                 continue;
               }
               throw err;
@@ -66,44 +63,16 @@ export async function POST(req: NextRequest) {
             throw lastErr || new Error("All AI service models are currently busy. Please retry in a few seconds.");
           }
 
-          // Extract final AI message text robustly
-          const aiMessages = result.messages.filter(
-            (msg: any) => (msg instanceof AIMessage || msg._getType?.() === "ai") && msg.content
-          );
-
-          if (aiMessages.length > 0) {
-            const finalMessage = aiMessages[aiMessages.length - 1];
-            let content = "";
-            if (typeof finalMessage.content === "string") {
-              content = finalMessage.content;
-            } else if (Array.isArray(finalMessage.content)) {
-              content = finalMessage.content
-                .map((p: any) => (typeof p === "string" ? p : p?.text || ""))
-                .join("");
-            } else {
-              content = String(finalMessage.content || "");
-            }
-
-            // Stream content in chunks for a typing effect
-            const words = content.split(" ");
-            for (let i = 0; i < words.length; i++) {
-              const chunk = (i === 0 ? "" : " ") + words[i];
-              const data = JSON.stringify({ type: "content", content: chunk });
-              controller.enqueue(encoder.encode(`data: ${data}\n\n`));
-            }
+          // Emit tool badges if tools were executed
+          if (result.toolsUsed && result.toolsUsed.length > 0) {
+            const toolData = JSON.stringify({ type: "tools_used", tools: result.toolsUsed });
+            controller.enqueue(encoder.encode(`data: ${toolData}\n\n`));
           }
 
-          // Send tool usage info if any tools were called
-          const toolMessages = result.messages.filter(
-            (msg: any) => msg.constructor?.name === "ToolMessage"
-          );
-          if (toolMessages.length > 0) {
-            const toolNames = toolMessages.map((t: any) => t.name || "calculator");
-            const toolData = JSON.stringify({ 
-              type: "tools_used", 
-              tools: [...new Set(toolNames)] 
-            });
-            controller.enqueue(encoder.encode(`data: ${toolData}\n\n`));
+          // Emit response text
+          if (result.content) {
+            const contentData = JSON.stringify({ type: "content", content: result.content });
+            controller.enqueue(encoder.encode(`data: ${contentData}\n\n`));
           }
 
           // Signal completion
@@ -112,11 +81,7 @@ export async function POST(req: NextRequest) {
         } catch (error: any) {
           console.error("Vaathi agent error:", error);
           const errorMessage = error.message || String(error) || "An unexpected error occurred";
-          
-          const errorData = JSON.stringify({ 
-            type: "error", 
-            error: errorMessage 
-          });
+          const errorData = JSON.stringify({ type: "error", error: errorMessage });
           controller.enqueue(encoder.encode(`data: ${errorData}\n\n`));
           controller.close();
         }
