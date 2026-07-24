@@ -10,9 +10,10 @@ import { vaathiTools } from "./tools";
  */
 export function createVaathiAgent() {
   const modelName = process.env.GEMINI_MODEL || "gemini-flash-latest";
+  const apiKey = process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY;
   const llm = new ChatGoogleGenerativeAI({
     model: modelName,
-    apiKey: process.env.GOOGLE_API_KEY,
+    apiKey: apiKey,
     temperature: 0.7,
     maxOutputTokens: 4096,
   });

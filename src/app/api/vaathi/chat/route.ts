@@ -16,10 +16,11 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (!process.env.GOOGLE_API_KEY || process.env.GOOGLE_API_KEY === "your_gemini_api_key_here") {
+    const apiKey = process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY;
+    if (!apiKey || apiKey === "your_gemini_api_key_here") {
       return new Response(
         JSON.stringify({ 
-          error: "Gemini API key not configured. Please add your GOOGLE_API_KEY to .env.local" 
+          error: "Gemini API key not configured. Please add GOOGLE_API_KEY or GEMINI_API_KEY to your environment variables." 
         }),
         { status: 500, headers: { "Content-Type": "application/json" } }
       );
