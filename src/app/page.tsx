@@ -24,7 +24,10 @@ import {
   Scissors,
   CreditCard,
   HeartPulse,
-  Zap
+  Zap,
+  Info,
+  Scale,
+  AlertTriangle
 } from "lucide-react";
 
 const STATS = [
@@ -35,6 +38,36 @@ const STATS = [
   { value: "Accurate", label: "Regime Tax Rules" }
 ];
 
+const MODEL_ASSUMPTIONS = [
+  {
+    title: "Constant CAGR vs Market Volatility",
+    desc: "Calculators assume a fixed annual compounding return (e.g., 12% p.a.). Real-world stock market returns fluctuate year-on-year with sequence-of-returns risk.",
+    icon: TrendingUp,
+    badge: "Compounding Limit",
+    color: "border-emerald/30 bg-emerald/5"
+  },
+  {
+    title: "Inflation Baseline (6% CPI)",
+    desc: "Default models assume a baseline inflation rate of 6% p.a. Specific goals like education or healthcare experience higher category inflation (8-10%).",
+    icon: Hourglass,
+    badge: "Purchasing Power",
+    color: "border-amber-500/30 bg-amber-500/5"
+  },
+  {
+    title: "FY 2024-25 Tax Rules",
+    desc: "Tax calculations incorporate standard deduction (₹75,000), 12.5% LTCG on equity mutual funds above ₹1.25L exemption, and the latest New Tax Regime slabs.",
+    icon: Calculator,
+    badge: "Tax Baseline",
+    color: "border-indigo-500/30 bg-indigo-500/5"
+  },
+  {
+    title: "Non-SEBI Educational Notice",
+    desc: "ValarchiX & Valarchi Vaathi are educational tools designed for financial literacy. They do not recommend individual stocks or provide SEBI-registered personalized advice.",
+    icon: ShieldAlert,
+    badge: "Guardrail",
+    color: "border-red-500/30 bg-red-500/5"
+  }
+];
 
 const FOUNDATIONS = [
   {
