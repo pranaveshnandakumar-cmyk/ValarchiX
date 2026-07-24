@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { createVaathiAgent, formatMessages } from "@/lib/vaathi/agent";
+import { createVaathiAgent, executeSinglePassVaathi, formatMessages } from "@/lib/vaathi/agent";
 import { AIMessage } from "@langchain/core/messages";
 
 export const runtime = "nodejs";
