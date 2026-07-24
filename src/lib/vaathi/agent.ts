@@ -93,6 +93,15 @@ export async function executeSinglePassVaathi(
 
           if (tc.name === "sipCalculator") {
             calculations.push(`The SIP investment of **₹${(data.monthlyAmount || 0).toLocaleString("en-IN")}/month** at **${data.annualReturn}%** for **${data.years} years** will result in a future value of **₹${(data.futureValue || 0).toLocaleString("en-IN")}**, with a total investment of ₹${(data.totalInvested || 0).toLocaleString("en-IN")} and a wealth gain of ₹${(data.wealthGained || 0).toLocaleString("en-IN")}. This represents a ${data.multiplesOfInvestment || "1.94x"} multiple of the initial investment.`);
+          } else if (tc.name === "lumpsumCalculator") {
+            calculations.push(`A one-time lumpsum investment of **₹${(data.investedAmount || data.amount || 0).toLocaleString("en-IN")}** at **${data.annualReturn}%** for **${data.years} years** will grow to **₹${(data.futureValue || 0).toLocaleString("en-IN")}** (Total Wealth Gained: **₹${(data.wealthGained || 0).toLocaleString("en-IN")}**, a **${data.multiplesOfInvestment || "3.1x"}** multiplier).`);
+          } else if (tc.name === "compoundInterestCalc") {
+            let tableText = "";
+            if (data.yearByYear && Array.isArray(data.yearByYear)) {
+              tableText = "\n\n| Year | Starting Amount | Interest Earned | Ending Balance |\n| :--- | :--- | :--- | :--- |\n" +
+                data.yearByYear.map((y: any) => `| Year ${y.year} | ₹${y.startingAmount.toLocaleString("en-IN")} | ₹${y.interestEarned.toLocaleString("en-IN")} | **₹${y.endingAmount.toLocaleString("en-IN")}** |`).join("\n");
+            }
+            calculations.push(`An initial investment of **₹${(data.principal || 0).toLocaleString("en-IN")}** at **${data.rate}% annual return** over **${data.years} years** will grow to **₹${(data.finalAmount || 0).toLocaleString("en-IN")}** (Total Interest Earned: **₹${(data.totalInterest || 0).toLocaleString("en-IN")}**).\n\n💡 *${data.ruleOf72 || `At ${data.rate}% return, your money doubles every ~${(72 / data.rate).toFixed(1)} years.`}*${tableText}`);
           } else if (tc.name === "goalPlanner") {
             calculations.push(`To reach your target goal of **₹${(data.goalAmount || 0).toLocaleString("en-IN")}** in **${data.years} years** (assuming ${data.expectedReturn}% return & ${data.inflationRate || 6}% inflation), you need a monthly SIP of **₹${(data.requiredMonthlySIP || 0).toLocaleString("en-IN")}**.`);
           } else if (tc.name === "retirementCalc") {
@@ -101,8 +110,18 @@ export async function executeSinglePassVaathi(
             calculations.push(`**Tax Regime Comparison:**\n- Old Tax Regime: ₹${(data.oldRegimeTax || 0).toLocaleString("en-IN")}\n- New Tax Regime: ₹${(data.newRegimeTax || 0).toLocaleString("en-IN")}\n- Recommended: **${data.recommendedRegime || "New Tax Regime"}** (Savings: ₹${(data.taxSavings || 0).toLocaleString("en-IN")}).`);
           } else if (tc.name === "fdVsMfCompare") {
             calculations.push(`**FD vs Mutual Fund Yield:**\n- 5-Year Fixed Deposit (Post-Tax): ₹${(data.fdMaturityPostTax || 0).toLocaleString("en-IN")}\n- 5-Year Equity Mutual Fund (Post-Tax): ₹${(data.mfMaturityPostTax || 0).toLocaleString("en-IN")}\n- Extra Wealth Gained in MF: **₹${(data.extraWealthInMf || 0).toLocaleString("en-IN")}**.`);
+          } else if (tc.name === "ppfCalc") {
+            calculations.push(`**Public Provident Fund (PPF):**\nAn annual deposit of **₹${(data.annualDeposit || 0).toLocaleString("en-IN")}** at **7.1% tax-free interest** over **${data.years || 15} years** matures at **₹${(data.maturityAmount || 0).toLocaleString("en-IN")}** (Total Deposited: ₹${(data.totalInvested || 0).toLocaleString("en-IN")}, Tax-Free Interest Earned: ₹${(data.interestEarned || 0).toLocaleString("en-IN")}).`);
+          } else if (tc.name === "emiCalc") {
+            calculations.push(`**Loan EMI Calculation:**\nFor a loan of **₹${(data.loanAmount || 0).toLocaleString("en-IN")}** at **${data.annualInterestRate}%** for **${data.tenureYears} years**:\n- Monthly EMI: **₹${(data.monthlyEmi || 0).toLocaleString("en-IN")}**\n- Total Interest Payable: ₹${(data.totalInterestPayable || 0).toLocaleString("en-IN")}\n- Total Repayment: ₹${(data.totalAmountPayable || 0).toLocaleString("en-IN")}.`);
+          } else if (tc.name === "emergencyFundCalc") {
+            calculations.push(`**Emergency Safety Net:**\nBased on essential monthly expenses of **₹${(data.monthlyExpenses || 0).toLocaleString("en-IN")}**, your recommended emergency buffer (${data.monthsOfSafety || 6} months) is **₹${(data.requiredEmergencyFund || 0).toLocaleString("en-IN")}**.\n- Cash in Bank (20%): ₹${(data.recommendedAllocation?.instantCashInBank || 0).toLocaleString("en-IN")}\n- Liquid/Arbitrage Funds (80%): ₹${(data.recommendedAllocation?.liquidOrArbitrageFunds || 0).toLocaleString("en-IN")}`);
           } else {
-            calculations.push(`Result for ${tc.name}: ${rawResultStr}`);
+            // Human-friendly key-value rendering (no raw JSON!)
+            const formattedLines = Object.entries(data)
+              .filter(([k]) => typeof data[k] !== "object")
+              .map(([k, v]) => `- **${k.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}**: ${typeof v === "number" ? "₹" + v.toLocaleString("en-IN") : String(v)}`);
+            calculations.push(`**${tc.name.replace("Calc", " Calculator")} Result:**\n${formattedLines.join("\n")}`);
           }
         } catch {
           // Tool fallback
