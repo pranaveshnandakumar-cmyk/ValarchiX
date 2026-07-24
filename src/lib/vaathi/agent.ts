@@ -13,35 +13,50 @@ export function createVaathiAgent() {
   const groqApiKey = process.env.GROQ_API_KEY;
   const googleApiKey = process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY;
 
-  let llm: any;
-  let activeTools = vaathiTools;
-
   if (groqApiKey) {
-    const groqModel = process.env.GROQ_MODEL || "llama-3.3-70b-versatile";
-    llm = new ChatGroq({
+    const groqModel = process.env.GROQ_MODEL || "llama-3.1-8b-instant";
+    const groqLlm = new ChatGroq({
       model: groqModel,
       apiKey: groqApiKey,
       temperature: 0.7,
       maxTokens: 4096,
     });
-    // Use top 10 core tools for Groq to stay within TPM limit & maintain 1.5s ultra speed
-    activeTools = vaathiTools.slice(0, 10);
-  } else {
-    const modelName = process.env.GEMINI_MODEL || "gemini-flash-latest";
-    llm = new ChatGoogleGenerativeAI({
-      model: modelName,
+
+    if (googleApiKey) {
+      const geminiLlm = new ChatGoogleGenerativeAI({
+        model: process.env.GEMINI_MODEL || "gemini-flash-latest",
+        apiKey: googleApiKey,
+        temperature: 0.7,
+        maxOutputTokens: 4096,
+      });
+
+      return createReactAgent({
+        llm: groqLlm.withFallbacks([geminiLlm]),
+        tools: vaathiTools.slice(0, 10),
+      });
+    }
+
+    return createReactAgent({
+      llm: groqLlm,
+      tools: vaathiTools.slice(0, 10),
+    });
+  }
+
+  if (googleApiKey) {
+    const geminiLlm = new ChatGoogleGenerativeAI({
+      model: process.env.GEMINI_MODEL || "gemini-flash-latest",
       apiKey: googleApiKey,
       temperature: 0.7,
       maxOutputTokens: 4096,
     });
+
+    return createReactAgent({
+      llm: geminiLlm,
+      tools: vaathiTools,
+    });
   }
 
-  const agent = createReactAgent({
-    llm,
-    tools: activeTools,
-  });
-
-  return agent;
+  throw new Error("No AI API key found. Please add GROQ_API_KEY or GOOGLE_API_KEY.");
 }
 
 /**
