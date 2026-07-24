@@ -4,6 +4,7 @@ import { createReactAgent } from "@langchain/langgraph/prebuilt";
 import { HumanMessage, SystemMessage, AIMessage, BaseMessage } from "@langchain/core/messages";
 import { VAATHI_SYSTEM_PROMPT } from "./system-prompt";
 import { vaathiTools } from "./tools";
+import { formatOptimizedMemory } from "./memory";
 
 /**
  * Create the valarchi Vaathi agent
@@ -67,7 +68,8 @@ export async function executeSinglePassVaathi(
     throw new Error("No AI API key found. Please add GROQ_API_KEY or GOOGLE_API_KEY.");
   }
 
-  const formatted = formatMessages(messages);
+  // Token-Optimized Memory: Sliding Window (Last 4 Messages) + Key Entity Extraction
+  const formatted = formatOptimizedMemory(messages, VAATHI_SYSTEM_PROMPT, 4);
   
   // Call 1: Single LLM API Request (0.6s)
   const response = await llm.invoke(formatted);

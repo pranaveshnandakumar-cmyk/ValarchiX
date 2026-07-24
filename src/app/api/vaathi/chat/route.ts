@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
-import { createVaathiAgent, executeSinglePassVaathi, formatMessages } from "@/lib/vaathi/agent";
-import { AIMessage } from "@langchain/core/messages";
+import { evaluatePreLLMGuardrail } from "@/lib/vaathi/guardrails";
+import { checkSemanticCache } from "@/lib/vaathi/cache";
+import { executeSinglePassVaathi } from "@/lib/vaathi/agent";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -16,90 +17,92 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const groqKey = process.env.GROQ_API_KEY;
-    const googleKey = process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY;
+    const latestMessage = messages[messages.length - 1]?.content || "";
 
-    if (!groqKey && (!googleKey || googleKey === "your_gemini_api_key_here")) {
-      return new Response(
-        JSON.stringify({ 
-          error: "No AI API key configured. Please add GROQ_API_KEY, GOOGLE_API_KEY, or GEMINI_API_KEY to your environment variables." 
-        }),
-        { status: 500, headers: { "Content-Type": "application/json" } }
-      );
+    // PIPELINE STEP 1: Pre-LLM Guardrail Check (0 Tokens Spent!)
+    const guardrail = evaluatePreLLMGuardrail(latestMessage);
+    if (guardrail.intercepted && guardrail.content) {
+      return createSSEResponse({
+        content: guardrail.content,
+        toolsUsed: []
+      });
     }
 
-    const formattedMessages = formatMessages(messages);
+    // PIPELINE STEP 2: Semantic Response Cache Check (0 Tokens Spent, 0ms Latency!)
+    const cacheHit = checkSemanticCache(latestMessage);
+    if (cacheHit) {
+      return createSSEResponse({
+        content: cacheHit.answer,
+        toolsUsed: cacheHit.toolsUsed || []
+      });
+    }
 
-    // Stream the response using SSE with single-pass 1-call LLM execution (0.6s)
-    const encoder = new TextEncoder();
-    const stream = new ReadableStream({
-      async start(controller) {
-        try {
-          const candidateModels = [
-            "llama-3.1-8b-instant",
-            "llama-3.3-70b-versatile",
-            "gemini-flash-latest"
-          ];
+    // PIPELINE STEP 3: Single-Pass 1-Call LLM Execution (80% Token & API Call Reduction)
+    const candidateModels = [
+      "llama-3.1-8b-instant",
+      "llama-3.3-70b-versatile",
+      "gemini-flash-latest"
+    ];
 
-          let result: { content: string; toolsUsed: string[] } | null = null;
-          let lastErr: any;
+    let result: { content: string; toolsUsed: string[] } | null = null;
+    let lastErr: any;
 
-          for (const modelName of candidateModels) {
-            try {
-              result = await executeSinglePassVaathi(messages, modelName);
-              break; // Single LLM call succeeded!
-            } catch (err: any) {
-              lastErr = err;
-              const is429 = err.status === 429 || String(err).includes("429") || String(err).includes("Rate limit") || String(err).includes("Quota exceeded");
-              if (is429) {
-                console.warn(`429 Rate limit on ${modelName}, trying fallback model...`);
-                continue;
-              }
-              throw err;
-            }
-          }
-
-          if (!result) {
-            throw lastErr || new Error("All AI service models are currently busy. Please retry in a few seconds.");
-          }
-
-          // Emit tool badges if tools were executed
-          if (result.toolsUsed && result.toolsUsed.length > 0) {
-            const toolData = JSON.stringify({ type: "tools_used", tools: result.toolsUsed });
-            controller.enqueue(encoder.encode(`data: ${toolData}\n\n`));
-          }
-
-          // Emit response text
-          if (result.content) {
-            const contentData = JSON.stringify({ type: "content", content: result.content });
-            controller.enqueue(encoder.encode(`data: ${contentData}\n\n`));
-          }
-
-          // Signal completion
-          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: "done" })}\n\n`));
-          controller.close();
-        } catch (error: any) {
-          console.error("Vaathi agent error:", error);
-          const errorMessage = error.message || String(error) || "An unexpected error occurred";
-          const errorData = JSON.stringify({ type: "error", error: errorMessage });
-          controller.enqueue(encoder.encode(`data: ${errorData}\n\n`));
-          controller.close();
+    for (const modelName of candidateModels) {
+      try {
+        result = await executeSinglePassVaathi(messages, modelName);
+        break; // Success!
+      } catch (err: any) {
+        lastErr = err;
+        const is429 = err.status === 429 || String(err).includes("429") || String(err).includes("Rate limit") || String(err).includes("Quota exceeded");
+        if (is429) {
+          console.warn(`429 Rate limit on ${modelName}, trying fallback model...`);
+          continue;
         }
-      },
-    });
+        throw err;
+      }
+    }
 
-    return new Response(stream, {
-      headers: {
-        "Content-Type": "text/event-stream",
-        "Cache-Control": "no-cache",
-        Connection: "keep-alive",
-      },
-    });
+    if (!result) {
+      throw lastErr || new Error("All AI service models are currently busy. Please retry in a few seconds.");
+    }
+
+    return createSSEResponse(result);
+
   } catch (error: any) {
     console.error("Vaathi API route error:", error);
+    const errorMessage = error.message || String(error) || "An unexpected error occurred";
     return new Response(
-      JSON.stringify({ error: error.message || "Internal server error" }),
+      JSON.stringify({ error: errorMessage }),
       { status: 500, headers: { "Content-Type": "application/json" } }
     );
   }
+}
+
+/** Helper to format SSE Stream Response */
+function createSSEResponse(payload: { content: string; toolsUsed: string[] }) {
+  const encoder = new TextEncoder();
+  const stream = new ReadableStream({
+    start(controller) {
+      if (payload.toolsUsed && payload.toolsUsed.length > 0) {
+        const toolData = JSON.stringify({ type: "tools_used", tools: payload.toolsUsed });
+        controller.enqueue(encoder.encode(`data: ${toolData}\n\n`));
+      }
+
+      if (payload.content) {
+        const contentData = JSON.stringify({ type: "content", content: payload.content });
+        controller.enqueue(encoder.encode(`data: ${contentData}\n\n`));
+      }
+
+      controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: "done" })}\n\n`));
+      controller.close();
+    }
+  });
+
+  return new Response(stream, {
+    headers: {
+      "Content-Type": "text/event-stream",
+      "Cache-Control": "no-cache",
+      Connection: "keep-alive",
+    },
+  });
 }
