@@ -14,6 +14,7 @@ export function createVaathiAgent() {
   const googleApiKey = process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY;
 
   let llm: any;
+  let activeTools = vaathiTools;
 
   if (groqApiKey) {
     const groqModel = process.env.GROQ_MODEL || "llama-3.3-70b-versatile";
@@ -23,6 +24,8 @@ export function createVaathiAgent() {
       temperature: 0.7,
       maxTokens: 4096,
     });
+    // Use top 10 core tools for Groq to stay within TPM limit & maintain 1.5s ultra speed
+    activeTools = vaathiTools.slice(0, 10);
   } else {
     const modelName = process.env.GEMINI_MODEL || "gemini-flash-latest";
     llm = new ChatGoogleGenerativeAI({
@@ -35,7 +38,7 @@ export function createVaathiAgent() {
 
   const agent = createReactAgent({
     llm,
-    tools: vaathiTools,
+    tools: activeTools,
   });
 
   return agent;
