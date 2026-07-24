@@ -18,27 +18,13 @@ export function createVaathiAgent() {
     const groqLlm = new ChatGroq({
       model: groqModel,
       apiKey: groqApiKey,
-      temperature: 0.7,
-      maxTokens: 4096,
+      temperature: 0.5,
+      maxTokens: 1024,
     });
-
-    if (googleApiKey) {
-      const geminiLlm = new ChatGoogleGenerativeAI({
-        model: process.env.GEMINI_MODEL || "gemini-flash-latest",
-        apiKey: googleApiKey,
-        temperature: 0.7,
-        maxOutputTokens: 4096,
-      });
-
-      return createReactAgent({
-        llm: groqLlm.withFallbacks([geminiLlm]),
-        tools: vaathiTools.slice(0, 10),
-      });
-    }
 
     return createReactAgent({
       llm: groqLlm,
-      tools: vaathiTools.slice(0, 10),
+      tools: vaathiTools.slice(0, 5),
     });
   }
 
@@ -47,7 +33,7 @@ export function createVaathiAgent() {
       model: process.env.GEMINI_MODEL || "gemini-flash-latest",
       apiKey: googleApiKey,
       temperature: 0.7,
-      maxOutputTokens: 4096,
+      maxOutputTokens: 2048,
     });
 
     return createReactAgent({
