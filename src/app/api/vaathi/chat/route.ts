@@ -28,17 +28,43 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const agent = createVaathiAgent();
     const formattedMessages = formatMessages(messages);
 
-    // Stream the agent's response using SSE
+    // Stream the agent's response using SSE with dynamic multi-model failover
     const encoder = new TextEncoder();
     const stream = new ReadableStream({
       async start(controller) {
         try {
-          const result = await agent.invoke({
-            messages: formattedMessages,
-          });
+          const candidateModels = [
+            "llama-3.1-8b-instant",
+            "llama-3.3-70b-versatile",
+            "gemini-flash-latest"
+          ];
+
+          let result: any;
+          let lastErr: any;
+
+          for (const modelName of candidateModels) {
+            try {
+              const agent = createVaathiAgent(modelName);
+              result = await agent.invoke({
+                messages: formattedMessages,
+              });
+              break; // Execution succeeded!
+            } catch (err: any) {
+              lastErr = err;
+              const is429 = err.status === 429 || String(err).includes("429") || String(err).includes("Rate limit") || String(err).includes("Quota exceeded");
+              if (is429) {
+                console.warn(`429 Rate limit on ${modelName}, automatically trying fallback model...`);
+                continue;
+              }
+              throw err;
+            }
+          }
+
+          if (!result) {
+            throw lastErr || new Error("All AI service models are currently busy. Please retry in a few seconds.");
+          }
 
           // Extract final AI message text robustly
           const aiMessages = result.messages.filter(

@@ -9,12 +9,12 @@ import { vaathiTools } from "./tools";
  * Create the valarchi Vaathi agent
  * Supports Groq (llama-3.3-70b-versatile) and Google Gemini with ReAct pattern + 25 calculator tools
  */
-export function createVaathiAgent() {
+export function createVaathiAgent(overrideModel?: string) {
   const groqApiKey = process.env.GROQ_API_KEY;
   const googleApiKey = process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY;
 
-  if (groqApiKey) {
-    const groqModel = process.env.GROQ_MODEL || "llama-3.1-8b-instant";
+  if (groqApiKey && (!overrideModel || overrideModel.startsWith("llama") || overrideModel.startsWith("mixtral"))) {
+    const groqModel = overrideModel || process.env.GROQ_MODEL || "llama-3.1-8b-instant";
     const groqLlm = new ChatGroq({
       model: groqModel,
       apiKey: groqApiKey,
@@ -24,13 +24,14 @@ export function createVaathiAgent() {
 
     return createReactAgent({
       llm: groqLlm,
-      tools: vaathiTools.slice(0, 5),
+      tools: vaathiTools.slice(0, 8),
     });
   }
 
   if (googleApiKey) {
+    const modelName = overrideModel || process.env.GEMINI_MODEL || "gemini-flash-latest";
     const geminiLlm = new ChatGoogleGenerativeAI({
-      model: process.env.GEMINI_MODEL || "gemini-flash-latest",
+      model: modelName,
       apiKey: googleApiKey,
       temperature: 0.7,
       maxOutputTokens: 2048,
