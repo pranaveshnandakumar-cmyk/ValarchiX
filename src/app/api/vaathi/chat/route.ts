@@ -83,9 +83,15 @@ export async function POST(req: NextRequest) {
           controller.close();
         } catch (error: any) {
           console.error("Vaathi agent error:", error);
+          let errorMessage = error.message || "An unexpected error occurred";
+          
+          if (error.status === 429 || errorMessage.includes("429") || errorMessage.includes("Quota exceeded") || errorMessage.includes("Too Many Requests")) {
+            errorMessage = "Vaathi is receiving high traffic right now on the free API tier. Please wait 10–15 seconds and click 'Retry Question'.";
+          }
+          
           const errorData = JSON.stringify({ 
             type: "error", 
-            error: error.message || "An unexpected error occurred" 
+            error: errorMessage 
           });
           controller.enqueue(encoder.encode(`data: ${errorData}\n\n`));
           controller.close();

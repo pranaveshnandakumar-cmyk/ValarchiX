@@ -9,7 +9,7 @@ import { vaathiTools } from "./tools";
  * Uses Gemini 2.5 Flash with ReAct pattern + calculator tools
  */
 export function createVaathiAgent() {
-  const modelName = process.env.GEMINI_MODEL || "gemini-flash-latest";
+  const modelName = process.env.GEMINI_MODEL || "gemini-1.5-flash";
   const apiKey = process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY;
   const llm = new ChatGoogleGenerativeAI({
     model: modelName,
