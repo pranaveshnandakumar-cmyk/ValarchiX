@@ -145,8 +145,15 @@ export default function VaathiPage() {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to get response");
+        let errorMsg = `Server error (${response.status})`;
+        try {
+          const rawText = await response.text();
+          const errorData = JSON.parse(rawText);
+          errorMsg = errorData.error || errorMsg;
+        } catch {
+          // If response body is non-JSON text
+        }
+        throw new Error(errorMsg);
       }
 
       const reader = response.body?.getReader();
@@ -155,38 +162,42 @@ export default function VaathiPage() {
       let toolsUsed: string[] = [];
 
       if (reader) {
+        let streamBuffer = "";
         while (true) {
           const { done, value } = await reader.read();
           if (done) break;
 
-          const text = decoder.decode(value);
-          const lines = text.split("\n");
+          streamBuffer += decoder.decode(value, { stream: true });
+          const events = streamBuffer.split("\n\n");
+          streamBuffer = events.pop() || ""; // Keep incomplete event block in buffer
 
-          for (const line of lines) {
-            if (line.startsWith("data: ")) {
-              const jsonStr = line.slice(6).trim();
-              if (!jsonStr) continue;
+          for (const event of events) {
+            for (const line of event.split("\n")) {
+              if (line.startsWith("data: ")) {
+                const jsonStr = line.slice(6).trim();
+                if (!jsonStr) continue;
 
-              let data: any;
-              try {
-                data = JSON.parse(jsonStr);
-              } catch {
-                continue;
-              }
+                let data: any;
+                try {
+                  data = JSON.parse(jsonStr);
+                } catch {
+                  continue;
+                }
 
-              if (data.type === "content") {
-                fullContent += data.content;
-                setMessages((prev) =>
-                  prev.map((m) =>
-                    m.id === assistantId
-                      ? { ...m, content: fullContent }
-                      : m
-                  )
-                );
-              } else if (data.type === "tools_used") {
-                toolsUsed = data.tools;
-              } else if (data.type === "error") {
-                throw new Error(data.error);
+                if (data.type === "content") {
+                  fullContent += data.content;
+                  setMessages((prev) =>
+                    prev.map((m) =>
+                      m.id === assistantId
+                        ? { ...m, content: fullContent }
+                        : m
+                    )
+                  );
+                } else if (data.type === "tools_used") {
+                  toolsUsed = data.tools;
+                } else if (data.type === "error") {
+                  throw new Error(data.error);
+                }
               }
             }
           }
